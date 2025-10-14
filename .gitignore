@@ -78,3 +78,7 @@ agenthub/agents/youtube/db
 
 # Mobile development
 android-sdk/ 
+
+# Ignore large or build files
+backend-java/jdk-17.0.2/
+backend-java/target/
