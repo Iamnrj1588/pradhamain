@@ -21,13 +21,18 @@ const API = `${BACKEND_URL}/api`;
 const AuthContext = createContext(null);
 
 const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
   const [token, setToken] = useState(localStorage.getItem('token'));
 
   useEffect(() => {
-    if (token) {
+    if (token && !user) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       fetchUser();
+    } else if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     }
   }, [token]);
 
@@ -35,6 +40,7 @@ const AuthProvider = ({ children }) => {
     try {
       const response = await axios.get(`${API}/auth/me`);
       setUser(response.data);
+      localStorage.setItem('user', JSON.stringify(response.data));
     } catch (error) {
       console.error('Failed to fetch user:', error);
       logout();
@@ -43,6 +49,7 @@ const AuthProvider = ({ children }) => {
 
   const login = (token, userData) => {
     localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(userData));
     setToken(token);
     setUser(userData);
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -50,6 +57,7 @@ const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setToken(null);
     setUser(null);
     delete axios.defaults.headers.common['Authorization'];
@@ -101,7 +109,7 @@ const Navbar = () => {
             <Link to="/products" className="nav-link">Collections</Link>
             <Link to="/about" className="nav-link">About</Link>
             <Link to="/contact" className="nav-link">Contact</Link>
-            {user && <Link to="/admin" className="nav-link">Admin</Link>}
+            {user && user.role === 'ADMIN' && <Link to="/admin" className="nav-link">Admin</Link>}
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
@@ -155,7 +163,7 @@ const Navbar = () => {
             <Link to="/products" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Collections</Link>
             <Link to="/about" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>About</Link>
             <Link to="/contact" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
-            {user && <Link to="/admin" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Admin</Link>}
+            {user && user.role === 'ADMIN' && <Link to="/admin" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Admin</Link>}
             {user ? (
               <>
                 <Link to="/cart" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Cart ({cartCount})</Link>
@@ -501,80 +509,94 @@ const ProductDetailPage = () => {
 
           <p className="text-gray-600">{product.description}</p>
 
-          <div className="space-y-4">
-            <div>
-              <Label>Size</Label>
-              <Select value={selectedSize} onValueChange={setSelectedSize}>
-                <SelectTrigger data-testid="size-select">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {product.sizes.map(size => (
-                    <SelectItem key={size} value={size}>{size}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          {user ? (
+            <>
+              <div className="space-y-4">
+                <div>
+                  <Label>Size</Label>
+                  <Select value={selectedSize} onValueChange={setSelectedSize}>
+                    <SelectTrigger data-testid="size-select">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {product.sizes.map(size => (
+                        <SelectItem key={size} value={size}>{size}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div>
-              <Label>Color</Label>
-              <Select value={selectedColor} onValueChange={setSelectedColor}>
-                <SelectTrigger data-testid="color-select">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {product.colors.map(color => (
-                    <SelectItem key={color} value={color}>{color}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                <div>
+                  <Label>Color</Label>
+                  <Select value={selectedColor} onValueChange={setSelectedColor}>
+                    <SelectTrigger data-testid="color-select">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {product.colors.map(color => (
+                        <SelectItem key={color} value={color}>{color}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div>
-              <Label>Quantity</Label>
-              <div className="flex items-center space-x-4 mt-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  data-testid="decrease-quantity-btn"
-                >
-                  <Minus className="w-4 h-4" />
-                </Button>
-                <span className="text-xl font-semibold w-12 text-center">{quantity}</span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setQuantity(quantity + 1)}
-                  data-testid="increase-quantity-btn"
-                >
-                  <Plus className="w-4 h-4" />
-                </Button>
+                <div>
+                  <Label>Quantity</Label>
+                  <div className="flex items-center space-x-4 mt-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      data-testid="decrease-quantity-btn"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </Button>
+                    <span className="text-xl font-semibold w-12 text-center">{quantity}</span>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setQuantity(quantity + 1)}
+                      data-testid="increase-quantity-btn"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                {product.customizable && (
+                  <div>
+                    <Label>Customization Notes (Optional)</Label>
+                    <Textarea
+                      placeholder="Any specific stitching requirements or design preferences..."
+                      value={customizationNotes}
+                      onChange={(e) => setCustomizationNotes(e.target.value)}
+                      className="mt-2"
+                      data-testid="customization-notes"
+                    />
+                  </div>
+                )}
               </div>
+
+              <Button
+                onClick={handleAddToCart}
+                className="w-full bg-[#8B1538] hover:bg-[#6B0F2A] text-white py-6 text-lg"
+                data-testid="add-to-cart-btn"
+              >
+                <ShoppingCart className="w-5 h-5 mr-2" />
+                Add to Cart
+              </Button>
+            </>
+          ) : (
+            <div className="text-center py-8 bg-gray-50 rounded-lg">
+              <p className="text-gray-600 mb-4">Please login to customize and purchase this item</p>
+              <Button
+                onClick={() => navigate('/login')}
+                className="bg-[#8B1538] hover:bg-[#6B0F2A] text-white"
+              >
+                Login to Shop
+              </Button>
             </div>
-
-            {product.customizable && (
-              <div>
-                <Label>Customization Notes (Optional)</Label>
-                <Textarea
-                  placeholder="Any specific stitching requirements or design preferences..."
-                  value={customizationNotes}
-                  onChange={(e) => setCustomizationNotes(e.target.value)}
-                  className="mt-2"
-                  data-testid="customization-notes"
-                />
-              </div>
-            )}
-          </div>
-
-          <Button
-            onClick={handleAddToCart}
-            className="w-full bg-[#8B1538] hover:bg-[#6B0F2A] text-white py-6 text-lg"
-            data-testid="add-to-cart-btn"
-          >
-            <ShoppingCart className="w-5 h-5 mr-2" />
-            Add to Cart
-          </Button>
+          )}
         </div>
       </div>
     </div>
@@ -1003,6 +1025,15 @@ const AuthPage = () => {
 
 // Admin Page
 const AdminPage = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user || user.role !== 'ADMIN') {
+      navigate('/');
+      return;
+    }
+  }, [user, navigate]);
   const [products, setProducts] = useState([]);
   const [inquiries, setInquiries] = useState([]);
   const [showProductForm, setShowProductForm] = useState(false);
