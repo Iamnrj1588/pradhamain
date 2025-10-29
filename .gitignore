@@ -87,3 +87,6 @@ backend-java/data/
 .env.prod
 backend-java/src/main/resources/application-prod.properties
 
+.env.prod
+.env
+backend-java/src/main/resources/application-prod.properties
