@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: pradha-db
+    environment:
+      POSTGRES_DB: pradhadb
+      POSTGRES_USER: pradha
+      POSTGRES_PASSWORD: pradha123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - pradha-network
+
+  backend:
+    build: ./backend-java
+    container_name: pradha-backend
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DATABASE_URL: jdbc:postgresql://db:5432/pradhadb
+      DATABASE_USERNAME: pradha
+      DATABASE_PASSWORD: pradha123
+    ports:
+      - "8081:8081"
+    depends_on:
+      - db
+    networks:
+      - pradha-network
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: pradha-frontend
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+    networks:
+      - pradha-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  pradha-network:
+    driver: bridge

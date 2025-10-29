@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Image Upload</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #8B1538;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .file-input {
+            border: 2px dashed #8B1538;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .file-input:hover {
+            background-color: #f9f9f9;
+        }
+        .image-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .image-item {
+            position: relative;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .image-item img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+        .image-item .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+        }
+        .image-item .filename {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px;
+            font-size: 12px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .btn {
+            background: #8B1538;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            background: #6B0F2A;
+        }
+        .btn-outline {
+            background: transparent;
+            color: #8B1538;
+            border: 2px solid #8B1538;
+        }
+        .btn-outline:hover {
+            background: #8B1538;
+            color: white;
+        }
+        .product-data {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            border-left: 4px solid #8B1538;
+        }
+        .product-data h3 {
+            margin-top: 0;
+            color: #8B1538;
+        }
+        .product-data pre {
+            background: white;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="color: #8B1538; text-align: center;">Pradha Fashion Outlet - Admin Test</h1>
+        <p style="text-align: center; color: #666;">Test the product image upload functionality</p>
+        
+        <form id="productForm">
+            <div class="form-group">
+                <label for="productName">Product Name *</label>
+                <input type="text" id="productName" required placeholder="Enter product name">
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="form-group">
+                    <label for="category">Category *</label>
+                    <select id="category" required>
+                        <option value="Women">Women</option>
+                        <option value="Men">Men</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="subcategory">Subcategory *</label>
+                    <select id="subcategory" required>
+                        <option value="Lehenga">Lehenga</option>
+                        <option value="Blouse">Blouse</option>
+                        <option value="Dresses">Dresses</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="price">Price (₹) *</label>
+                <input type="number" id="price" required placeholder="Enter price">
+            </div>
+            
+            <div class="form-group">
+                <label>Product Images</label>
+                <div class="file-input" onclick="document.getElementById('imageInput').click()">
+                    <input type="file" id="imageInput" accept="image/*" multiple style="display: none;">
+                    <p>📷 Click to upload images or drag and drop</p>
+                    <p style="font-size: 12px; color: #666;">Supports JPG, PNG, GIF formats</p>
+                </div>
+                <div id="imagePreview" class="image-preview"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description *</label>
+                <textarea id="description" rows="3" required placeholder="Enter product description"></textarea>
+            </div>
+            
+            <div style="margin: 20px 0;">
+                <label style="display: inline-flex; align-items: center; margin-right: 20px;">
+                    <input type="checkbox" id="customizable" checked style="margin-right: 8px;">
+                    Customizable
+                </label>
+                <label style="display: inline-flex; align-items: center; margin-right: 20px;">
+                    <input type="checkbox" id="featured" style="margin-right: 8px;">
+                    Featured
+                </label>
+                <label style="display: inline-flex; align-items: center;">
+                    <input type="checkbox" id="newArrival" style="margin-right: 8px;">
+                    New Arrival
+                </label>
+            </div>
+            
+            <button type="submit" class="btn">Create Product</button>
+            <button type="button" class="btn btn-outline" onclick="resetForm()">Reset Form</button>
+        </form>
+        
+        <div id="productData" class="product-data" style="display: none;">
+            <h3>Generated Product Data</h3>
+            <pre id="productJson"></pre>
+        </div>
+    </div>
+
+    <script>
+        let uploadedImages = [];
+        
+        // Handle category change
+        document.getElementById('category').addEventListener('change', function() {
+            const subcategorySelect = document.getElementById('subcategory');
+            const category = this.value;
+            
+            subcategorySelect.innerHTML = '';
+            
+            if (category === 'Women') {
+                ['Lehenga', 'Blouse', 'Dresses'].forEach(sub => {
+                    const option = document.createElement('option');
+                    option.value = sub;
+                    option.textContent = sub;
+                    subcategorySelect.appendChild(option);
+                });
+            } else {
+                ['Khadi', 'Kurta', 'T-Shirt'].forEach(sub => {
+                    const option = document.createElement('option');
+                    option.value = sub;
+                    option.textContent = sub;
+                    subcategorySelect.appendChild(option);
+                });
+            }
+        });
+        
+        // Handle file input
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            files.forEach(file => handleImageUpload(file));
+        });
+        
+        function handleImageUpload(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Please select a valid image file');
+                return;
+            }
+            
+            const category = document.getElementById('category').value;
+            const subcategory = document.getElementById('subcategory').value;
+            const timestamp = Date.now();
+            const fileName = file.name.replace(/\.[^/.]+$/, '') || 'product';
+            
+            // Generate realistic S3-style URL
+            const imageUrl = `https://pradha-main.s3.eu-north-1.amazonaws.com/${category.toLowerCase()}/${subcategory.toLowerCase()}/${timestamp}_${fileName}.jpg`;
+            
+            uploadedImages.push({
+                url: imageUrl,
+                originalName: file.name,
+                file: file
+            });
+            
+            updateImagePreview();
+        }
+        
+        function updateImagePreview() {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '';
+            
+            uploadedImages.forEach((img, index) => {
+                const div = document.createElement('div');
+                div.className = 'image-item';
+                
+                // Create object URL for preview
+                const objectUrl = URL.createObjectURL(img.file);
+                
+                div.innerHTML = `
+                    <img src="${objectUrl}" alt="Product Image ${index + 1}">
+                    <button type="button" class="remove-btn" onclick="removeImage(${index})">&times;</button>
+                    <div class="filename">${img.originalName}</div>
+                `;
+                
+                preview.appendChild(div);
+            });
+        }
+        
+        function removeImage(index) {
+            uploadedImages.splice(index, 1);
+            updateImagePreview();
+        }
+        
+        function resetForm() {
+            document.getElementById('productForm').reset();
+            uploadedImages = [];
+            updateImagePreview();
+            document.getElementById('productData').style.display = 'none';
+        }
+        
+        // Handle form submission
+        document.getElementById('productForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('productName').value,
+                category: document.getElementById('category').value,
+                subcategory: document.getElementById('subcategory').value,
+                description: document.getElementById('description').value,
+                price: parseFloat(document.getElementById('price').value),
+                sizes: ["S", "M", "L", "XL"], // Default sizes
+                colors: ["Red", "Blue", "Green"], // Default colors
+                images: uploadedImages.map(img => img.url),
+                customizable: document.getElementById('customizable').checked,
+                featured: document.getElementById('featured').checked,
+                newArrival: document.getElementById('newArrival').checked,
+                createdAt: new Date().toISOString()
+            };
+            
+            // Display the generated JSON
+            document.getElementById('productJson').textContent = JSON.stringify(formData, null, 2);
+            document.getElementById('productData').style.display = 'block';
+            
+            // Scroll to the result
+            document.getElementById('productData').scrollIntoView({ behavior: 'smooth' });
+            
+            alert('Product data generated successfully! Check the JSON output below.');
+        });
+        
+        // Drag and drop functionality
+        const fileInput = document.querySelector('.file-input');
+        
+        fileInput.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.style.backgroundColor = '#f0f0f0';
+        });
+        
+        fileInput.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.style.backgroundColor = '';
+        });
+        
+        fileInput.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.style.backgroundColor = '';
+            
+            const files = Array.from(e.dataTransfer.files);
+            files.forEach(file => handleImageUpload(file));
+        });
+    </script>
+</body>
+</html>
