@@ -18,23 +18,23 @@ services:
   backend:
     build: ./backend-java
     container_name: pradha-backend
+    env_file:
+      - .env
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      DATABASE_URL: jdbc:postgresql://db:5432/pradhadb
-      DATABASE_USERNAME: pradha
-      DATABASE_PASSWORD: pradha123
     ports:
       - "8081:8081"
     depends_on:
       - db
     networks:
       - pradha-network
-    volumes:
-      - ./data:/app/data
     restart: unless-stopped
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        REACT_APP_BACKEND_URL: http://18.205.19.24:8081
     container_name: pradha-frontend
     ports:
       - "80:80"
@@ -51,3 +51,4 @@ volumes:
 networks:
   pradha-network:
     driver: bridge
+

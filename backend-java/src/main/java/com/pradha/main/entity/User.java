@@ -9,37 +9,43 @@ import java.util.UUID;
 @Entity
 @Table(name = "users")
 public class User {
+
     @Id
     private String id = UUID.randomUUID().toString();
-    
+
     @Email
     @NotBlank
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String email;
-    
+
     @NotBlank
     private String name;
-    
+
     private String phone;
-    
+
     @NotBlank
-    private String passwordHash;
-    
-    private String role = "USER"; // USER or ADMIN
-    
+    @Column(name = "password", nullable = false)
+    private String password; // main field
+
+    @Transient
+    private String otp; // For OTP verification
+
+    private String role = "USER";
+
+    private boolean emailVerified = false;
+
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    // Constructors
     public User() {}
 
-    public User(String email, String name, String phone, String passwordHash) {
+    public User(String email, String name, String phone, String password) {
         this.email = email;
         this.name = name;
         this.phone = phone;
-        this.passwordHash = passwordHash;
+        this.password = password;
     }
 
-    // Getters and Setters
+    // ---- GETTERS & SETTERS ----
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
@@ -52,12 +58,24 @@ public class User {
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
 
-    public String getPasswordHash() { return passwordHash; }
-    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+
+    // ✅ backward compatibility for old code
+    public String getPasswordHash() { return password; }
+    public void setPasswordHash(String password) { this.password = password; }
 
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
 
+    public boolean isEmailVerified() { return emailVerified; }
+    public void setEmailVerified(boolean emailVerified) { this.emailVerified = emailVerified; }
+
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    // ✅ OTP fields support
+    public String getOtp() { return otp; }
+    public void setOtp(String otp) { this.otp = otp; }
 }
+

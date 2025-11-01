@@ -19,20 +19,14 @@ public class OTPService {
     private EmailService emailService;
 
     public String generateAndSendOTP(String email) {
-        // Generate 6-digit OTP
         String otpCode = String.format("%06d", new Random().nextInt(999999));
-        
-        // Set expiry time (10 minutes from now)
         LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(10);
         
-        // Delete any existing OTPs for this email
         otpRepository.deleteByEmail(email);
         
-        // Save new OTP
         EmailOTP emailOTP = new EmailOTP(email, otpCode, expiryTime);
         otpRepository.save(emailOTP);
         
-        // Send email
         emailService.sendOTP(email, otpCode);
         
         return otpCode;
@@ -48,12 +42,10 @@ public class OTPService {
         
         EmailOTP emailOTP = otpOptional.get();
         
-        // Check if OTP is expired
         if (LocalDateTime.now().isAfter(emailOTP.getExpiryTime())) {
             return false;
         }
         
-        // Mark as verified
         emailOTP.setVerified(true);
         otpRepository.save(emailOTP);
         
