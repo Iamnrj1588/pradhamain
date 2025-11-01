@@ -1,66 +1,69 @@
-import { useState, useEffect, createContext, useContext } from 'react';
-import { BrowserRouter, Routes, Route, Link, useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { toast } from 'sonner';
-import { ShoppingCart, Heart, User, Menu, X, Plus, Minus, Trash2, Upload } from 'lucide-react';
-import '@/App.css';
+import { useState, useEffect, createContext, useContext } from "react";
+import { BrowserRouter, Routes, Route, Link, useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { ShoppingCart, Heart, User, Menu, X, Plus, Minus, Trash2, Upload } from "lucide-react";
+import "@/App.css";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+import Register from "./components/ui/register";
+import VerifyEmail from "./components/ui/verifyEmail";
+import Login from "./components/ui/login";
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://18.205.19.24:8081";
 const API = `${BACKEND_URL}/api`;
 
-// Auth Context
 const AuthContext = createContext(null);
+export { AuthContext };
 
-const AuthProvider = ({ children }) => {
+export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem('user');
-    return savedUser ? JSON.parse(savedUser) : null;
+    const saved = localStorage.getItem("user");
+    return saved && saved !== "undefined" ? JSON.parse(saved) : null;
   });
-  const [token, setToken] = useState(localStorage.getItem('token'));
+
+  const [token, setToken] = useState(localStorage.getItem("token"));
 
   useEffect(() => {
-    if (token && !user) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      fetchUser();
-    } else if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    if (token) {
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      if (!user) fetchUser();
     }
   }, [token]);
 
   const fetchUser = async () => {
     try {
-      const response = await axios.get(`${API}/auth/me`);
-      setUser(response.data);
-      localStorage.setItem('user', JSON.stringify(response.data));
-    } catch (error) {
-      console.error('Failed to fetch user:', error);
+      const res = await axios.get(`${API}/auth/me`);
+      setUser(res.data);
+      localStorage.setItem("user", JSON.stringify(res.data));
+    } catch (err) {
+      console.error("fetch user failed", err);
       logout();
     }
   };
 
   const login = (token, userData) => {
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(userData));
     setToken(token);
     setUser(userData);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setToken(null);
     setUser(null);
-    delete axios.defaults.headers.common['Authorization'];
+    delete axios.defaults.headers.common["Authorization"];
   };
 
   return (
@@ -70,9 +73,9 @@ const AuthProvider = ({ children }) => {
   );
 };
 
-const useAuth = () => useContext(AuthContext);
+export const useAuth = () => useContext(AuthContext);
 
-// Navbar Component
+// ✅ Navbar
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -80,17 +83,15 @@ const Navbar = () => {
   const [cartCount, setCartCount] = useState(0);
 
   useEffect(() => {
-    if (user) {
-      fetchCartCount();
-    }
+    if (user) fetchCartCount();
   }, [user]);
 
   const fetchCartCount = async () => {
     try {
-      const response = await axios.get(`${API}/cart`);
-      setCartCount(response.data.length);
-    } catch (error) {
-      console.error('Failed to fetch cart:', error);
+      const res = await axios.get(`${API}/cart`);
+      setCartCount(res.data.length);
+    } catch (err) {
+      console.error("cart load failed", err);
     }
   };
 
@@ -98,28 +99,27 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-[#8B1538]/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
+
           <Link to="/" className="flex items-center space-x-2">
             <span className="text-2xl font-bold text-[#8B1538]">Pradha</span>
             <span className="text-lg text-gray-600">Fashion Outlet</span>
           </Link>
 
-          {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8">
             <Link to="/" className="nav-link">Home</Link>
             <Link to="/products" className="nav-link">Collections</Link>
             <Link to="/about" className="nav-link">About</Link>
             <Link to="/contact" className="nav-link">Contact</Link>
-            {user && user.role === 'ADMIN' && <Link to="/admin" className="nav-link">Admin</Link>}
+
+            {user?.role === "ADMIN" && (
+              <Link to="/admin" className="nav-link">Admin</Link>
+            )}
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
               <>
-                <button
-                  onClick={() => navigate('/cart')}
-                  className="relative p-2 hover:bg-gray-100 rounded-full transition-colors"
-                  data-testid="cart-icon-btn"
-                >
+                <button onClick={() => navigate("/cart")} className="relative p-2 hover:bg-gray-100 rounded-full">
                   <ShoppingCart className="w-5 h-5 text-[#8B1538]" />
                   {cartCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-[#DAA520] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -127,47 +127,38 @@ const Navbar = () => {
                     </span>
                   )}
                 </button>
-                <Button
-                  variant="ghost"
-                  onClick={logout}
-                  className="text-[#8B1538]"
-                  data-testid="logout-btn"
-                >
-                  Logout
-                </Button>
+
+                <Button variant="ghost" onClick={logout} className="text-[#8B1538]">Logout</Button>
               </>
             ) : (
-              <Button
-                onClick={() => navigate('/login')}
-                className="bg-[#8B1538] hover:bg-[#6B0F2A] text-white"
-                data-testid="login-btn"
-              >
+              <Button onClick={() => navigate("/login")} className="bg-[#8B1538] hover:bg-[#6B0F2A] text-white">
                 Login
               </Button>
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
+          <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
 
-        {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden py-4 space-y-4">
             <Link to="/" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Home</Link>
             <Link to="/products" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Collections</Link>
             <Link to="/about" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>About</Link>
             <Link to="/contact" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
-            {user && user.role === 'ADMIN' && <Link to="/admin" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Admin</Link>}
+
+            {user?.role === "ADMIN" && (
+              <Link to="/admin" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Admin</Link>
+            )}
+
             {user ? (
               <>
-                <Link to="/cart" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Cart ({cartCount})</Link>
-                <button onClick={logout} className="block nav-link text-left w-full">Logout</button>
+                <Link to="/cart" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>
+                  Cart ({cartCount})
+                </Link>
+                <button onClick={logout} className="block nav-link w-full text-left">Logout</button>
               </>
             ) : (
               <Link to="/login" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Login</Link>
@@ -178,26 +169,6 @@ const Navbar = () => {
     </nav>
   );
 };
-
-// Home Page
-const Home = () => {
-  const navigate = useNavigate();
-  const [featuredProducts, setFeaturedProducts] = useState([]);
-  const [newArrivals, setNewArrivals] = useState([]);
-
-  useEffect(() => {
-    fetchFeaturedProducts();
-    fetchNewArrivals();
-  }, []);
-
-  const fetchFeaturedProducts = async () => {
-    try {
-      const response = await axios.get(`${API}/products?featured=true`);
-      setFeaturedProducts(response.data.slice(0, 4));
-    } catch (error) {
-      console.error('Failed to fetch featured products:', error);
-    }
-  };
 
   const fetchNewArrivals = async () => {
     try {
@@ -210,7 +181,6 @@ const Home = () => {
 
   return (
     <div className="home-page">
-      {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-overlay">
           <div className="hero-content">
@@ -237,7 +207,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Featured Products */}
       {featuredProducts.length > 0 && (
         <section className="section-container">
           <h2 className="section-title">Featured Products</h2>
@@ -249,7 +218,6 @@ const Home = () => {
         </section>
       )}
 
-      {/* New Arrivals */}
       {newArrivals.length > 0 && (
         <section className="section-container bg-[#F5F5DC]/20">
           <h2 className="section-title">New Arrivals</h2>
@@ -261,7 +229,6 @@ const Home = () => {
         </section>
       )}
 
-      {/* Collections Preview */}
       <section className="section-container">
         <h2 className="section-title">Our Collections</h2>
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
@@ -289,7 +256,6 @@ const Home = () => {
   );
 };
 
-// Product Card Component
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
 
@@ -328,7 +294,6 @@ const ProductCard = ({ product }) => {
   );
 };
 
-// Products Page
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -374,7 +339,6 @@ const ProductsPage = () => {
     <div className="page-container">
       <h1 className="page-title">Our Collections</h1>
 
-      {/* Filters */}
       <div className="filters-container">
         <div className="filter-group">
           <Label>Category</Label>
@@ -405,7 +369,6 @@ const ProductsPage = () => {
         </div>
       </div>
 
-      {/* Products Grid */}
       <div className="product-grid">
         {filteredProducts.map(product => (
           <ProductCard key={product.id} product={product} />
@@ -421,7 +384,6 @@ const ProductsPage = () => {
   );
 };
 
-// Product Detail Page
 const ProductDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -476,7 +438,6 @@ const ProductDetailPage = () => {
   return (
     <div className="page-container">
       <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
-        {/* Product Images */}
         <div className="space-y-4">
           <div className="product-detail-image-container">
             <img
@@ -499,7 +460,6 @@ const ProductDetailPage = () => {
           )}
         </div>
 
-        {/* Product Details */}
         <div className="space-y-6">
           <div>
             <Badge className="mb-2">{product.category}</Badge>
@@ -603,7 +563,6 @@ const ProductDetailPage = () => {
   );
 };
 
-// Cart Page
 const CartPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -763,24 +722,23 @@ const CartPage = () => {
   );
 };
 
-// About Page
 const AboutPage = () => {
   return (
     <div className="page-container">
       <h1 className="page-title">About Pradha Fashion Outlet</h1>
       <div className="max-w-4xl mx-auto space-y-6 text-gray-700 leading-relaxed">
         <p className="text-lg">
-          Welcome to <span className="font-semibold text-[#8B1538]">Pradha Fashion Outlet</span>, where tradition meets elegance. 
+          Welcome to <span className="font-semibold text-[#8B1538]">Pradha Fashion Outlet</span>, where tradition meets elegance.
           We are a premier boutique dedicated to providing exquisite traditional and modern fashion wear for both women and men.
         </p>
         <p>
-          Our boutique specializes in customization, ensuring that every piece of clothing reflects your unique style and personality. 
-          Whether you're looking for a stunning lehenga for a wedding, a perfectly tailored blouse, or elegant ethnic wear for men, 
+          Our boutique specializes in customization, ensuring that every piece of clothing reflects your unique style and personality.
+          Whether you're looking for a stunning lehenga for a wedding, a perfectly tailored blouse, or elegant ethnic wear for men,
           we have you covered.
         </p>
         <h2 className="text-2xl font-semibold text-[#8B1538] mt-8 mb-4">Our Mission</h2>
         <p>
-          At Pradha Fashion Outlet, our mission is to blend traditional Indian craftsmanship with contemporary fashion sensibilities. 
+          At Pradha Fashion Outlet, our mission is to blend traditional Indian craftsmanship with contemporary fashion sensibilities.
           We believe that every garment tells a story, and we're here to help you tell yours with elegance and grace.
         </p>
         <h2 className="text-2xl font-semibold text-[#8B1538] mt-8 mb-4">What We Offer</h2>
@@ -812,7 +770,6 @@ const AboutPage = () => {
   );
 };
 
-// Contact Page
 const ContactPage = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -917,113 +874,6 @@ const ContactPage = () => {
   );
 };
 
-// Login/Signup Page
-const AuthPage = () => {
-  const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    name: '',
-    phone: ''
-  });
-  const { login } = useAuth();
-  const navigate = useNavigate();
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const endpoint = isLogin ? 'login' : 'signup';
-      const response = await axios.post(`${API}/auth/${endpoint}`, formData);
-      login(response.data.access_token, response.data.user);
-      toast.success(isLogin ? 'Welcome back!' : 'Account created successfully!');
-      navigate('/');
-    } catch (error) {
-      console.error('Auth error:', error);
-      toast.error(error.response?.data?.detail || 'Authentication failed');
-    }
-  };
-
-  return (
-    <div className="page-container flex items-center justify-center min-h-[calc(100vh-5rem)]">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>{isLogin ? 'Login' : 'Sign Up'}</CardTitle>
-          <CardDescription>
-            {isLogin ? 'Welcome back to Pradha Fashion Outlet' : 'Create your account'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
-              <>
-                <div>
-                  <Label htmlFor="name">Name *</Label>
-                  <Input
-                    id="name"
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    data-testid="auth-name-input"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input
-                    id="phone"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    data-testid="auth-phone-input"
-                  />
-                </div>
-              </>
-            )}
-            <div>
-              <Label htmlFor="email">Email *</Label>
-              <Input
-                id="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                data-testid="auth-email-input"
-              />
-            </div>
-            <div>
-              <Label htmlFor="password">Password *</Label>
-              <Input
-                id="password"
-                type="password"
-                required
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                data-testid="auth-password-input"
-              />
-            </div>
-            <Button
-              type="submit"
-              className="w-full bg-[#8B1538] hover:bg-[#6B0F2A] text-white"
-              data-testid="auth-submit-btn"
-            >
-              {isLogin ? 'Login' : 'Sign Up'}
-            </Button>
-          </form>
-          <div className="mt-4 text-center">
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-[#8B1538] hover:underline"
-              data-testid="auth-toggle-btn"
-            >
-              {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Login'}
-            </button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
-
-// Admin Page
 const AdminPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -1076,28 +926,40 @@ const AdminPage = () => {
   };
 
   const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const file = e.target.files[0];
+  if (!file) return;
 
-    const formDataUpload = new FormData();
-    formDataUpload.append('file', file);
+  // ✅ Set category & subcategory — modify based on your form state
+  const category = formData.category || "default";
+  const subcategory = formData.subcategory || "default";
 
-    try {
-      const response = await axios.post(`${API}/admin/upload-image`, formDataUpload);
-      setFormData({
-        ...formData,
-        images: [...formData.images, response.data.url]
-      });
-      toast.success('Image uploaded!');
-    } catch (error) {
-      console.error('Failed to upload image:', error);
-      toast.error('Failed to upload image');
-    }
-  };
+  const formDataUpload = new FormData();
+  formDataUpload.append("file", file);
+  formDataUpload.append("category", category);
+  formDataUpload.append("subcategory", subcategory);
+
+  try {
+    const response = await axios.post(
+      `${API}/auth/upload-image`,
+      formDataUpload,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    setFormData({
+      ...formData,
+      images: [...formData.images, response.data.url]
+    });
+
+    toast.success("Image uploaded!");
+  } catch (error) {
+    console.error("Failed to upload image:", error);
+    toast.error("Failed to upload image");
+  }
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const productData = {
       ...formData,
       price: parseFloat(formData.price),
@@ -1430,7 +1292,6 @@ const AdminPage = () => {
   );
 };
 
-// Footer Component
 const Footer = () => {
   return (
     <footer className="bg-[#8B1538] text-white mt-20">
@@ -1466,27 +1327,35 @@ const Footer = () => {
   );
 };
 
-// Main App
+const Layout = ({ children }) => {
+  return (
+    <div className="App">
+      <Navbar />
+      <main className="pt-20">
+        {children}
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <div className="App">
-          <Navbar />
-          <main className="pt-20">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/products" element={<ProductsPage />} />
-              <Route path="/products/:id" element={<ProductDetailPage />} />
-              <Route path="/cart" element={<CartPage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/login" element={<AuthPage />} />
-              <Route path="/admin" element={<AdminPage />} />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
+        <Routes>
+          <Route path="/" element={<Layout><HomePage /></Layout>} />
+          <Route path="/products" element={<Layout><ProductsPage /></Layout>} />
+          <Route path="/products/:id" element={<Layout><ProductDetailPage /></Layout>} />
+          <Route path="/cart" element={<Layout><CartPage /></Layout>} />
+          <Route path="/about" element={<Layout><AboutPage /></Layout>} />
+          <Route path="/contact" element={<Layout><ContactPage /></Layout>} />
+          <Route path="/admin" element={<Layout><AdminPage /></Layout>} />
+
+          <Route path="/register" element={<Register />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/login" element={<Login />} />
+        </Routes>
       </BrowserRouter>
     </AuthProvider>
   );

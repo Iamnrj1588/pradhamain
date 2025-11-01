@@ -13,7 +13,7 @@ public class HealthController {
     @Autowired
     private DataSource dataSource;
 
-    @GetMapping("/health")
+    @GetMapping("/api/health")
     public Map<String, String> health() {
         try (Connection connection = dataSource.getConnection()) {
             return Map.of(
@@ -30,3 +30,4 @@ public class HealthController {
         }
     }
 }
+

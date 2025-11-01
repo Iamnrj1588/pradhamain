@@ -13,26 +13,29 @@ import java.util.UUID;
 public class CartItem {
     @Id
     private String id = UUID.randomUUID().toString();
-    
+
     @NotBlank
     @Column(name = "user_id")
     private String userId;
-    
+
     @NotBlank
     @Column(name = "product_id")
     private String productId;
-    
+
     @NotNull
     private Integer quantity = 1;
-    
+
     @NotBlank
     private String size;
-    
+
     @NotBlank
     private String color;
-    
+
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    // Optional field (you were using it in getters/setters)
+    private String customizationNotes;
 
     // Constructors
     public CartItem() {}
@@ -58,4 +61,8 @@ public class CartItem {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public String getCustomizationNotes() { return customizationNotes; }
+    public void setCustomizationNotes(String customizationNotes) { this.customizationNotes = customizationNotes; }
 }
+

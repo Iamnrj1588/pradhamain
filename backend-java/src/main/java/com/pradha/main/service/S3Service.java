@@ -52,7 +52,6 @@ public class S3Service {
         } catch (Exception e) {
             System.err.println("❌ S3 Upload failed: " + e.getClass().getSimpleName() + " - " + e.getMessage());
             
-            // Print detailed error information
             if (e instanceof software.amazon.awssdk.services.s3.model.NoSuchBucketException) {
                 System.err.println("Bucket '" + bucketName + "' does not exist in eu-north-1 region");
             } else if (e instanceof software.amazon.awssdk.services.s3.model.S3Exception) {
