@@ -6,7 +6,6 @@
 /home/ubuntu/pradhamain/backend-java/src/main/java/com/pradha/main/controller/InquiryController.java
 /home/ubuntu/pradhamain/backend-java/src/main/java/com/pradha/main/entity/Inquiry.java
 /home/ubuntu/pradhamain/backend-java/src/main/java/com/pradha/main/controller/HealthController.java
-/home/ubuntu/pradhamain/backend-java/src/main/java/com/pradha/main/config/SecurityConfig.java
 /home/ubuntu/pradhamain/backend-java/src/main/java/com/pradha/main/dto/SignupRequest.java
 /home/ubuntu/pradhamain/backend-java/src/main/java/com/pradha/main/service/S3Service.java
 /home/ubuntu/pradhamain/backend-java/src/main/java/com/pradha/main/controller/AuthController.java

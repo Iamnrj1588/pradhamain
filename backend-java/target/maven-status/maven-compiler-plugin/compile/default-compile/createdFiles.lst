@@ -1,3 +1,4 @@
+com/pradha/main/controller/LoginRequest.class
 com/pradha/main/entity/Product.class
 com/pradha/main/repository/EmailOTPRepository.class
 com/pradha/main/config/S3Config.class
@@ -20,7 +21,6 @@ com/pradha/main/config/WebConfig.class
 com/pradha/main/controller/AuthController.class
 com/pradha/main/controller/CartController.class
 com/pradha/main/service/S3Service.class
-com/pradha/main/config/SecurityConfig.class
 com/pradha/main/security/SecurityConfig.class
 com/pradha/main/controller/HealthController.class
 com/pradha/main/service/CustomUserDetailsService.class

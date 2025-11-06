@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "eslint-plugin-react-hooks": "^7.0.1"
+  },
+  "dependencies": {
+    "cors": "^2.8.5"
+  }
+}

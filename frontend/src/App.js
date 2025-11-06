@@ -1,69 +1,72 @@
-import { useState, useEffect, createContext, useContext } from "react";
-import { BrowserRouter, Routes, Route, Link, useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { toast } from "sonner";
-import { ShoppingCart, Heart, User, Menu, X, Plus, Minus, Trash2, Upload } from "lucide-react";
-import "@/App.css";
+import { useState, useEffect, createContext, useContext } from 'react';
+import { BrowserRouter, Routes, Route, Link, useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { toast } from 'sonner';
+import { ShoppingCart, Heart, User, Menu, X, Plus, Minus, Trash2, Upload } from 'lucide-react';
+import '@/App.css';
 
-import Register from "./components/ui/register";
-import VerifyEmail from "./components/ui/verifyEmail";
-import Login from "./components/ui/login";
+import Register from './components/ui/register';
+import VerifyEmail from './components/ui/verifyEmail';
+import Login from './components/ui/login';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://18.205.19.24:8081";
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://18.205.19.24:8081';
 const API = `${BACKEND_URL}/api`;
 
 const AuthContext = createContext(null);
+
 export { AuthContext };
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem("user");
-    return saved && saved !== "undefined" ? JSON.parse(saved) : null;
+    const savedUser = localStorage.getItem('user');
+    return savedUser && savedUser !== 'undefined' ? JSON.parse(savedUser) : null;
   });
-
-  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [token, setToken] = useState(localStorage.getItem('token'));
 
   useEffect(() => {
-    if (token) {
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      if (!user) fetchUser();
+    if (token && !user) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      fetchUser();
+    } else if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   const fetchUser = async () => {
     try {
-      const res = await axios.get(`${API}/auth/me`);
-      setUser(res.data);
-      localStorage.setItem("user", JSON.stringify(res.data));
-    } catch (err) {
-      console.error("fetch user failed", err);
+      const response = await axios.get(`${API}/auth/me`);
+      setUser(response.data);
+      localStorage.setItem('user', JSON.stringify(response.data));
+    } catch (error) {
+      console.error('Failed to fetch user:', error);
       logout();
     }
   };
 
-  const login = (token, userData) => {
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(userData));
-    setToken(token);
+  const login = (tokenVal, userData) => {
+    localStorage.setItem('token', tokenVal);
+    localStorage.setItem('user', JSON.stringify(userData));
+    setToken(tokenVal);
     setUser(userData);
-    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    axios.defaults.headers.common['Authorization'] = `Bearer ${tokenVal}`;
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setToken(null);
     setUser(null);
-    delete axios.defaults.headers.common["Authorization"];
+    delete axios.defaults.headers.common['Authorization'];
   };
 
   return (
@@ -73,9 +76,10 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+const useAuth = () => useContext(AuthContext);
 
-// ✅ Navbar
+export { useAuth };
+
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -83,15 +87,20 @@ const Navbar = () => {
   const [cartCount, setCartCount] = useState(0);
 
   useEffect(() => {
-    if (user) fetchCartCount();
+    if (user) {
+      fetchCartCount();
+    } else {
+      setCartCount(0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchCartCount = async () => {
     try {
-      const res = await axios.get(`${API}/cart`);
-      setCartCount(res.data.length);
-    } catch (err) {
-      console.error("cart load failed", err);
+      const response = await axios.get(`${API}/cart`);
+      setCartCount(Array.isArray(response.data) ? response.data.length : 0);
+    } catch (error) {
+      console.error('Failed to fetch cart:', error);
     }
   };
 
@@ -99,7 +108,6 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-[#8B1538]/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-
           <Link to="/" className="flex items-center space-x-2">
             <span className="text-2xl font-bold text-[#8B1538]">Pradha</span>
             <span className="text-lg text-gray-600">Fashion Outlet</span>
@@ -110,16 +118,17 @@ const Navbar = () => {
             <Link to="/products" className="nav-link">Collections</Link>
             <Link to="/about" className="nav-link">About</Link>
             <Link to="/contact" className="nav-link">Contact</Link>
-
-            {user?.role === "ADMIN" && (
-              <Link to="/admin" className="nav-link">Admin</Link>
-            )}
+            {user && user.role === 'ADMIN' && <Link to="/admin" className="nav-link">Admin</Link>}
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
               <>
-                <button onClick={() => navigate("/cart")} className="relative p-2 hover:bg-gray-100 rounded-full">
+                <button
+                  onClick={() => navigate('/cart')}
+                  className="relative p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  data-testid="cart-icon-btn"
+                >
                   <ShoppingCart className="w-5 h-5 text-[#8B1538]" />
                   {cartCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-[#DAA520] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -127,17 +136,30 @@ const Navbar = () => {
                     </span>
                   )}
                 </button>
-
-                <Button variant="ghost" onClick={logout} className="text-[#8B1538]">Logout</Button>
+                <Button
+                  variant="ghost"
+                  onClick={logout}
+                  className="text-[#8B1538]"
+                  data-testid="logout-btn"
+                >
+                  Logout
+                </Button>
               </>
             ) : (
-              <Button onClick={() => navigate("/login")} className="bg-[#8B1538] hover:bg-[#6B0F2A] text-white">
+              <Button
+                onClick={() => navigate('/login')}
+                className="bg-[#8B1538] hover:bg-[#6B0F2A] text-white"
+                data-testid="login-btn"
+              >
                 Login
               </Button>
             )}
           </div>
 
-          <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+          <button
+            className="md:hidden p-2"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
@@ -148,17 +170,11 @@ const Navbar = () => {
             <Link to="/products" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Collections</Link>
             <Link to="/about" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>About</Link>
             <Link to="/contact" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
-
-            {user?.role === "ADMIN" && (
-              <Link to="/admin" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Admin</Link>
-            )}
-
+            {user && user.role === 'ADMIN' && <Link to="/admin" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Admin</Link>}
             {user ? (
               <>
-                <Link to="/cart" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>
-                  Cart ({cartCount})
-                </Link>
-                <button onClick={logout} className="block nav-link w-full text-left">Logout</button>
+                <Link to="/cart" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Cart ({cartCount})</Link>
+                <button onClick={logout} className="block nav-link text-left w-full">Logout</button>
               </>
             ) : (
               <Link to="/login" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Login</Link>
@@ -170,10 +186,30 @@ const Navbar = () => {
   );
 };
 
+const HomePage = () => {
+  const navigate = useNavigate();
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [newArrivals, setNewArrivals] = useState([]);
+
+  useEffect(() => {
+    fetchFeaturedProducts();
+    fetchNewArrivals();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const fetchFeaturedProducts = async () => {
+    try {
+      const response = await axios.get(`${API}/products?featured=true`);
+      setFeaturedProducts(Array.isArray(response.data) ? response.data.slice(0, 4) : []);
+    } catch (error) {
+      console.error('Failed to fetch featured products:', error);
+    }
+  };
+
   const fetchNewArrivals = async () => {
     try {
       const response = await axios.get(`${API}/products?new_arrival=true`);
-      setNewArrivals(response.data.slice(0, 4));
+      setNewArrivals(Array.isArray(response.data) ? response.data.slice(0, 4) : []);
     } catch (error) {
       console.error('Failed to fetch new arrivals:', error);
     }
@@ -255,7 +291,6 @@ const Navbar = () => {
     </div>
   );
 };
-
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
 
