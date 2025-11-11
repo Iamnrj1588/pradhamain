@@ -24,11 +24,12 @@ public class User {
     private String phone;
 
     @NotBlank
-    @Column(name = "password", nullable = false)
+    @Column(name = "password_hash", nullable = false)
     private String password; // main field
 
-    @Transient
     private String otp; // For OTP verification
+    
+    private LocalDateTime otpExpiry; // OTP expiration time
 
     private String role = "USER";
 
@@ -77,5 +78,8 @@ public class User {
     // ✅ OTP fields support
     public String getOtp() { return otp; }
     public void setOtp(String otp) { this.otp = otp; }
+    
+    public LocalDateTime getOtpExpiry() { return otpExpiry; }
+    public void setOtpExpiry(LocalDateTime otpExpiry) { this.otpExpiry = otpExpiry; }
 }
 

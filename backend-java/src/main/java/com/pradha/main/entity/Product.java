@@ -29,16 +29,24 @@ public class Product {
     private Double price;
     
     @ElementCollection
+    @CollectionTable(name = "product_sizes", joinColumns = @JoinColumn(name = "product_id"))
+    @Column(name = "size")
     private List<String> sizes;
     
     @ElementCollection
+    @CollectionTable(name = "product_colors", joinColumns = @JoinColumn(name = "product_id"))
+    @Column(name = "color")
     private List<String> colors;
     
     @ElementCollection
+    @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
+    @Column(name = "image_url")
     private List<String> images;
     
     private Boolean customizable = true;
     private Boolean featured = false;
+    
+    @Column(name = "new_arrival")
     private Boolean newArrival = true;
     
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -73,6 +81,10 @@ public class Product {
 
     public List<String> getImages() { return images; }
     public void setImages(List<String> images) { this.images = images; }
+    
+    // Alias for frontend compatibility
+    public List<String> getImageUrls() { return images; }
+    public void setImageUrls(List<String> imageUrls) { this.images = imageUrls; }
 
     public Boolean getCustomizable() { return customizable; }
     public void setCustomizable(Boolean customizable) { this.customizable = customizable; }

@@ -4,7 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../App";
 import { ShoppingCart } from 'lucide-react';
 
-const API_URL = "http://18.205.19.24:8081/api/auth";
+const API_URL = `${process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081'}/api/auth`;
 
 const Navbar = () => {
   const { user, logout } = useAuth();

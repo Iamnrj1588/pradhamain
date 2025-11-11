@@ -2,10 +2,14 @@ package com.pradha.main.controller;
 
 import com.pradha.main.entity.CartItem;
 import com.pradha.main.entity.Product;
+import com.pradha.main.entity.User;
 import com.pradha.main.repository.CartRepository;
 import com.pradha.main.repository.ProductRepository;
+import com.pradha.main.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +26,9 @@ public class CartController {
     
     @Autowired
     private ProductRepository productRepository;
+    
+    @Autowired
+    private UserRepository userRepository;
 
     @GetMapping
     public ResponseEntity<?> getCart() {
@@ -65,34 +72,81 @@ public class CartController {
             System.out.println("=== Cart Add Request ===");
             System.out.println("Request data: " + request);
             
-            CartItem cartItem = new CartItem();
-            cartItem.setUserId("guest");
-            
+            // Validate product exists
             String productId = (String) request.get("product_id");
             if (productId == null || productId.trim().isEmpty()) {
                 return ResponseEntity.badRequest().body(Map.of("error", "Product ID is required"));
             }
+            
+            if (!productRepository.existsById(productId)) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Product not found"));
+            }
+            
+            // Get user ID from JWT token
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String userId = "guest";
+            
+            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+                String email = auth.getName();
+                User user = userRepository.findByEmail(email).orElse(null);
+                if (user != null) {
+                    userId = user.getId();
+                }
+            }
+            
+            // Ensure guest user exists in database
+            if ("guest".equals(userId)) {
+                if (!userRepository.existsById("guest")) {
+                    User guestUser = new User();
+                    guestUser.setId("guest");
+                    guestUser.setEmail("guest@pradha.com");
+                    guestUser.setName("Guest User");
+                    guestUser.setPassword("guest");
+                    guestUser.setRole("GUEST");
+                    userRepository.save(guestUser);
+                }
+            }
+            String size = (String) request.get("size");
+            if (size == null || size.trim().isEmpty()) {
+                size = "M";
+            }
+            
+            String color = (String) request.get("color");
+            if (color == null || color.trim().isEmpty()) {
+                color = "Default";
+            }
+            
+            // Check if item already exists in cart
+            List<CartItem> existingItems = cartRepository.findAll();
+            for (CartItem existing : existingItems) {
+                if (existing.getUserId().equals(userId) && 
+                    existing.getProductId().equals(productId) &&
+                    existing.getSize().equals(size) &&
+                    existing.getColor().equals(color)) {
+                    
+                    // Update quantity instead of creating new item
+                    Object quantityObj = request.get("quantity");
+                    Integer additionalQuantity = quantityObj != null ? Integer.valueOf(quantityObj.toString()) : 1;
+                    existing.setQuantity(existing.getQuantity() + additionalQuantity);
+                    cartRepository.save(existing);
+                    return ResponseEntity.ok(Map.of("message", "Cart updated"));
+                }
+            }
+            
+            // Create new cart item
+            CartItem cartItem = new CartItem();
+            cartItem.setUserId(userId);
             cartItem.setProductId(productId);
+            cartItem.setSize(size);
+            cartItem.setColor(color);
             
             Object quantityObj = request.get("quantity");
             Integer quantity = quantityObj != null ? Integer.valueOf(quantityObj.toString()) : 1;
             cartItem.setQuantity(quantity);
             
-            String size = (String) request.get("size");
-            if (size == null || size.trim().isEmpty()) {
-                size = "M"; // Default size
-            }
-            cartItem.setSize(size);
-            
-            String color = (String) request.get("color");
-            if (color == null || color.trim().isEmpty()) {
-                color = "Default"; // Default color
-            }
-            cartItem.setColor(color);
-            
             cartItem.setCustomizationNotes((String) request.get("customization_notes"));
             
-            System.out.println("Saving cart item: " + cartItem.getProductId());
+            System.out.println("Saving new cart item: " + cartItem.getProductId());
             cartRepository.save(cartItem);
             System.out.println("✅ Cart item saved successfully");
             

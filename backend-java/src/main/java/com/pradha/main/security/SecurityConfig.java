@@ -34,7 +34,26 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/**",
-                                "/error"
+                                "/api/products",
+                                "/api/products/{id}",
+                                "/api/rental/dresses",
+                                "/api/rental/dresses/available",
+                                "/api/rental/bookings",
+                                "/api/admin/rental/dresses",
+                                "/api/admin/rental/dresses/**",
+                                "/api/hero-content",
+                                "/api/inquiries",
+                                "/api/cart",
+                                "/api/cart/**",
+                                "/api/checkout/**",
+                                "/api/test-db",
+                                "/error",
+                                "/",
+                                "/favicon.ico",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**",
+                                "/webjars/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
@@ -48,8 +67,7 @@ public class SecurityConfig {
         CorsConfiguration cors = new CorsConfiguration();
         cors.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",
-                "http://18.205.19.24",
-                "http://18.205.19.24:3000"
+                "http://127.0.0.1:3000"
         ));
         cors.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
         cors.setAllowedHeaders(Arrays.asList("*"));

@@ -17,9 +17,30 @@ import '@/App.css';
 import Register from './components/ui/register';
 import VerifyEmail from './components/ui/verifyEmail';
 import Login from './components/ui/login';
+import RentalDresses from './components/ui/RentalDresses';
+import AdminRentalDashboard from './components/ui/AdminRentalDashboard';
+import Checkout from './components/ui/Checkout';
+import Orders from './components/ui/Orders';
+import Cart from './components/ui/Cart';
+import Developer from './components/ui/Developer';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://18.205.19.24:8081';
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081';
 const API = `${BACKEND_URL}/api`;
+
+// Add axios interceptor to ensure token is always sent
+axios.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+      console.log('Sending request with token:', token.substring(0, 20) + '...');
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 const AuthContext = createContext(null);
 
@@ -108,14 +129,26 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-[#8B1538]/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          <Link to="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold text-[#8B1538]">Pradha</span>
-            <span className="text-lg text-gray-600">Fashion Outlet</span>
+          <Link to="/" className="flex items-center">
+            <img 
+              src="/logo.png" 
+              alt="Pradha Fashion Outlet" 
+              className="h-12 w-auto"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+            <div className="flex items-center space-x-2" style={{display: 'none'}}>
+              <span className="text-2xl font-bold text-[#8B1538]">Pradha</span>
+              <span className="text-lg text-gray-600">Fashion Outlet</span>
+            </div>
           </Link>
 
           <div className="hidden md:flex items-center space-x-8">
             <Link to="/" className="nav-link">Home</Link>
             <Link to="/products" className="nav-link">Collections</Link>
+            <Link to="/rentals" className="nav-link">Rentals</Link>
             <Link to="/about" className="nav-link">About</Link>
             <Link to="/contact" className="nav-link">Contact</Link>
             {user && user.role === 'ADMIN' && <Link to="/admin" className="nav-link">Admin</Link>}
@@ -135,6 +168,12 @@ const Navbar = () => {
                       {cartCount}
                     </span>
                   )}
+                </button>
+                <button
+                  onClick={() => navigate('/orders')}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <User className="w-5 h-5 text-[#8B1538]" />
                 </button>
                 <Button
                   variant="ghost"
@@ -168,6 +207,7 @@ const Navbar = () => {
           <div className="md:hidden py-4 space-y-4">
             <Link to="/" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Home</Link>
             <Link to="/products" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Collections</Link>
+            <Link to="/rentals" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Rentals</Link>
             <Link to="/about" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>About</Link>
             <Link to="/contact" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
             {user && user.role === 'ADMIN' && <Link to="/admin" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Admin</Link>}
@@ -190,12 +230,41 @@ const HomePage = () => {
   const navigate = useNavigate();
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [newArrivals, setNewArrivals] = useState([]);
+  const [currentHero, setCurrentHero] = useState(0);
+  const [heroPages, setHeroPages] = useState([]);
+
+  const defaultHeroPages = [
+    {
+      title: "Pradha Fashion Outlet",
+      subtitle: "Where Tradition Meets Elegance",
+      image: "https://images.unsplash.com/photo-1756483510837-e79455e52188?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzB8MHwxfHNlYXJjaHwxfHxJbmRpYW4lMjB0cmFkaXRpb25hbCUyMGZhc2hpb258ZW58MHx8fHwxNzYwMDIyODcxfDA&ixlib=rb-4.1.0&q=85"
+    }
+  ];
 
   useEffect(() => {
     fetchFeaturedProducts();
     fetchNewArrivals();
+    fetchHeroContent();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const fetchHeroContent = async () => {
+    try {
+      const response = await axios.get(`${API}/hero-content`);
+      setHeroPages(Array.isArray(response.data) && response.data.length > 0 ? response.data : defaultHeroPages);
+    } catch (error) {
+      setHeroPages(defaultHeroPages);
+    }
+  };
+
+  useEffect(() => {
+    if (heroPages.length > 0) {
+      const interval = setInterval(() => {
+        setCurrentHero((prev) => (prev + 1) % heroPages.length);
+      }, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [heroPages.length]);
 
   const fetchFeaturedProducts = async () => {
     try {
@@ -217,11 +286,22 @@ const HomePage = () => {
 
   return (
     <div className="home-page">
-      <section className="hero-section">
-        <div className="hero-overlay">
+      <section className="hero-section relative overflow-hidden">
+        {/* Background Images with Fade Animation */}
+        {(heroPages.length > 0 ? heroPages : defaultHeroPages).map((page, index) => (
+          <div
+            key={index}
+            className={`absolute inset-0 bg-cover bg-center bg-fixed transition-opacity duration-1000 ${
+              index === currentHero ? 'opacity-100' : 'opacity-0'
+            }`}
+            style={{backgroundImage: `url(${page.image})`}}
+          />
+        ))}
+        
+        <div className="hero-overlay relative z-10">
           <div className="hero-content">
-            <h1 className="hero-title">Pradha Fashion Outlet</h1>
-            <p className="hero-subtitle">Where Tradition Meets Elegance</p>
+            <h1 className="hero-title animate-fade-in">{heroPages[currentHero]?.title || defaultHeroPages[0].title}</h1>
+            <p className="hero-subtitle animate-fade-in-delay">{heroPages[currentHero]?.subtitle || defaultHeroPages[0].subtitle}</p>
             <div className="flex gap-4 justify-center mt-8">
               <Button
                 onClick={() => navigate('/products')}
@@ -238,6 +318,17 @@ const HomePage = () => {
               >
                 Customize Your Outfit
               </Button>
+            </div>
+            <div className="flex justify-center mt-6 space-x-2">
+              {(heroPages.length > 0 ? heroPages : defaultHeroPages).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentHero(index)}
+                  className={`w-3 h-3 rounded-full transition-all duration-300 hover:scale-125 ${
+                    index === currentHero ? 'bg-white scale-110' : 'bg-white/50'
+                  }`}
+                />
+              ))}
             </div>
           </div>
         </div>
@@ -291,8 +382,57 @@ const HomePage = () => {
     </div>
   );
 };
+// Unified Product Image Component
+const ProductImage = ({ src, alt, className = "", showHover = false, badges = [] }) => {
+  const [imageError, setImageError] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
+  return (
+    <div 
+      className={`relative overflow-hidden bg-[#F5F5DC] ${className}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {!imageError ? (
+        <img
+          src={src || 'https://via.placeholder.com/400x400/F5F5DC/8B1538?text=No+Image'}
+          alt={alt}
+          className={`w-full h-full object-contain transition-transform duration-300 ${
+            showHover && isHovered ? 'scale-105' : ''
+          }`}
+          onError={handleImageError}
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center text-[#8B1538] bg-[#F5F5DC]">
+          <div className="text-center">
+            <div className="text-2xl mb-2">📷</div>
+            <div className="text-sm">No Image</div>
+          </div>
+        </div>
+      )}
+      {badges.map((badge, index) => (
+        <Badge key={index} className={badge.className}>
+          {badge.text}
+        </Badge>
+      ))}
+    </div>
+  );
+};
+
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
+
+  const badges = [];
+  if (product.new_arrival) {
+    badges.push({ text: 'New', className: 'absolute top-2 left-2 bg-[#DAA520] hover:bg-[#B8860B]' });
+  }
+  if (product.featured) {
+    badges.push({ text: 'Featured', className: 'absolute top-2 right-2 bg-[#8B1538] hover:bg-[#6B0F2A]' });
+  }
 
   return (
     <Card
@@ -300,19 +440,13 @@ const ProductCard = ({ product }) => {
       onClick={() => navigate(`/products/${product.id}`)}
       data-testid={`product-card-${product.id}`}
     >
-      <div className="product-image-container">
-        <img
-          src={product.images[0] || 'https://via.placeholder.com/300'}
-          alt={product.name}
-          className="product-image"
-        />
-        {product.new_arrival && (
-          <Badge className="absolute top-2 left-2 bg-[#DAA520] hover:bg-[#B8860B]">New</Badge>
-        )}
-        {product.featured && (
-          <Badge className="absolute top-2 right-2 bg-[#8B1538] hover:bg-[#6B0F2A]">Featured</Badge>
-        )}
-      </div>
+      <ProductImage
+        src={product.images?.[0] || product.imageUrls?.[0]}
+        alt={product.name}
+        className="h-80"
+        showHover={true}
+        badges={badges}
+      />
       <CardHeader>
         <CardTitle className="text-lg">{product.name}</CardTitle>
         <CardDescription>{product.subcategory}</CardDescription>
@@ -474,21 +608,19 @@ const ProductDetailPage = () => {
     <div className="page-container">
       <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
         <div className="space-y-4">
-          <div className="product-detail-image-container">
-            <img
-              src={product.images[0] || 'https://via.placeholder.com/600'}
-              alt={product.name}
-              className="product-detail-image"
-            />
-          </div>
-          {product.images.length > 1 && (
+          <ProductImage
+            src={product.images?.[0] || product.imageUrls?.[0]}
+            alt={product.name}
+            className="h-[600px] rounded-2xl shadow-lg"
+          />
+          {(product.images?.length > 1 || product.imageUrls?.length > 1) && (
             <div className="grid grid-cols-4 gap-2">
-              {product.images.slice(1, 5).map((img, idx) => (
-                <img
+              {(product.images || product.imageUrls)?.slice(1, 5).map((img, idx) => (
+                <ProductImage
                   key={idx}
                   src={img}
                   alt={`${product.name} ${idx + 2}`}
-                  className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-75 transition-opacity"
+                  className="h-24 rounded-lg cursor-pointer hover:opacity-75 transition-opacity"
                 />
               ))}
             </div>
@@ -671,10 +803,10 @@ const CartPage = () => {
               <Card key={item.id} data-testid={`cart-item-${item.id}`}>
                 <CardContent className="p-6">
                   <div className="flex gap-4">
-                    <img
-                      src={item.product?.images?.[0] || 'https://via.placeholder.com/150'}
+                    <ProductImage
+                      src={item.product?.images?.[0] || item.product?.imageUrls?.[0]}
                       alt={item.product?.name}
-                      className="w-24 h-24 object-cover rounded-lg"
+                      className="w-24 h-24 rounded-lg"
                     />
                     <div className="flex-1">
                       <h3 className="font-semibold text-lg mb-1">{item.product?.name}</h3>
@@ -743,7 +875,7 @@ const CartPage = () => {
                 </div>
                 <Button
                   className="w-full bg-[#DAA520] hover:bg-[#B8860B] text-white py-6 text-lg"
-                  onClick={() => toast.info('Checkout feature coming soon!')}
+                  onClick={() => navigate('/checkout')}
                   data-testid="checkout-btn"
                 >
                   Proceed to Checkout
@@ -909,8 +1041,163 @@ const ContactPage = () => {
   );
 };
 
+const HeroContentManager = () => {
+  const [heroSlides, setHeroSlides] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editingSlide, setEditingSlide] = useState(null);
+  const [formData, setFormData] = useState({ title: '', subtitle: '', image: '' });
+  const [imageFile, setImageFile] = useState(null);
+
+  useEffect(() => {
+    fetchHeroSlides();
+  }, []);
+
+  const fetchHeroSlides = async () => {
+    try {
+      const response = await axios.get(`${API}/hero-content`);
+      setHeroSlides(Array.isArray(response.data) ? response.data : []);
+    } catch (error) {
+      console.error('Failed to fetch hero slides:', error);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const slideData = {
+        title: formData.title,
+        subtitle: formData.subtitle,
+        image: formData.image || 'https://images.unsplash.com/photo-1756483510837-e79455e52188?w=1200'
+      };
+      
+      if (editingSlide) {
+        await axios.put(`${API}/admin/hero-content/${editingSlide.id}`, slideData);
+      } else {
+        await axios.post(`${API}/admin/hero-content`, slideData);
+      }
+      
+      fetchHeroSlides();
+      setFormData({ title: '', subtitle: '', image: '' });
+      setImageFile(null);
+      setShowForm(false);
+      setEditingSlide(null);
+    } catch (error) {
+      console.error('Failed to save hero slide:', error);
+      alert('Error saving hero slide. Please try again.');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this hero slide?')) return;
+    try {
+      await axios.delete(`${API}/admin/hero-content/${id}`);
+      fetchHeroSlides();
+    } catch (error) {
+      console.error('Failed to delete hero slide:', error);
+    }
+  };
+
+  const handleEdit = (slide) => {
+    setEditingSlide(slide);
+    setFormData({ title: slide.title, subtitle: slide.subtitle, image: slide.image });
+    setShowForm(true);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Hero Content Management</h2>
+        <Button onClick={() => setShowForm(!showForm)} className="bg-[#8B1538] hover:bg-[#6B0F2A]">
+          <Plus className="w-4 h-4 mr-2" />
+          Add Hero Slide
+        </Button>
+      </div>
+
+      {showForm && (
+        <Card>
+          <CardContent className="p-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label>Title</Label>
+                <Input
+                  required
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Subtitle</Label>
+                <Input
+                  required
+                  value={formData.subtitle}
+                  onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Hero Image</Label>
+                <div className="space-y-2">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        const uploadFormData = new FormData();
+                        uploadFormData.append('images', file);
+                        try {
+                          const response = await axios.post(`${API}/admin/hero-content/upload`, uploadFormData, {
+                            headers: { 'Content-Type': 'multipart/form-data' }
+                          });
+                          setFormData({ ...formData, image: response.data.imageUrl });
+                        } catch (error) {
+                          console.error('Upload failed:', error);
+                          alert('Image upload failed. Please try again.');
+                        }
+                      }
+                    }}
+                  />
+                  <div className="text-xs text-gray-500">
+                    Or use sample URLs:
+                    <button type="button" className="block text-blue-600 hover:underline" onClick={() => setFormData({ ...formData, image: 'https://images.unsplash.com/photo-1756483510837-e79455e52188?w=1200' })}>Traditional Fashion</button>
+                    <button type="button" className="block text-blue-600 hover:underline" onClick={() => setFormData({ ...formData, image: 'https://images.unsplash.com/photo-1711130388758-2ccf44bb735c?w=1200' })}>Lehenga Collection</button>
+                  </div>
+                </div>
+                {formData.image && <img src={formData.image} alt="Preview" className="w-full h-32 object-cover rounded mt-2" />}
+              </div>
+              <div className="flex gap-2">
+                <Button type="submit" className="bg-[#8B1538] hover:bg-[#6B0F2A]">
+                  {editingSlide ? 'Update' : 'Create'}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingSlide(null); setFormData({ title: '', subtitle: '', image: '' }); setImageFile(null); }}>
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {heroSlides.map((slide) => (
+          <Card key={slide.id}>
+            <CardContent className="p-4">
+              <img src={slide.image} alt={slide.title} className="w-full h-32 object-cover rounded mb-3" />
+              <h3 className="font-semibold mb-1">{slide.title}</h3>
+              <p className="text-sm text-gray-600 mb-3">{slide.subtitle}</p>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" onClick={() => handleEdit(slide)}>Edit</Button>
+                <Button size="sm" variant="destructive" onClick={() => handleDelete(slide.id)}>Delete</Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const AdminPage = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -932,10 +1219,12 @@ const AdminPage = () => {
     sizes: '',
     colors: '',
     images: [],
+    imageFiles: [],
     customizable: true,
     featured: false,
     new_arrival: false
   });
+  const [hoveredProduct, setHoveredProduct] = useState(null);
 
   useEffect(() => {
     fetchProducts();
@@ -960,61 +1249,90 @@ const AdminPage = () => {
     }
   };
 
-  const handleImageUpload = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  // ✅ Set category & subcategory — modify based on your form state
-  const category = formData.category || "default";
-  const subcategory = formData.subcategory || "default";
-
-  const formDataUpload = new FormData();
-  formDataUpload.append("file", file);
-  formDataUpload.append("category", category);
-  formDataUpload.append("subcategory", subcategory);
-
-  try {
-    const response = await axios.post(
-      `${API}/auth/upload-image`,
-      formDataUpload,
-      { headers: { "Content-Type": "multipart/form-data" } }
-    );
-
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+    
+    // Store files temporarily, will upload after product creation
     setFormData({
       ...formData,
-      images: [...formData.images, response.data.url]
+      imageFiles: files
     });
-
-    toast.success("Image uploaded!");
-  } catch (error) {
-    console.error("Failed to upload image:", error);
-    toast.error("Failed to upload image");
-  }
-};
+    
+    toast.success(`${files.length} image(s) selected for upload`);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const productData = {
-      ...formData,
+      name: formData.name,
+      category: formData.category,
+      subcategory: formData.subcategory,
+      description: formData.description,
       price: parseFloat(formData.price),
       sizes: formData.sizes.split(',').map(s => s.trim()),
-      colors: formData.colors.split(',').map(c => c.trim())
+      colors: formData.colors.split(',').map(c => c.trim()),
+      customizable: formData.customizable,
+      featured: formData.featured,
+      newArrival: formData.new_arrival,
+      images: formData.images
     };
 
     try {
+      let savedProduct;
       if (editingProduct) {
-        await axios.put(`${API}/admin/products/${editingProduct.id}`, productData);
+        const response = await axios.put(`${API}/admin/products/${editingProduct.id}`, productData, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        savedProduct = response.data;
         toast.success('Product updated!');
       } else {
-        await axios.post(`${API}/admin/products`, productData);
+        const response = await axios.post(`${API}/admin/products`, productData, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        savedProduct = response.data;
         toast.success('Product created!');
       }
+      
+      // Upload images if any
+      if (formData.imageFiles && formData.imageFiles.length > 0) {
+        const imageFormData = new FormData();
+        formData.imageFiles.forEach(file => {
+          imageFormData.append('images', file);
+        });
+        
+        try {
+          await axios.post(`${API}/admin/products/${savedProduct.id}/images`, imageFormData, {
+            headers: { 
+              'Content-Type': 'multipart/form-data',
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+          toast.success('Images uploaded successfully!');
+        } catch (imageError) {
+          console.error('Failed to upload images:', imageError);
+          toast.error('Product saved but image upload failed');
+        }
+      }
+      
       resetForm();
       fetchProducts();
     } catch (error) {
       console.error('Failed to save product:', error);
-      toast.error('Failed to save product');
+      console.error('Error details:', {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data
+      });
+      
+      const errorMessage = error.response?.data?.error || error.response?.data?.message || error.message || 'Unknown error';
+      toast.error(`Failed to save product: ${errorMessage}`);
     }
   };
 
@@ -1031,7 +1349,7 @@ const AdminPage = () => {
       images: product.images,
       customizable: product.customizable,
       featured: product.featured,
-      new_arrival: product.new_arrival
+      new_arrival: product.newArrival
     });
     setShowProductForm(true);
   };
@@ -1039,7 +1357,11 @@ const AdminPage = () => {
   const handleDelete = async (productId) => {
     if (!window.confirm('Are you sure you want to delete this product?')) return;
     try {
-      await axios.delete(`${API}/admin/products/${productId}`);
+      await axios.delete(`${API}/admin/products/${productId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
       toast.success('Product deleted!');
       fetchProducts();
     } catch (error) {
@@ -1058,6 +1380,7 @@ const AdminPage = () => {
       sizes: '',
       colors: '',
       images: [],
+      imageFiles: [],
       customizable: true,
       featured: false,
       new_arrival: false
@@ -1071,13 +1394,42 @@ const AdminPage = () => {
       <h1 className="page-title">Admin Dashboard</h1>
 
       <Tabs defaultValue="products" className="w-full">
-        <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+        <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-4">
           <TabsTrigger value="products" data-testid="products-tab">Products</TabsTrigger>
+          <TabsTrigger value="rentals" data-testid="rentals-tab">Rentals</TabsTrigger>
+          <TabsTrigger value="hero" data-testid="hero-tab">Hero Content</TabsTrigger>
           <TabsTrigger value="inquiries" data-testid="inquiries-tab">Inquiries</TabsTrigger>
         </TabsList>
 
         <TabsContent value="products" className="space-y-6">
-          <div className="flex justify-end">
+          <div className="flex justify-between items-center">
+            <div className="flex gap-2">
+              <Button
+                onClick={() => {
+                  logout();
+                  toast.info('Please login again to refresh your session');
+                  navigate('/login');
+                }}
+                variant="outline"
+                className="text-sm bg-yellow-100 text-yellow-800"
+              >
+                Refresh Session
+              </Button>
+              <Button
+                onClick={async () => {
+                  try {
+                    const response = await axios.get(`${API}/admin/auth-test`);
+                    toast.success('Admin authentication successful!');
+                  } catch (error) {
+                    toast.error('Please refresh your session - JWT expired');
+                  }
+                }}
+                variant="outline"
+                className="text-sm"
+              >
+                Test Auth
+              </Button>
+            </div>
             <Button
               onClick={() => setShowProductForm(!showProductForm)}
               className="bg-[#8B1538] hover:bg-[#6B0F2A]"
@@ -1195,6 +1547,7 @@ const AdminPage = () => {
                       <Input
                         type="file"
                         accept="image/*"
+                        multiple
                         onChange={handleImageUpload}
                         className="flex-1"
                         data-testid="product-image-upload"
@@ -1263,13 +1616,24 @@ const AdminPage = () => {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {products.map((product) => (
-              <Card key={product.id} data-testid={`admin-product-${product.id}`}>
+              <Card key={product.id} data-testid={`admin-product-${product.id}`} className="group">
                 <CardContent className="p-4">
-                  <img
-                    src={product.images[0] || 'https://via.placeholder.com/300'}
-                    alt={product.name}
-                    className="w-full h-48 object-cover rounded-lg mb-3"
-                  />
+                  <div className="relative mb-3">
+                    <ProductImage
+                      src={product.images?.[0] || product.imageUrls?.[0]}
+                      alt={product.name}
+                      className="w-full h-48 rounded-lg"
+                      showHover={true}
+                    />
+                    {/* Hover preview for full image */}
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
+                      <ProductImage
+                        src={product.images?.[0] || product.imageUrls?.[0]}
+                        alt={product.name}
+                        className="w-64 h-64 rounded-lg shadow-2xl transform scale-0 group-hover:scale-100 transition-transform duration-300 absolute top-0 left-1/2 -translate-x-1/2 -translate-y-4 bg-white p-2"
+                      />
+                    </div>
+                  </div>
                   <h3 className="font-semibold text-lg mb-1">{product.name}</h3>
                   <p className="text-sm text-gray-600 mb-2">{product.category} - {product.subcategory}</p>
                   <p className="text-lg font-bold text-[#8B1538] mb-3">₹{product.price}</p>
@@ -1295,6 +1659,14 @@ const AdminPage = () => {
               </Card>
             ))}
           </div>
+        </TabsContent>
+
+        <TabsContent value="rentals">
+          <AdminRentalDashboard />
+        </TabsContent>
+
+        <TabsContent value="hero">
+          <HeroContentManager />
         </TabsContent>
 
         <TabsContent value="inquiries">
@@ -1343,6 +1715,7 @@ const Footer = () => {
               <Link to="/products" className="block hover:text-[#DAA520] transition-colors">Collections</Link>
               <Link to="/about" className="block hover:text-[#DAA520] transition-colors">About</Link>
               <Link to="/contact" className="block hover:text-[#DAA520] transition-colors">Contact</Link>
+              <Link to="/developer" className="block hover:text-[#DAA520] transition-colors">Developer</Link>
             </div>
           </div>
           <div>
@@ -1382,9 +1755,13 @@ function App() {
           <Route path="/" element={<Layout><HomePage /></Layout>} />
           <Route path="/products" element={<Layout><ProductsPage /></Layout>} />
           <Route path="/products/:id" element={<Layout><ProductDetailPage /></Layout>} />
-          <Route path="/cart" element={<Layout><CartPage /></Layout>} />
+          <Route path="/rentals" element={<Layout><RentalDresses /></Layout>} />
+          <Route path="/cart" element={<Layout><Cart /></Layout>} />
+          <Route path="/checkout" element={<Layout><Checkout /></Layout>} />
+          <Route path="/orders" element={<Layout><Orders /></Layout>} />
           <Route path="/about" element={<Layout><AboutPage /></Layout>} />
           <Route path="/contact" element={<Layout><ContactPage /></Layout>} />
+          <Route path="/developer" element={<Layout><Developer /></Layout>} />
           <Route path="/admin" element={<Layout><AdminPage /></Layout>} />
 
           <Route path="/register" element={<Register />} />

@@ -3,6 +3,9 @@
 # IDE and editors
 .idea/
 .vscode/
+*.swp
+*.swo
+*~
 
 # Dependencies
 node_modules/
@@ -27,16 +30,25 @@ next-env.d.ts
 
 # Production builds
 /build
+/frontend/build
 dist/
 dist
 
-# Environment files (comprehensive coverage)
-
-*token.json*
-*credentials.json*
+# Environment files - Keep only examples
 .env
+.env.local
+.env.production
+.env.development
+.env.test
 .env.*
 !.env.example
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+frontend/.env.development
+backend-java/.env
+*token.json*
+*credentials.json*
 
 # Logs and debug files
 npm-debug.log*
@@ -44,16 +56,48 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 dump.rdb
+*.log
+logs/
 
 # System files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 *.pem
+
+# Java/Maven/Spring Boot
+backend-java/target/
+backend-java/jdk-17.0.2/
+backend-java/data/
+backend-java/src/main/resources/application-prod.properties
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+postgres_data/
 
 # Python
 __pycache__/
-*pyc*
+*.py[cod]
+*$py.class
 venv/
 .venv/
+*.egg-info/
 
 # Development tools
 chainlit.md
@@ -78,18 +122,20 @@ agenthub/agents/youtube/db
 
 # Build caches
 .cache/
+.npm/
+.eslintcache
 
 # Mobile development
-android-sdk/ 
+android-sdk/
 
-# Ignore large or build files
-backend-java/jdk-17.0.2/
-backend-java/target/
-backend-java/data/
-.env
-.env.prod
-backend-java/src/main/resources/application-prod.properties
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+.temp/
 
-.env.prod
-.env
-backend-java/src/main/resources/application-prod.properties
+# OS generated files
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*

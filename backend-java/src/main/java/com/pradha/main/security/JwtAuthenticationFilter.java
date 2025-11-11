@@ -34,13 +34,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = header.substring(7);
 
             try {
+                System.out.println("Processing token: " + token.substring(0, Math.min(20, token.length())) + "...");
                 String username = jwtUtil.extractUsername(token);
                 String role = jwtUtil.extractRole(token);
+                System.out.println("Extracted username: " + username + ", role: " + role);
 
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
                     if (role == null) role = "USER";
                     String roleName = role.startsWith("ROLE_") ? role : "ROLE_" + role;
+                    System.out.println("Final role name: " + roleName);
 
                     UsernamePasswordAuthenticationToken auth =
                             new UsernamePasswordAuthenticationToken(
@@ -50,9 +53,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             );
 
                     SecurityContextHolder.getContext().setAuthentication(auth);
+                    System.out.println("Authentication set for user: " + username);
                 }
 
             } catch (Exception ex) {
+                System.err.println("❌ Invalid JWT: " + ex.getMessage());
                 logger.error("❌ Invalid JWT: " + ex.getMessage());
             }
         }

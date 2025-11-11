@@ -1,11 +1,11 @@
 server:
-  port: 8081
+  port: ${BACKEND_PORT:8081}
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/pradha_db
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:password}
+    url: jdbc:postgresql://${SERVER_IP:localhost}:${DB_PORT:5432}/pradha_db
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:Niraj@1588}
     driver-class-name: org.postgresql.Driver
   
   jpa:
@@ -19,14 +19,38 @@ spring:
   
   security:
     enabled: true
+  
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:pradhafashionoutlet@gmail.com}
+    password: ${MAIL_PASSWORD:qedj gxbi xttj oicb}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 aws:
+  region: ${AWS_REGION:eu-north-1}
+  access-key-id: ${AWS_ACCESS_KEY_ID:}
+  secret-access-key: ${AWS_SECRET_ACCESS_KEY:}
   s3:
     bucket-name: ${AWS_S3_BUCKET_NAME:pradha-main}
     base-url: ${AWS_S3_BASE_URL:https://pradha-main.s3.amazonaws.com/}
-    region: ${AWS_REGION:eu-north-1}
-    access-key-id: ${AWS_ACCESS_KEY_ID}
-    secret-access-key: ${AWS_SECRET_ACCESS_KEY}
+
+jwt:
+  secret: ${JWT_SECRET:b87edff85441f05edccfdee9cb33c5a43af0d37a1bb45f79c9f89b586c3e9aae1d14ca860f9cc96b28c25f82b3addb6166aa550314d8eaf36f99cce0aeeecbb0}
+
+razorpay:
+  key:
+    id: ${RAZORPAY_KEY_ID:rzp_test_your_key_id}
+    secret: ${RAZORPAY_KEY_SECRET:your_secret_key}
+
+whatsapp:
+  api-url: ${WHATSAPP_API_URL:https://graph.facebook.com/v18.0/YOUR_PHONE_NUMBER_ID/messages}
+  access-token: ${WHATSAPP_ACCESS_TOKEN:your_whatsapp_access_token}
 
 logging:
   level:
