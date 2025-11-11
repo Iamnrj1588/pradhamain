@@ -47,6 +47,8 @@ frontend/.env.local
 frontend/.env.production
 frontend/.env.development
 backend-java/.env
+backend-java/.env.*
+!backend-java/.env.example
 *token.json*
 *credentials.json*
 
