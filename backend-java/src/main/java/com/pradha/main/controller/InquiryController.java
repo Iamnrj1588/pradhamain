@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = {"http://localhost:3000", "http://127.0.0.1:3000"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://127.0.0.1:3000", "http://18.205.19.24"})
 public class InquiryController {
 
     @Autowired
@@ -34,11 +34,11 @@ public class InquiryController {
                 return ResponseEntity.badRequest().body("Name, email, and message are required");
             }
             
-            // Generate random ID
-            long randomId = System.currentTimeMillis();
+            // Generate UUID for ID
+            String inquiryId = java.util.UUID.randomUUID().toString();
             
-            String sql = "INSERT INTO inquiries (id, name, email, phone, message, product_id, created_at) VALUES (?, ?, ?, ?, ?, NULL, NOW())";
-            int result = jdbcTemplate.update(sql, randomId, request.getName(), request.getEmail(), request.getPhone(), request.getMessage());
+            String sql = "INSERT INTO inquiries (id, name, email, phone, message, created_at) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)";
+            int result = jdbcTemplate.update(sql, inquiryId, request.getName(), request.getEmail(), request.getPhone(), request.getMessage());
             
             System.out.println("Insert result: " + result);
             return ResponseEntity.ok("Inquiry submitted successfully");
