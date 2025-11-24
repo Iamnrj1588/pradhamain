@@ -26,7 +26,21 @@ public class EmailService {
         }
     }
 
-    // ✅ ADD THIS
+    public void sendPasswordResetOTP(String toEmail, String otpCode) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(toEmail);
+            message.setSubject("Pradha Fashion Outlet - Password Reset");
+            message.setText("Your OTP for password reset is: " + otpCode + "\n\nThis OTP will expire in 10 minutes.\n\nIf you didn't request this, please ignore this email.");
+
+            mailSender.send(message);
+            System.out.println("✅ Password reset OTP sent to: " + toEmail);
+        } catch (Exception e) {
+            System.err.println("❌ Failed to send password reset OTP: " + e.getMessage());
+            throw new RuntimeException("Failed to send password reset OTP", e);
+        }
+    }
+
     public void sendVerificationEmail(String email) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();

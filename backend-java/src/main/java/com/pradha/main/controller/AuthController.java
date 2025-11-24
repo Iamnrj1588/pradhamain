@@ -137,6 +137,78 @@ public class AuthController {
             Map.of("id", user.getId(), "email", user.getEmail(), "name", user.getName(), "role", user.getRole())
         ));
     }
+    
+    @PostMapping("/verify-reset-otp")
+    public ResponseEntity<?> verifyResetOtp(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String otp = request.get("otp");
+        
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "User not found"));
+        }
+        
+        if (user.getOtp() == null || !user.getOtp().equals(otp)) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid OTP"));
+        }
+        
+        if (user.getOtpExpiry() == null || LocalDateTime.now().isAfter(user.getOtpExpiry())) {
+            return ResponseEntity.badRequest().body(Map.of("error", "OTP expired"));
+        }
+        
+        // Don't clear OTP yet - keep it for password reset
+        return ResponseEntity.ok(Map.of("message", "OTP verified successfully"));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Email not found"));
+        }
+        
+        // Generate 6-digit OTP
+        String otp = String.format("%06d", new Random().nextInt(1000000));
+        user.setOtp(otp);
+        user.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
+        userRepository.save(user);
+        
+        try {
+            emailService.sendPasswordResetOTP(email, otp);
+            return ResponseEntity.ok(Map.of("message", "Password reset OTP sent to your email"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to send OTP"));
+        }
+    }
+    
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String otp = request.get("otp");
+        String newPassword = request.get("newPassword");
+        
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "User not found"));
+        }
+        
+        if (user.getOtp() == null || !user.getOtp().equals(otp)) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid OTP"));
+        }
+        
+        if (user.getOtpExpiry() == null || LocalDateTime.now().isAfter(user.getOtpExpiry())) {
+            return ResponseEntity.badRequest().body(Map.of("error", "OTP expired"));
+        }
+        
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        user.setOtp(null);
+        user.setOtpExpiry(null);
+        userRepository.save(user);
+        
+        return ResponseEntity.ok(Map.of("message", "Password reset successfully"));
+    }
 
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser() {

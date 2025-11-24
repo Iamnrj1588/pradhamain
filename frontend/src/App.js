@@ -17,6 +17,7 @@ import '@/App.css';
 import Register from './components/ui/register';
 import VerifyEmail from './components/ui/verifyEmail';
 import Login from './components/ui/login';
+import ForgotPassword from './components/ui/forgotPassword';
 import RentalDresses from './components/ui/RentalDresses';
 import AdminRentalDashboard from './components/ui/AdminRentalDashboard';
 import Checkout from './components/ui/Checkout';
@@ -1767,6 +1768,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

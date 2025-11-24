@@ -264,9 +264,12 @@ export default function Login() {
             >
               {loading ? 'Logging in...' : 'Login'}
             </button>
-            <p style={{ margin: 0, color: '#666' }}>
-              Don't have an account? <Link to="/register" style={{ color: '#8B1538', textDecoration: 'none' }}>Sign up</Link>
-            </p>
+            <div style={{ textAlign: 'center' }}>
+              <Link to="/forgot-password" style={{ color: '#8B1538', textDecoration: 'none', fontSize: '14px', marginBottom: '15px', display: 'block' }}>Forgot Password?</Link>
+              <p style={{ margin: 0, color: '#666' }}>
+                Don't have an account? <Link to="/register" style={{ color: '#8B1538', textDecoration: 'none' }}>Sign up</Link>
+              </p>
+            </div>
           </form>
         </div>
       </main>
