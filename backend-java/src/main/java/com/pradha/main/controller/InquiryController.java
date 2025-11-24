@@ -37,7 +37,7 @@ public class InquiryController {
             // Generate UUID for ID
             String inquiryId = java.util.UUID.randomUUID().toString();
             
-            String sql = "INSERT INTO inquiries (id, name, email, phone, message, created_at) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)";
+            String sql = "INSERT INTO inquiries (id, name, email, phone, message) VALUES (?, ?, ?, ?, ?)";
             int result = jdbcTemplate.update(sql, inquiryId, request.getName(), request.getEmail(), request.getPhone(), request.getMessage());
             
             System.out.println("Insert result: " + result);

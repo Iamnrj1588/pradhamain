@@ -105,7 +105,7 @@ const RentalDresses = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             <CategoryCard 
               title="Navratri Outfits" 
-              image="https://images.unsplash.com/photo-1583391733956-6c78276477e2?w=300" 
+              image="https://images.unsplash.com/photo-1754244575428-8123e0d27ef3?w=300&auto=format&fit=crop&q=80" 
               onClick={() => filterBySubcategory('Navratri')}
             />
             <CategoryCard 

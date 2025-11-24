@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../../App";
-import { ShoppingCart, Menu, X } from 'lucide-react';
+import { ShoppingCart, Menu, X, CheckCircle, XCircle } from 'lucide-react';
 
 const API_URL = `${process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081'}/api/auth`;
 
@@ -130,29 +130,36 @@ export default function Login() {
   const { login } = useAuth();
 
   const [form, setForm] = useState({ email: "", password: "" });
+  const [message, setMessage] = useState({ text: "", type: "" });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setMessage({ text: "", type: "" });
+    
     try {
       const res = await axios.post(`${API_URL}/login`, form);
 
       // ✅ Save login info
       login(res.data.accessToken, res.data.user);
 
-      alert("Login Successful!");
-      navigate("/");
+      setMessage({ text: "Login successful! Redirecting...", type: "success" });
+      setTimeout(() => navigate("/"), 1500);
     } catch (err) {
       // ✅ Redirect unverified users to OTP screen
       if (err.response?.data?.requiresVerification) {
-        alert("Please verify email to continue.");
-        navigate(`/verify-email?email=${form.email}`);
+        setMessage({ text: "Please verify your email to continue.", type: "error" });
+        setTimeout(() => navigate(`/verify-email?email=${form.email}`), 2000);
         return;
       }
 
-      alert(err.response?.data?.error || "Login failed");
+      setMessage({ text: "Your username or password is incorrect", type: "error" });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -195,27 +202,48 @@ export default function Login() {
               style={{
                 width: '100%',
                 padding: '12px',
-                marginBottom: '20px',
+                marginBottom: '10px',
                 border: '1px solid #ccc',
                 borderRadius: '4px',
                 fontSize: '16px'
               }}
             />
+            {message.text && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px',
+                marginBottom: '15px',
+                borderRadius: '4px',
+                backgroundColor: message.type === 'success' ? '#f0f9ff' : '#fef2f2',
+                border: `1px solid ${message.type === 'success' ? '#3b82f6' : '#ef4444'}`,
+                color: message.type === 'success' ? '#1e40af' : '#dc2626',
+                fontSize: '14px'
+              }}>
+                {message.type === 'success' ? 
+                  <CheckCircle size={16} /> : 
+                  <XCircle size={16} />
+                }
+                {message.text}
+              </div>
+            )}
             <button 
               type="submit"
+              disabled={loading}
               style={{
                 width: '100%',
                 padding: '12px',
-                backgroundColor: '#8B1538',
+                backgroundColor: loading ? '#ccc' : '#8B1538',
                 color: 'white',
                 border: 'none',
                 borderRadius: '4px',
                 fontSize: '16px',
-                cursor: 'pointer',
+                cursor: loading ? 'not-allowed' : 'pointer',
                 marginBottom: '20px'
               }}
             >
-              Login
+              {loading ? 'Logging in...' : 'Login'}
             </button>
             <p style={{ margin: 0, color: '#666' }}>
               Don't have an account? <Link to="/register" style={{ color: '#8B1538', textDecoration: 'none' }}>Sign up</Link>
