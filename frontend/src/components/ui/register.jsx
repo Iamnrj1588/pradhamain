@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../App";
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react';
 
 const API_URL = `${process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081'}/api/auth`;
 
@@ -92,20 +92,29 @@ const Footer = () => {
 export default function Register() {
   const navigate = useNavigate();
   const [user, setUser] = useState({ name: "", email: "", phone: "", password: "" });
+  const [message, setMessage] = useState({ text: "", type: "" });
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) =>
     setUser({ ...user, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setMessage({ text: "", type: "" });
 
     try {
       await axios.post(`${API_URL}/signup`, user);
 
-      alert("OTP sent to email! Verify to activate account");
-      navigate(`/verify-email?email=${user.email}&name=${encodeURIComponent(user.name)}&phone=${encodeURIComponent(user.phone)}&password=${encodeURIComponent(user.password)}`);
+      setMessage({ text: "OTP sent to email! Redirecting to verification...", type: "success" });
+      setTimeout(() => {
+        navigate(`/verify-email?email=${user.email}&name=${encodeURIComponent(user.name)}&phone=${encodeURIComponent(user.phone)}&password=${encodeURIComponent(user.password)}`);
+      }, 2000);
     } catch (err) {
-      alert(err.response?.data?.error || "Registration failed");
+      setMessage({ text: err.response?.data?.error || "Registration failed", type: "error" });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -168,36 +177,75 @@ export default function Register() {
                 fontSize: '16px'
               }}
             />
-            <input 
-              type="password" 
-              name="password" 
-              placeholder="Password" 
-              onChange={handleChange} 
-              required 
-              style={{
-                width: '100%',
-                padding: '12px',
-                marginBottom: '20px',
-                border: '1px solid #ccc',
+            <div style={{ position: 'relative', marginBottom: '10px' }}>
+              <input 
+                type={showPassword ? "text" : "password"}
+                name="password" 
+                placeholder="Password" 
+                onChange={handleChange} 
+                required 
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  paddingRight: '45px',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  fontSize: '16px'
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#666'
+                }}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+            {message.text && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px',
+                marginBottom: '15px',
                 borderRadius: '4px',
-                fontSize: '16px'
-              }}
-            />
+                backgroundColor: message.type === 'success' ? '#f0f9ff' : '#fef2f2',
+                border: `1px solid ${message.type === 'success' ? '#3b82f6' : '#ef4444'}`,
+                color: message.type === 'success' ? '#1e40af' : '#dc2626',
+                fontSize: '14px'
+              }}>
+                {message.type === 'success' ? 
+                  <CheckCircle size={16} /> : 
+                  <XCircle size={16} />
+                }
+                {message.text}
+              </div>
+            )}
             <button 
               type="submit"
+              disabled={loading}
               style={{
                 width: '100%',
                 padding: '12px',
-                backgroundColor: '#8B1538',
+                backgroundColor: loading ? '#ccc' : '#8B1538',
                 color: 'white',
                 border: 'none',
                 borderRadius: '4px',
                 fontSize: '16px',
-                cursor: 'pointer',
+                cursor: loading ? 'not-allowed' : 'pointer',
                 marginBottom: '20px'
               }}
             >
-              Register
+              {loading ? 'Registering...' : 'Register'}
             </button>
             <p style={{ margin: 0, color: '#666' }}>
               Already have an account? <Link to="/login" style={{ color: '#8B1538', textDecoration: 'none' }}>Sign in</Link>

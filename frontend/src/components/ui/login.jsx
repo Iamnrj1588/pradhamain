@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../../App";
-import { ShoppingCart, Menu, X, CheckCircle, XCircle } from 'lucide-react';
+import { ShoppingCart, Menu, X, CheckCircle, XCircle, Eye, EyeOff } from 'lucide-react';
 
 const API_URL = `${process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081'}/api/auth`;
 
@@ -132,6 +132,7 @@ export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [message, setMessage] = useState({ text: "", type: "" });
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -193,21 +194,39 @@ export default function Login() {
                 fontSize: '16px'
               }}
             />
-            <input 
-              type="password" 
-              name="password" 
-              placeholder="Password" 
-              onChange={handleChange} 
-              required 
-              style={{
-                width: '100%',
-                padding: '12px',
-                marginBottom: '10px',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                fontSize: '16px'
-              }}
-            />
+            <div style={{ position: 'relative', marginBottom: '10px' }}>
+              <input 
+                type={showPassword ? "text" : "password"}
+                name="password" 
+                placeholder="Password" 
+                onChange={handleChange} 
+                required 
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  paddingRight: '45px',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  fontSize: '16px'
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#666'
+                }}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
             {message.text && (
               <div style={{
                 display: 'flex',
