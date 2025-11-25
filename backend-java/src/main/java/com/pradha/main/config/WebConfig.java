@@ -19,8 +19,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        String userHome = System.getProperty("user.home");
-        String uploadPath = "file:" + userHome + "/pradha-uploads/products/";
+        String uploadPath = "file:/home/pradha-uploads/products/";
         
         registry.addResourceHandler("/uploads/products/**")
                 .addResourceLocations(uploadPath);

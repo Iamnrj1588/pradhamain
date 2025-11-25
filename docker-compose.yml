@@ -24,6 +24,8 @@ services:
       SPRING_PROFILES_ACTIVE: prod
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT}"
+    volumes:
+      - pradha_uploads:/home/pradha-uploads
     depends_on:
       - db
     networks:
@@ -48,6 +50,7 @@ services:
 
 volumes:
   postgres_data:
+  pradha_uploads:
 
 networks:
   pradha-network:
