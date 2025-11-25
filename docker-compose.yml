@@ -11,7 +11,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "${DB_PORT}:5432"
+      - "${DB_PORT:-5432}:5432"
     networks:
       - pradha-network
 
@@ -22,8 +22,11 @@ services:
       - .env
     environment:
       SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://db:5432/pradha_db"
+      SPRING_DATASOURCE_USERNAME: ${DATABASE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DATABASE_PASSWORD}
     ports:
-      - "${BACKEND_PORT}:${BACKEND_PORT}"
+      - "${BACKEND_PORT:-8081}:8081"
     volumes:
       - pradha_uploads:/home/pradha-uploads
     depends_on:
@@ -36,12 +39,13 @@ services:
     build:
       context: ./frontend
       args:
-        REACT_APP_BACKEND_URL: http://${SERVER_IP}:${BACKEND_PORT}
-        SERVER_IP: ${SERVER_IP}
-        BACKEND_PORT: ${BACKEND_PORT}
+        # Use defaults so empty env doesn't produce "http://:" or bad strings
+        REACT_APP_BACKEND_URL: "http://${SERVER_IP:-127.0.0.1}:${BACKEND_PORT:-8081}"
+        SERVER_IP: "${SERVER_IP:-127.0.0.1}"
+        BACKEND_PORT: "${BACKEND_PORT:-8081}"
     container_name: pradha-frontend
     ports:
-      - "${FRONTEND_PORT}:80"
+      - "${FRONTEND_PORT:-80}:80"
     depends_on:
       - backend
     networks:
