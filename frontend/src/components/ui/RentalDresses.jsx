@@ -278,7 +278,7 @@ const DressCard = ({ dress, onBookNow }) => {
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
       {/* Image */}
-      <div className="relative h-64 bg-gray-200">
+      <div className="relative aspect-square sm:aspect-[4/5] bg-gray-200">
         {dress.imageUrls && dress.imageUrls.length > 0 ? (
           <>
             <img

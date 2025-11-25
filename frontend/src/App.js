@@ -402,7 +402,7 @@ const ProductImage = ({ src, alt, className = "", showHover = false, badges = []
         <img
           src={src || 'https://via.placeholder.com/400x400/F5F5DC/8B1538?text=No+Image'}
           alt={alt}
-          className={`w-full h-full object-contain transition-transform duration-300 ${
+          className={`w-full h-full object-cover transition-transform duration-300 ${
             showHover && isHovered ? 'scale-105' : ''
           }`}
           onError={handleImageError}
