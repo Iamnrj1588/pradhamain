@@ -287,7 +287,7 @@ const DressModal = ({ dress, onClose, onSuccess }) => {
     name: dress?.name || '',
     description: dress?.description || '',
     pricePerDay: dress?.pricePerDay || '',
-    category: dress?.category || 'Festival',
+    category: dress?.category || "Women's Festival",
     subcategory: dress?.subcategory || 'Navratri',
     occasion: dress?.occasion || '',
     color: dress?.color || '',
@@ -421,10 +421,14 @@ const DressModal = ({ dress, onClose, onSuccess }) => {
                   onChange={(e) => setFormData({...formData, category: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
                 >
-                  <option value="Festival">Festival</option>
-                  <option value="Wedding">Wedding</option>
-                  <option value="Party">Party</option>
-                  <option value="Traditional">Traditional</option>
+                  <option value="Women's Festival">Women's Festival</option>
+                  <option value="Women's Wedding">Women's Wedding</option>
+                  <option value="Women's Party">Women's Party</option>
+                  <option value="Women's Traditional">Women's Traditional</option>
+                  <option value="Women's Blouses">Women's Blouses</option>
+                  <option value="Men's Wedding">Men's Wedding</option>
+                  <option value="Men's Party">Men's Party</option>
+                  <option value="Men's Traditional">Men's Traditional</option>
                 </select>
               </div>
 
@@ -437,7 +441,7 @@ const DressModal = ({ dress, onClose, onSuccess }) => {
                   onChange={(e) => setFormData({...formData, subcategory: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
                 >
-                  {formData.category === 'Festival' && (
+                  {formData.category === "Women's Festival" && (
                     <>
                       <option value="Navratri">Navratri</option>
                       <option value="Diwali">Diwali</option>
@@ -445,7 +449,7 @@ const DressModal = ({ dress, onClose, onSuccess }) => {
                       <option value="Karva Chauth">Karva Chauth</option>
                     </>
                   )}
-                  {formData.category === 'Wedding' && (
+                  {formData.category === "Women's Wedding" && (
                     <>
                       <option value="Wedding">Wedding</option>
                       <option value="Pre-Wedding">Pre-Wedding</option>
@@ -455,7 +459,7 @@ const DressModal = ({ dress, onClose, onSuccess }) => {
                       <option value="Haldi">Haldi</option>
                     </>
                   )}
-                  {formData.category === 'Party' && (
+                  {formData.category === "Women's Party" && (
                     <>
                       <option value="Party">Party</option>
                       <option value="Cocktail">Cocktail</option>
@@ -463,11 +467,32 @@ const DressModal = ({ dress, onClose, onSuccess }) => {
                       <option value="Anniversary">Anniversary</option>
                     </>
                   )}
-                  {formData.category === 'Traditional' && (
+                  {formData.category === "Women's Traditional" && (
                     <>
                       <option value="Puja">Puja</option>
                       <option value="Temple Visit">Temple Visit</option>
                       <option value="Cultural Event">Cultural Event</option>
+                    </>
+                  )}
+                  {formData.category === "Women's Blouses" && (
+                    <>
+                      <option value="Designer Blouses">Designer Blouses</option>
+                    </>
+                  )}
+                  {formData.category === "Men's Wedding" && (
+                    <>
+                      <option value="Wedding Outfit">Wedding Outfit</option>
+                      <option value="Reception Outfit">Reception Outfit</option>
+                    </>
+                  )}
+                  {formData.category === "Men's Party" && (
+                    <>
+                      <option value="Party Wears">Party Wears</option>
+                    </>
+                  )}
+                  {formData.category === "Men's Traditional" && (
+                    <>
+                      <option value="Traditional Outfits">Traditional Outfits</option>
                     </>
                   )}
                 </select>

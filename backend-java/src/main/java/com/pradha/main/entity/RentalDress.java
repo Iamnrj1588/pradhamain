@@ -35,6 +35,9 @@ public class RentalDress {
     private String subcategory; // Specific like "Navratri", "Sangam", "Reception"
     private String occasion; // Event type
     private String color;
+    private String chest; // Chest measurement
+    private String waist; // Waist measurement  
+    private String hip;   // Hip measurement
     private boolean available = true;
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -71,6 +74,15 @@ public class RentalDress {
 
     public String getColor() { return color; }
     public void setColor(String color) { this.color = color; }
+
+    public String getChest() { return chest; }
+    public void setChest(String chest) { this.chest = chest; }
+
+    public String getWaist() { return waist; }
+    public void setWaist(String waist) { this.waist = waist; }
+
+    public String getHip() { return hip; }
+    public void setHip(String hip) { this.hip = hip; }
 
     public boolean isAvailable() { return available; }
     public void setAvailable(boolean available) { this.available = available; }

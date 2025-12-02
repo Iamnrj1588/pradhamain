@@ -59,8 +59,11 @@ const RentalDresses = () => {
   };
 
   const filterBySubcategory = (subcategory) => {
+    console.log('Filtering by subcategory:', subcategory);
+    console.log('Available dresses:', dresses.map(d => ({ name: d.name, subcategory: d.subcategory })));
     setSelectedSubcategory(subcategory);
-    applyFilters(selectedCategory, subcategory);
+    setSelectedCategory(''); // Reset category filter when filtering by subcategory
+    applyFilters('', subcategory);
   };
 
   const applyFilters = (category, subcategory) => {
@@ -95,43 +98,75 @@ const RentalDresses = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Dress Rentals</h1>
-          <p className="text-lg text-gray-600">Rent beautiful dresses for your special occasions</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Outfit Rentals</h1>
+          <p className="text-lg text-gray-600">Rent beautiful outfits for your special occasions - Women's & Men's Collections</p>
         </div>
 
-        {/* Category Sections */}
+        {/* Women's Category Sections */}
         <div className="mb-8">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-6 text-center">Shop by Occasion</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6 text-center">Women's Collection</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             <CategoryCard 
               title="Navratri Outfits" 
-              image="https://images.unsplash.com/photo-1754244575428-8123e0d27ef3?w=300&auto=format&fit=crop&q=80" 
+              image="/images/categories/womens-navratri-outfit.jpeg" 
               onClick={() => filterBySubcategory('Navratri')}
             />
             <CategoryCard 
               title="Wedding Outfits" 
-              image="https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=300" 
+              image="/images/categories/womens-wedding-outfit.jpeg" 
               onClick={() => filterBySubcategory('Wedding')}
             />
             <CategoryCard 
               title="Pre-Wedding" 
-              image="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=300" 
+              image="/images/categories/womens-pre-wedding.jpeg" 
               onClick={() => filterBySubcategory('Pre-Wedding')}
             />
             <CategoryCard 
               title="Reception" 
-              image="https://images.unsplash.com/photo-1583391733981-24c4ec5d7eaf?w=300" 
+              image="/images/categories/womens-reception.jpeg" 
               onClick={() => filterBySubcategory('Reception')}
             />
             <CategoryCard 
               title="Sangam" 
-              image="https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=300" 
+              image="/images/categories/womens-sangam.jpeg" 
               onClick={() => filterBySubcategory('Sangam')}
             />
             <CategoryCard 
               title="Party Wear" 
-              image="https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=300" 
+              image="/images/categories/womens-party-wear.jpeg" 
               onClick={() => filterBySubcategory('Party')}
+            />
+            <CategoryCard 
+              title="Designer Blouses" 
+              image="/images/categories/womens-designer-blouses.jpeg" 
+              onClick={() => filterBySubcategory('Designer Blouses')}
+            />
+          </div>
+        </div>
+
+        {/* Men's Category Sections */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6 text-center">Men's Collection</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <CategoryCard 
+              title="Wedding Outfit" 
+              image="/images/categories/mens-wedding-outfit.jpeg" 
+              onClick={() => filterBySubcategory('Wedding Outfit')}
+            />
+            <CategoryCard 
+              title="Reception Outfit" 
+              image="/images/categories/mens-reception-outfit.jpeg" 
+              onClick={() => filterBySubcategory('Reception Outfit')}
+            />
+            <CategoryCard 
+              title="Party Wears" 
+              image="/images/categories/mens-party-wear.jpeg" 
+              onClick={() => filterBySubcategory('Party Wears')}
+            />
+            <CategoryCard 
+              title="Traditional Outfits" 
+              image="/images/categories/mens-traditional-outfit.jpeg" 
+              onClick={() => filterBySubcategory('Traditional Outfits')}
             />
           </div>
         </div>
