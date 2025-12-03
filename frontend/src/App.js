@@ -307,10 +307,10 @@ const HomePage = () => {
           <div className="hero-content">
             <h1 className="hero-title animate-fade-in">{heroPages[currentHero]?.title || defaultHeroPages[0].title}</h1>
             <p className="hero-subtitle animate-fade-in-delay">{heroPages[currentHero]?.subtitle || defaultHeroPages[0].subtitle}</p>
-            <div className="flex gap-4 justify-center mt-8">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8 px-4">
               <Button
                 onClick={() => navigate('/products')}
-                className="hero-btn"
+                className="hero-btn w-full sm:w-auto"
                 data-testid="shop-now-btn"
               >
                 Shop Now
@@ -318,7 +318,7 @@ const HomePage = () => {
               <Button
                 onClick={() => navigate('/contact')}
                 variant="outline"
-                className="hero-btn-outline"
+                className="hero-btn-outline w-full sm:w-auto"
                 data-testid="customize-btn"
               >
                 Customize Your Outfit
@@ -430,6 +430,21 @@ const ProductImage = ({ src, alt, className = "", showHover = false, badges = []
 
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  // Get images from either images or imageUrls array
+  const images = (product.images && Array.isArray(product.images) ? product.images : []) 
+    .concat(product.imageUrls && Array.isArray(product.imageUrls) ? product.imageUrls : [])
+    .filter(img => img); // Remove empty/null values
+
+  useEffect(() => {
+    if (images.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentImageIndex((prev) => (prev + 1) % images.length);
+      }, 2000);
+      return () => clearInterval(interval);
+    }
+  }, [images.length]);
 
   const badges = [];
   if (product.new_arrival) {
@@ -445,13 +460,27 @@ const ProductCard = ({ product }) => {
       onClick={() => navigate(`/products/${product.id}`)}
       data-testid={`product-card-${product.id}`}
     >
-      <ProductImage
-        src={product.images?.[0] || product.imageUrls?.[0]}
-        alt={product.name}
-        className="h-80"
-        showHover={true}
-        badges={badges}
-      />
+      <div className="relative h-80 overflow-hidden">
+        <ProductImage
+          src={images[currentImageIndex] || images[0] || ''}
+          alt={product.name}
+          className="h-80"
+          showHover={true}
+          badges={badges}
+        />
+        {images.length > 1 && (
+          <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
+            {images.map((_, index) => (
+              <div
+                key={index}
+                className={`w-2 h-2 rounded-full ${
+                  index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                }`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
       <CardHeader>
         <CardTitle className="text-lg">{product.name}</CardTitle>
         <CardDescription>{product.subcategory}</CardDescription>
@@ -1049,6 +1078,7 @@ const ContactPage = () => {
 const AdminFeedbackManager = () => {
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [lightboxImage, setLightboxImage] = useState(null);
 
   useEffect(() => {
     fetchFeedbacks();
@@ -1134,7 +1164,8 @@ const AdminFeedbackManager = () => {
                           key={index}
                           src={imageUrl}
                           alt={`Review ${index}`}
-                          className="w-16 h-16 object-cover rounded border"
+                          className="w-16 h-16 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => setLightboxImage(imageUrl)}
                         />
                       ))}
                     </div>
@@ -1156,6 +1187,20 @@ const AdminFeedbackManager = () => {
               </div>
             </Card>
           ))}
+        </div>
+      )}
+
+      {lightboxImage && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-8 overflow-auto" onClick={() => setLightboxImage(null)}>
+          <div className="relative max-w-none max-h-none" onClick={(e) => e.stopPropagation()}>
+            <img src={lightboxImage} alt="Review" className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg" />
+            <button
+              onClick={() => setLightboxImage(null)}
+              className="absolute -top-3 -right-3 bg-white text-black rounded-full p-2 hover:bg-gray-200 shadow-lg"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -1374,13 +1419,21 @@ const AdminPage = () => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
     
-    // Store files temporarily, will upload after product creation
+    // Add new files to existing ones
     setFormData({
       ...formData,
-      imageFiles: files
+      imageFiles: [...(formData.imageFiles || []), ...files]
     });
     
-    toast.success(`${files.length} image(s) selected for upload`);
+    toast.success(`${files.length} image(s) added. Total: ${(formData.imageFiles || []).length + files.length}`);
+    
+    // Clear the input so same file can be selected again
+    e.target.value = '';
+  };
+
+  const removeImageFile = (index) => {
+    const newFiles = formData.imageFiles.filter((_, i) => i !== index);
+    setFormData({ ...formData, imageFiles: newFiles });
   };
 
   const handleSubmit = async (e) => {
@@ -1445,15 +1498,15 @@ const AdminPage = () => {
       fetchProducts();
     } catch (error) {
       console.error('Failed to save product:', error);
-      console.error('Error details:', {
-        message: error.message,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data
-      });
       
-      const errorMessage = error.response?.data?.error || error.response?.data?.message || error.message || 'Unknown error';
-      toast.error(`Failed to save product: ${errorMessage}`);
+      if (error.response?.status === 403) {
+        toast.error('Session expired. Please login again.');
+        logout();
+        navigate('/login');
+      } else {
+        const errorMessage = error.response?.data?.error || error.response?.data?.message || error.message || 'Unknown error';
+        toast.error(`Failed to save product: ${errorMessage}`);
+      }
     }
   };
 
@@ -1487,7 +1540,14 @@ const AdminPage = () => {
       fetchProducts();
     } catch (error) {
       console.error('Failed to delete product:', error);
-      toast.error('Failed to delete product');
+      
+      if (error.response?.status === 403) {
+        toast.error('Session expired. Please login again.');
+        logout();
+        navigate('/login');
+      } else {
+        toast.error('Failed to delete product');
+      }
     }
   };
 
@@ -1675,11 +1735,27 @@ const AdminPage = () => {
                         data-testid="product-image-upload"
                       />
                     </div>
-                    {formData.images.length > 0 && (
+                    {(formData.imageFiles && formData.imageFiles.length > 0) && (
+                      <div className="grid grid-cols-4 gap-2 mt-4">
+                        {formData.imageFiles.map((file, idx) => (
+                          <div key={idx} className="relative">
+                            <img src={URL.createObjectURL(file)} alt={`Product ${idx + 1}`} className="w-full h-20 object-cover rounded" />
+                            <button
+                              type="button"
+                              onClick={() => removeImageFile(idx)}
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {(formData.images && formData.images.length > 0) && (
                       <div className="grid grid-cols-4 gap-2 mt-4">
                         {formData.images.map((img, idx) => (
                           <div key={idx} className="relative">
-                            <img src={img} alt={`Product ${idx + 1}`} className="w-full h-20 object-cover rounded" />
+                            <img src={img} alt={`Existing ${idx + 1}`} className="w-full h-20 object-cover rounded" />
                             <button
                               type="button"
                               onClick={() => setFormData({ ...formData, images: formData.images.filter((_, i) => i !== idx) })}

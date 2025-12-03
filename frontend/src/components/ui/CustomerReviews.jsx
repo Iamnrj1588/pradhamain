@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Star, Upload, X } from 'lucide-react';
 
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081';
+const API = `${BACKEND_URL}/api`;
+
 const CustomerReviews = () => {
   const [reviews, setReviews] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
-    customerName: '',
+    name: '',
+    email: '',
     rating: 5,
     comment: ''
   });
   const [selectedImages, setSelectedImages] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState(null);
+  const [showThankYou, setShowThankYou] = useState(false);
 
   useEffect(() => {
     fetchReviews();
@@ -18,11 +24,15 @@ const CustomerReviews = () => {
 
   const fetchReviews = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/feedback`);
+      const response = await fetch(`${API}/feedback`);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
       const data = await response.json();
-      setReviews(data);
+      setReviews(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching reviews:', error);
+      setReviews([]);
     }
   };
 
@@ -32,7 +42,7 @@ const CustomerReviews = () => {
 
     try {
       // Create feedback
-      const feedbackResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/feedback`, {
+      const feedbackResponse = await fetch(`${API}/feedback`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -48,16 +58,18 @@ const CustomerReviews = () => {
             formDataImages.append('images', image);
           });
 
-          await fetch(`${process.env.REACT_APP_API_URL}/api/feedback/${feedback.id}/images`, {
+          await fetch(`${API}/feedback/${feedback.id}/images`, {
             method: 'POST',
             body: formDataImages
           });
         }
 
-        setFormData({ customerName: '', rating: 5, comment: '' });
+        setFormData({ name: '', email: '', rating: 5, comment: '' });
         setSelectedImages([]);
         setShowForm(false);
+        setShowThankYou(true);
         fetchReviews();
+        setTimeout(() => setShowThankYou(false), 3000);
       }
     } catch (error) {
       console.error('Error submitting review:', error);
@@ -68,7 +80,7 @@ const CustomerReviews = () => {
 
   const handleImageSelect = (e) => {
     const files = Array.from(e.target.files);
-    setSelectedImages(prev => [...prev, ...files].slice(0, 5));
+    setSelectedImages(prev => [...prev, ...files].slice(0, 3));
   };
 
   const removeImage = (index) => {
@@ -107,8 +119,19 @@ const CustomerReviews = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
               <input
                 type="text"
-                value={formData.customerName}
-                onChange={(e) => setFormData({...formData, customerName: e.target.value})}
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
+                required
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
                 required
               />
@@ -147,7 +170,7 @@ const CustomerReviews = () => {
                     className="hidden"
                   />
                 </label>
-                <span className="text-sm text-gray-500">Max 5 images</span>
+                <span className="text-sm text-gray-500">Max 3 images</span>
               </div>
               
               {selectedImages.length > 0 && (
@@ -188,7 +211,7 @@ const CustomerReviews = () => {
           <div key={review.id} className="bg-white rounded-lg shadow-md p-6">
             <div className="flex justify-between items-start mb-3">
               <div>
-                <h3 className="font-semibold text-lg">{review.customerName}</h3>
+                <h3 className="font-semibold text-lg">{review.name}</h3>
                 <div className="flex items-center space-x-2">
                   <div className="flex">{renderStars(review.rating)}</div>
                   <span className="text-sm text-gray-500">
@@ -207,8 +230,8 @@ const CustomerReviews = () => {
                     key={index}
                     src={imageUrl}
                     alt={`Review ${index + 1}`}
-                    className="w-24 h-24 object-cover rounded-lg cursor-pointer hover:opacity-80"
-                    onClick={() => window.open(imageUrl, '_blank')}
+                    className="w-20 h-16 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={() => setLightboxImage(imageUrl)}
                   />
                 ))}
               </div>
@@ -220,6 +243,37 @@ const CustomerReviews = () => {
       {reviews.length === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">No reviews yet. Be the first to share your experience!</p>
+          <p className="text-sm text-gray-400 mt-2">Make sure the backend server is running on port 8081</p>
+        </div>
+      )}
+
+      {lightboxImage && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-8 overflow-auto" onClick={() => setLightboxImage(null)}>
+          <div className="relative max-w-none max-h-none" onClick={(e) => e.stopPropagation()}>
+            <img src={lightboxImage} alt="Review" className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg" />
+            <button
+              onClick={() => setLightboxImage(null)}
+              className="absolute -top-3 -right-3 bg-white text-black rounded-full p-2 hover:bg-gray-200 shadow-lg"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showThankYou && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-md mx-4 text-center">
+            <div className="text-6xl mb-4">🎉</div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Thank You!</h2>
+            <p className="text-gray-600 mb-4">Your review has been submitted successfully. We appreciate your feedback!</p>
+            <button
+              onClick={() => setShowThankYou(false)}
+              className="bg-pink-600 text-white px-6 py-2 rounded-lg hover:bg-pink-700 transition-colors"
+            >
+              Close
+            </button>
+          </div>
         </div>
       )}
     </div>

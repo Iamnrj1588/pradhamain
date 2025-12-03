@@ -1,6 +1,53 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Upload, Eye, CheckCircle, XCircle } from 'lucide-react';
 
+const RentalImageSlider = ({ dress }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const images = dress.imageUrls || [];
+
+  useEffect(() => {
+    if (images.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentImageIndex((prev) => (prev + 1) % images.length);
+      }, 2000);
+      return () => clearInterval(interval);
+    }
+  }, [images.length]);
+
+  if (!images || images.length === 0) {
+    return (
+      <div className="h-48 bg-[#F5F5DC] flex items-center justify-center text-[#8B1538]">
+        <div className="text-center">
+          <div className="text-2xl mb-2">📷</div>
+          <div className="text-sm">No Image</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative h-48 bg-[#F5F5DC] overflow-hidden">
+      <img
+        src={images[currentImageIndex]}
+        alt={dress.name}
+        className="w-full h-full object-contain transition-transform duration-300 hover:scale-105"
+      />
+      {images.length > 1 && (
+        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
+          {images.map((_, index) => (
+            <div
+              key={index}
+              className={`w-2 h-2 rounded-full ${
+                index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const AdminRentalDashboard = () => {
   const [activeTab, setActiveTab] = useState('dresses');
   const [dresses, setDresses] = useState([]);
@@ -146,25 +193,7 @@ const DressesTab = ({ dresses, onAddDress, onEditDress, onRefresh }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {(dresses || []).map((dress) => (
           <div key={dress.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="h-48 bg-[#F5F5DC] overflow-hidden">
-              {dress.imageUrls && dress.imageUrls[0] ? (
-                <img
-                  src={dress.imageUrls[0]}
-                  alt={dress.name}
-                  className="w-full h-full object-contain transition-transform duration-300 hover:scale-105"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
-                  }}
-                />
-              ) : null}
-              <div className="flex items-center justify-center h-full text-[#8B1538]" style={{display: dress.imageUrls && dress.imageUrls[0] ? 'none' : 'flex'}}>
-                <div className="text-center">
-                  <div className="text-2xl mb-2">📷</div>
-                  <div className="text-sm">No Image</div>
-                </div>
-              </div>
-            </div>
+            <RentalImageSlider dress={dress} />
             
             <div className="p-4">
               <h3 className="font-semibold text-gray-900 mb-2">{dress.name}</h3>
@@ -575,9 +604,31 @@ const DressModal = ({ dress, onClose, onSuccess }) => {
                 type="file"
                 multiple
                 accept="image/*"
-                onChange={(e) => setImages(Array.from(e.target.files))}
+                onChange={(e) => {
+                  const files = Array.from(e.target.files);
+                  if (files.length > 0) {
+                    setImages(prev => [...prev, ...files]);
+                    e.target.value = '';
+                  }
+                }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
               />
+              {images.length > 0 && (
+                <div className="grid grid-cols-4 gap-2 mt-4">
+                  {images.map((file, idx) => (
+                    <div key={idx} className="relative">
+                      <img src={URL.createObjectURL(file)} alt={`Image ${idx + 1}`} className="w-full h-20 object-cover rounded" />
+                      <button
+                        type="button"
+                        onClick={() => setImages(prev => prev.filter((_, i) => i !== idx))}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="flex items-center">
