@@ -43,6 +43,8 @@ public class SecurityConfig {
                                 "/api/admin/rental/dresses/**",
                                 "/api/hero-content",
                                 "/api/inquiries",
+                                "/api/feedback",
+                                "/api/feedback/*/images",
                                 "/api/cart",
                                 "/api/cart/**",
                                 "/api/checkout/**",

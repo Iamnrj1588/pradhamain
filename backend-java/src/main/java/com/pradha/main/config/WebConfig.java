@@ -20,9 +20,13 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         String uploadPath = "file:/home/pradha-uploads/products/";
+        String feedbackUploadPath = "file:/home/pradha-uploads/feedback/";
         
         registry.addResourceHandler("/uploads/products/**")
                 .addResourceLocations(uploadPath);
+                
+        registry.addResourceHandler("/uploads/feedback/**")
+                .addResourceLocations(feedbackUploadPath);
     }
 }
 

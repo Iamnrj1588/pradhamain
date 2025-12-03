@@ -6,6 +6,7 @@ E:\pradhamain\backend-java\src\main\java\com\pradha\main\service\EmailService.ja
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\dto\ProductRequest.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\controller\CheckoutController.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\entity\CartItem.java
+E:\pradhamain\backend-java\src\main\java\com\pradha\main\controller\CustomerFeedbackController.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\config\AppConfig.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\entity\User.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\security\JwtAuthenticationFilter.java
@@ -19,6 +20,7 @@ E:\pradhamain\backend-java\src\main\java\com\pradha\main\service\NotificationSer
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\dto\InquiryRequest.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\security\JwtUtil.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\dto\RentalBookingRequest.java
+E:\pradhamain\backend-java\src\main\java\com\pradha\main\entity\CustomerFeedback.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\repository\EmailOTPRepository.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\security\SecurityConfig.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\entity\EmailOTP.java
@@ -45,6 +47,7 @@ E:\pradhamain\backend-java\src\main\java\com\pradha\main\entity\HeroContent.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\controller\CartController.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\entity\Order.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\config\S3Config.java
+E:\pradhamain\backend-java\src\main\java\com\pradha\main\repository\CustomerFeedbackRepository.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\repository\RentalDressRepository.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\controller\AuthController.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\service\RentalService.java

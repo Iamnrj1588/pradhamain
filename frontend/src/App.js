@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { ShoppingCart, Heart, User, Menu, X, Plus, Minus, Trash2, Upload } from 'lucide-react';
+import { ShoppingCart, Heart, User, Menu, X, Plus, Minus, Trash2, Upload, Star } from 'lucide-react';
 import '@/App.css';
 
 import Register from './components/ui/register';
@@ -24,6 +24,8 @@ import Checkout from './components/ui/Checkout';
 import Orders from './components/ui/Orders';
 import Cart from './components/ui/Cart';
 import Developer from './components/ui/Developer';
+import CustomerFeedback from './components/ui/CustomerFeedback';
+import CustomerReviews from './components/ui/CustomerReviews';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081';
 const API = `${BACKEND_URL}/api`;
@@ -150,6 +152,7 @@ const Navbar = () => {
             <Link to="/" className="nav-link">Home</Link>
             <Link to="/products" className="nav-link">Collections</Link>
             <Link to="/rentals" className="nav-link">Rentals</Link>
+            <Link to="/reviews" className="nav-link">Reviews</Link>
             <Link to="/about" className="nav-link">About</Link>
             <Link to="/contact" className="nav-link">Contact</Link>
             {user && user.role === 'ADMIN' && <Link to="/admin" className="nav-link">Admin</Link>}
@@ -209,6 +212,7 @@ const Navbar = () => {
             <Link to="/" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Home</Link>
             <Link to="/products" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Collections</Link>
             <Link to="/rentals" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Rentals</Link>
+            <Link to="/reviews" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Reviews</Link>
             <Link to="/about" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>About</Link>
             <Link to="/contact" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
             {user && user.role === 'ADMIN' && <Link to="/admin" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Admin</Link>}
@@ -1042,6 +1046,122 @@ const ContactPage = () => {
   );
 };
 
+const AdminFeedbackManager = () => {
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchFeedbacks();
+  }, []);
+
+  const fetchFeedbacks = async () => {
+    try {
+      const response = await axios.get(`${API}/feedback`);
+      setFeedbacks(Array.isArray(response.data) ? response.data : []);
+    } catch (error) {
+      console.error('Failed to fetch feedbacks:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteFeedback = async (feedbackId) => {
+    if (!window.confirm('Are you sure you want to delete this review?')) return;
+    
+    try {
+      await axios.delete(`${API}/feedback/${feedbackId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      toast.success('Review deleted successfully');
+      fetchFeedbacks();
+    } catch (error) {
+      console.error('Failed to delete feedback:', error);
+      toast.error('Failed to delete review');
+    }
+  };
+
+  const StarDisplay = ({ rating }) => {
+    return (
+      <div className="flex space-x-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`w-4 h-4 ${
+              star <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+            }`}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  if (loading) {
+    return <div className="text-center py-8">Loading reviews...</div>;
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Customer Reviews Management</h2>
+        <div className="text-sm text-gray-600">
+          Total Reviews: {feedbacks.length}
+        </div>
+      </div>
+
+      {feedbacks.length === 0 ? (
+        <div className="text-center py-12 text-gray-500">
+          No customer reviews yet
+        </div>
+      ) : (
+        <div className="grid gap-4">
+          {feedbacks.map((feedback) => (
+            <Card key={feedback.id} className="p-4">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold text-lg">{feedback.name}</h3>
+                    <StarDisplay rating={feedback.rating} />
+                  </div>
+                  <p className="text-sm text-gray-600 mb-2">{feedback.email}</p>
+                  <p className="text-gray-700 mb-3">{feedback.comment}</p>
+                  
+                  {feedback.imageUrls && feedback.imageUrls.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {feedback.imageUrls.map((imageUrl, index) => (
+                        <img
+                          key={index}
+                          src={imageUrl}
+                          alt={`Review ${index}`}
+                          className="w-16 h-16 object-cover rounded border"
+                        />
+                      ))}
+                    </div>
+                  )}
+                  
+                  <p className="text-xs text-gray-500">
+                    {new Date(feedback.createdAt).toLocaleDateString()} at {new Date(feedback.createdAt).toLocaleTimeString()}
+                  </p>
+                </div>
+                
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => deleteFeedback(feedback.id)}
+                  className="ml-4"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const HeroContentManager = () => {
   const [heroSlides, setHeroSlides] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -1395,9 +1515,10 @@ const AdminPage = () => {
       <h1 className="page-title">Admin Dashboard</h1>
 
       <Tabs defaultValue="products" className="w-full">
-        <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-4">
+        <TabsList className="grid w-full max-w-3xl mx-auto grid-cols-5">
           <TabsTrigger value="products" data-testid="products-tab">Products</TabsTrigger>
           <TabsTrigger value="rentals" data-testid="rentals-tab">Rentals</TabsTrigger>
+          <TabsTrigger value="feedback" data-testid="feedback-tab">Reviews</TabsTrigger>
           <TabsTrigger value="hero" data-testid="hero-tab">Hero Content</TabsTrigger>
           <TabsTrigger value="inquiries" data-testid="inquiries-tab">Inquiries</TabsTrigger>
         </TabsList>
@@ -1666,6 +1787,10 @@ const AdminPage = () => {
           <AdminRentalDashboard />
         </TabsContent>
 
+        <TabsContent value="feedback">
+          <AdminFeedbackManager />
+        </TabsContent>
+
         <TabsContent value="hero">
           <HeroContentManager />
         </TabsContent>
@@ -1757,6 +1882,8 @@ function App() {
           <Route path="/products" element={<Layout><ProductsPage /></Layout>} />
           <Route path="/products/:id" element={<Layout><ProductDetailPage /></Layout>} />
           <Route path="/rentals" element={<Layout><RentalDresses /></Layout>} />
+          <Route path="/feedback" element={<Layout><CustomerFeedback /></Layout>} />
+          <Route path="/reviews" element={<Layout><CustomerReviews /></Layout>} />
           <Route path="/cart" element={<Layout><Cart /></Layout>} />
           <Route path="/checkout" element={<Layout><Checkout /></Layout>} />
           <Route path="/orders" element={<Layout><Orders /></Layout>} />
