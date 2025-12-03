@@ -455,6 +455,8 @@ const DressModal = ({ dress, onClose, onSuccess }) => {
                   <option value="Women's Party">Women's Party</option>
                   <option value="Women's Traditional">Women's Traditional</option>
                   <option value="Women's Blouses">Women's Blouses</option>
+                  <option value="Women's Maternity">Women's Maternity</option>
+                  <option value="Jewellery">Jewellery</option>
                   <option value="Men's Wedding">Men's Wedding</option>
                   <option value="Men's Party">Men's Party</option>
                   <option value="Men's Traditional">Men's Traditional</option>
@@ -506,6 +508,16 @@ const DressModal = ({ dress, onClose, onSuccess }) => {
                   {formData.category === "Women's Blouses" && (
                     <>
                       <option value="Designer Blouses">Designer Blouses</option>
+                    </>
+                  )}
+                  {formData.category === "Women's Maternity" && (
+                    <>
+                      <option value="Maternity Outfits">Maternity Outfits</option>
+                    </>
+                  )}
+                  {formData.category === "Jewellery" && (
+                    <>
+                      <option value="Jewellery">Jewellery</option>
                     </>
                   )}
                   {formData.category === "Men's Wedding" && (

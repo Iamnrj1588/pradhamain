@@ -141,6 +141,40 @@ const RentalDresses = () => {
               image="/images/categories/womens-designer-blouses.jpeg" 
               onClick={() => filterBySubcategory('Designer Blouses')}
             />
+            <CategoryCard 
+              title="Maternity Outfits" 
+              image="/images/categories/womens-maternity-outfits.jpeg" 
+              onClick={() => filterBySubcategory('Maternity Outfits')}
+            />
+          </div>
+          
+          {/* Jewellery Highlight Section */}
+          <div className="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-lg p-6 mt-6">
+            <div className="flex items-center justify-center mb-4">
+              <span className="text-3xl mr-2">💎</span>
+              <h3 className="text-xl font-semibold text-amber-800">Premium Jewellery Rentals</h3>
+            </div>
+            <div className="grid md:grid-cols-3 gap-4 text-sm text-amber-700 mb-4">
+              <div className="flex items-center">
+                <span className="text-green-600 mr-2">✓</span>
+                <span>Authentic & Certified Pieces</span>
+              </div>
+              <div className="flex items-center">
+                <span className="text-green-600 mr-2">✓</span>
+                <span>Insured & Secure</span>
+              </div>
+              <div className="flex items-center">
+                <span className="text-green-600 mr-2">✓</span>
+                <span>Professional Cleaning</span>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <CategoryCard 
+                title="Jewellery" 
+                image="/images/categories/womens-jewellery.jpeg" 
+                onClick={() => filterBySubcategory('Jewellery')}
+              />
+            </div>
           </div>
         </div>
 
