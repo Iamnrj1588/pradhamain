@@ -309,6 +309,16 @@ const CategoryCard = ({ title, image, onClick }) => {
 
 const DressCard = ({ dress, onBookNow }) => {
   const [selectedImage, setSelectedImage] = useState(0);
+  const images = dress.imageUrls || [];
+
+  useEffect(() => {
+    if (images.length > 1) {
+      const interval = setInterval(() => {
+        setSelectedImage((prev) => (prev + 1) % images.length);
+      }, 2000);
+      return () => clearInterval(interval);
+    }
+  }, [images.length]);
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
