@@ -37,7 +37,11 @@ public class S3Service {
     }
 
     public String uploadFile(MultipartFile file, String folder) throws IOException {
-        String fileName = folder + "/" + UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+        return uploadFile(file, folder, null);
+    }
+
+    public String uploadFile(MultipartFile file, String folder, String prefix) throws IOException {
+        String fileName = folder + "/" + (prefix != null ? prefix + "_" : "") + UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
         
         S3Client s3Client = getS3Client();
         
