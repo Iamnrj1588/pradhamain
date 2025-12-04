@@ -280,14 +280,46 @@ const AdminPage = () => {
     }
   };
 
-  const handleImageUpload = (e) => {
+  const compressImage = (file, maxWidth = 1200, quality = 0.8) => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = () => {
+        const ratio = Math.min(maxWidth / img.width, maxWidth / img.height);
+        canvas.width = img.width * ratio;
+        canvas.height = img.height * ratio;
+        
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(resolve, 'image/jpeg', quality);
+      };
+      
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
+    
+    toast.info('Compressing images...');
+    const compressedFiles = [];
+    
+    for (const file of files) {
+      if (file.size > 2 * 1024 * 1024) { // If file > 2MB, compress it
+        const compressed = await compressImage(file);
+        compressedFiles.push(new File([compressed], file.name, { type: 'image/jpeg' }));
+      } else {
+        compressedFiles.push(file);
+      }
+    }
+    
     setFormData({
       ...formData,
-      imageFiles: [...(formData.imageFiles || []), ...files]
+      imageFiles: [...(formData.imageFiles || []), ...compressedFiles]
     });
-    toast.success(`${files.length} image(s) added. Total: ${(formData.imageFiles || []).length + files.length}`);
+    toast.success(`${files.length} image(s) added. Total: ${(formData.imageFiles || []).length + compressedFiles.length}`);
     e.target.value = '';
   };
 
@@ -384,7 +416,8 @@ const AdminPage = () => {
       price: product.price.toString(),
       sizes: product.sizes.join(', '),
       colors: product.colors.join(', '),
-      images: product.images,
+      images: product.images || [],
+      imageFiles: [],
       customizable: product.customizable,
       featured: product.featured,
       new_arrival: product.newArrival
@@ -522,14 +555,34 @@ const AdminPage = () => {
                   <div>
                     <Label>Product Images</Label>
                     <Input type="file" accept="image/*" multiple onChange={handleImageUpload} className="mt-2" />
+                    
+                    {/* Existing Images */}
+                    {(formData.images && formData.images.length > 0) && (
+                      <div className="mt-4">
+                        <Label className="text-sm text-gray-600">Current Images:</Label>
+                        <div className="grid grid-cols-4 gap-2 mt-2">
+                          {formData.images.map((imageUrl, idx) => (
+                            <div key={idx} className="relative">
+                              <img src={imageUrl} alt={`Current ${idx + 1}`} className="w-full h-20 object-cover rounded" />
+                              <div className="absolute -top-1 -right-1 bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">✓</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* New Images to Upload */}
                     {(formData.imageFiles && formData.imageFiles.length > 0) && (
-                      <div className="grid grid-cols-4 gap-2 mt-4">
-                        {formData.imageFiles.map((file, idx) => (
-                          <div key={idx} className="relative">
-                            <img src={URL.createObjectURL(file)} alt={`Product ${idx + 1}`} className="w-full h-20 object-cover rounded" />
-                            <button type="button" onClick={() => removeImageFile(idx)} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center">×</button>
-                          </div>
-                        ))}
+                      <div className="mt-4">
+                        <Label className="text-sm text-gray-600">New Images to Upload:</Label>
+                        <div className="grid grid-cols-4 gap-2 mt-2">
+                          {formData.imageFiles.map((file, idx) => (
+                            <div key={idx} className="relative">
+                              <img src={URL.createObjectURL(file)} alt={`New ${idx + 1}`} className="w-full h-20 object-cover rounded" />
+                              <button type="button" onClick={() => removeImageFile(idx)} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center">×</button>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -559,6 +612,20 @@ const AdminPage = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {products.map((product) => (
               <Card key={product.id}>
+                {product.images && product.images.length > 0 && (
+                  <div className="relative h-48">
+                    <img
+                      src={product.images[0]}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                    {product.images.length > 1 && (
+                      <div className="absolute top-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-xs">
+                        +{product.images.length - 1} more
+                      </div>
+                    )}
+                  </div>
+                )}
                 <CardContent className="p-4">
                   <h3 className="font-semibold text-lg mb-1">{product.name}</h3>
                   <p className="text-sm text-gray-600 mb-2">{product.category} - {product.subcategory}</p>
