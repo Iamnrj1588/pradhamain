@@ -73,34 +73,52 @@ public class NotificationService {
     private String buildCustomerEmailContent(RentalBooking booking) {
         StringBuilder measurements = new StringBuilder();
         if (booking.getChestMeasurement() != null && !booking.getChestMeasurement().isEmpty()) {
-            measurements.append("Chest: ").append(booking.getChestMeasurement()).append(" inches\n");
+            measurements.append("• Chest: ").append(booking.getChestMeasurement()).append(" inches\n");
         }
         if (booking.getWaistMeasurement() != null && !booking.getWaistMeasurement().isEmpty()) {
-            measurements.append("Waist: ").append(booking.getWaistMeasurement()).append(" inches\n");
+            measurements.append("• Waist: ").append(booking.getWaistMeasurement()).append(" inches\n");
         }
         if (booking.getHipMeasurement() != null && !booking.getHipMeasurement().isEmpty()) {
-            measurements.append("Hip: ").append(booking.getHipMeasurement()).append(" inches\n");
+            measurements.append("• Hip: ").append(booking.getHipMeasurement()).append(" inches\n");
         }
+        
+        String statusMessage = booking.getStatus().toString().toLowerCase().equals("pending") ? 
+            "Your dress rental booking has been received and is currently pending confirmation." :
+            "Your dress rental booking has been " + booking.getStatus().toString().toLowerCase() + ".";
         
         return String.format(
             "Dear %s,\n\n" +
-            "Your dress rental booking has been %s.\n\n" +
-            "Booking Details:\n" +
-            "Dress: %s\n" +
-            "Dates: %s to %s\n" +
-            "Size: %s\n" +
+            "%s\n\n" +
+            "**BOOKING DETAILS:**\n" +
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+            "**Dress:** %s\n" +
+            "**Rental Period:** %s to %s\n" +
+            "**Size:** %s\n" +
             "%s" +
-            "Total Amount: ₹%s\n\n" +
-            "Thank you for choosing Pradha Fashion!\n\n" +
+            "**Total Amount:** ₹%s\n" +
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n" +
+            "**IMPORTANT NOTE:** 📍\n" +
+            "**For the best fitting, we request you to visit our store for a trial.**\n" +
+            "If you're sure about the sizes you gave, we can alter the dress as per your measurements.\n\n" +
+            "**NEXT STEPS:**\n" +
+            "• Confirmation call within 24 hours\n" +
+            "• Store visit for fitting (if required)\n" +
+            "• Final alterations as per measurements\n" +
+            "• Pick-up/Delivery coordination\n\n" +
+            "**CONTACT US:**\n" +
+            "📞 Phone: **8308721599**\n" +
+            "📧 Email: **pradhafashionoutlet@gmail.com**\n" +
+            "🌐 Website: **www.pradhafashionoutlet.com**\n\n" +
+            "Thank you for choosing Pradha Fashion Outlet!\n\n" +
             "Best regards,\n" +
             "Pradha Fashion Team",
             booking.getUser().getName(),
-            booking.getStatus().toString().toLowerCase(),
+            statusMessage,
             booking.getDress().getName(),
             booking.getStartDate(),
             booking.getEndDate(),
             booking.getSelectedSize(),
-            measurements.length() > 0 ? "Measurements:\n" + measurements.toString() : "",
+            measurements.length() > 0 ? "**Your Measurements:**\n" + measurements.toString() : "",
             booking.getTotalAmount()
         );
     }

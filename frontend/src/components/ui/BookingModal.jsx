@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Calendar, User, CreditCard } from 'lucide-react';
+import { X, Calendar, User, CreditCard, CheckCircle } from 'lucide-react';
 
 const BookingModal = ({ dress, isOpen, onClose, onBookingSuccess }) => {
   const [formData, setFormData] = useState({
@@ -13,6 +13,7 @@ const BookingModal = ({ dress, isOpen, onClose, onBookingSuccess }) => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081';
 
@@ -21,7 +22,8 @@ const BookingModal = ({ dress, isOpen, onClose, onBookingSuccess }) => {
     
     const start = new Date(formData.startDate);
     const end = new Date(formData.endDate);
-    const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+    const timeDiff = end - start;
+    const days = Math.max(1, Math.ceil(timeDiff / (1000 * 60 * 60 * 24)));
     
     return days * dress.pricePerDay;
   };
@@ -49,17 +51,21 @@ const BookingModal = ({ dress, isOpen, onClose, onBookingSuccess }) => {
 
       if (response.ok) {
         const booking = await response.json();
-        onBookingSuccess(booking);
-        onClose();
-        setFormData({
-          startDate: '',
-          endDate: '',
-          selectedSize: '',
-          chestMeasurement: '',
-          waistMeasurement: '',
-          hipMeasurement: '',
-          customerNotes: ''
-        });
+        setShowSuccess(true);
+        setTimeout(() => {
+          setShowSuccess(false);
+          onBookingSuccess(booking);
+          onClose();
+          setFormData({
+            startDate: '',
+            endDate: '',
+            selectedSize: '',
+            chestMeasurement: '',
+            waistMeasurement: '',
+            hipMeasurement: '',
+            customerNotes: ''
+          });
+        }, 2000);
       } else {
         const errorData = await response.json();
         setError(errorData.error || 'Booking failed');
@@ -72,6 +78,18 @@ const BookingModal = ({ dress, isOpen, onClose, onBookingSuccess }) => {
   };
 
   if (!isOpen) return null;
+
+  if (showSuccess) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-lg p-8 max-w-sm w-full text-center">
+          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">Booking Successful!</h3>
+          <p className="text-gray-600">You will receive a confirmation email shortly.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

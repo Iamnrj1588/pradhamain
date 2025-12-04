@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = {"http://localhost:3000", "http://127.0.0.1:3000", "http://18.205.19.24"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://18.205.19.24"})
 public class HeroContentController {
 
     @Autowired
@@ -24,38 +24,92 @@ public class HeroContentController {
     private S3Service s3Service;
 
     @GetMapping("/hero-content")
-    public List<HeroContent> getAllHeroContent() {
-        return heroContentRepository.findAll();
+    public ResponseEntity<List<HeroContent>> getAllHeroContent() {
+        List<HeroContent> heroContent = heroContentRepository.findByIsActiveTrueOrderByDisplayOrderAsc();
+        return ResponseEntity.ok(heroContent);
     }
 
     @PostMapping("/admin/hero-content")
     @PreAuthorize("hasRole('ADMIN')")
-    public HeroContent createHeroContent(@RequestBody HeroContent heroContent) {
-        return heroContentRepository.save(heroContent);
-    }
-
-    @PostMapping("/admin/hero-content/upload")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Map<String, String>> uploadHeroImage(@RequestParam("images") MultipartFile file) {
+    public ResponseEntity<?> createHeroContent(
+            @RequestParam("title") String title,
+            @RequestParam("subtitle") String subtitle,
+            @RequestParam(value = "displayOrder", defaultValue = "0") String displayOrderStr,
+            @RequestParam(value = "isActive", defaultValue = "true") String isActiveStr,
+            @RequestParam(value = "backgroundImage", required = false) MultipartFile backgroundImage) {
+        
         try {
-            String imageUrl = s3Service.uploadFile(file, "hero-content", "hero-" + System.currentTimeMillis());
-            return ResponseEntity.ok(Map.of("imageUrl", imageUrl));
+            Integer displayOrder = Integer.parseInt(displayOrderStr);
+            Boolean isActive = Boolean.parseBoolean(isActiveStr);
+            
+            HeroContent heroContent = new HeroContent();
+            heroContent.setTitle(title);
+            heroContent.setSubtitle(subtitle);
+            heroContent.setDisplayOrder(displayOrder);
+            heroContent.setIsActive(isActive);
+
+            if (backgroundImage != null && !backgroundImage.isEmpty()) {
+                String imageUrl = s3Service.uploadFile(backgroundImage, "hero-images");
+                heroContent.setBackgroundImageUrl(imageUrl);
+            }
+
+            HeroContent savedHeroContent = heroContentRepository.save(heroContent);
+            return ResponseEntity.ok(savedHeroContent);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
 
     @PutMapping("/admin/hero-content/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public HeroContent updateHeroContent(@PathVariable Long id, @RequestBody HeroContent heroContent) {
-        heroContent.setId(id);
-        return heroContentRepository.save(heroContent);
+    public ResponseEntity<?> updateHeroContent(
+            @PathVariable Long id,
+            @RequestParam("title") String title,
+            @RequestParam("subtitle") String subtitle,
+            @RequestParam(value = "displayOrder", defaultValue = "0") String displayOrderStr,
+            @RequestParam(value = "isActive", defaultValue = "true") String isActiveStr,
+            @RequestParam(value = "backgroundImage", required = false) MultipartFile backgroundImage) {
+        
+        try {
+            Integer displayOrder = Integer.parseInt(displayOrderStr);
+            Boolean isActive = Boolean.parseBoolean(isActiveStr);
+            
+            Optional<HeroContent> optionalHeroContent = heroContentRepository.findById(id);
+            if (!optionalHeroContent.isPresent()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            HeroContent heroContent = optionalHeroContent.get();
+            heroContent.setTitle(title);
+            heroContent.setSubtitle(subtitle);
+            heroContent.setDisplayOrder(displayOrder);
+            heroContent.setIsActive(isActive);
+
+            if (backgroundImage != null && !backgroundImage.isEmpty()) {
+                String imageUrl = s3Service.uploadFile(backgroundImage, "hero-images");
+                heroContent.setBackgroundImageUrl(imageUrl);
+            }
+
+            HeroContent savedHeroContent = heroContentRepository.save(heroContent);
+            return ResponseEntity.ok(savedHeroContent);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
     }
 
     @DeleteMapping("/admin/hero-content/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteHeroContent(@PathVariable Long id) {
-        heroContentRepository.deleteById(id);
-        return ResponseEntity.ok().build();
+        try {
+            if (!heroContentRepository.existsById(id)) {
+                return ResponseEntity.notFound().build();
+            }
+            heroContentRepository.deleteById(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

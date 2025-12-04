@@ -53,7 +53,8 @@ public class RentalService {
         }
 
         // Calculate total amount
-        long days = ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate()) + 1;
+        long daysBetween = ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate());
+        long days = Math.max(1, daysBetween);
         BigDecimal totalAmount = dress.getPricePerDay().multiply(BigDecimal.valueOf(days));
 
         RentalBooking booking = new RentalBooking();

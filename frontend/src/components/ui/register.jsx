@@ -2,13 +2,14 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../App";
-import { ShoppingCart, Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react';
+import { ShoppingCart, Menu, X, Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react';
 
 const API_URL = `${process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081'}/api/auth`;
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <nav style={{
@@ -27,27 +28,40 @@ const Navbar = () => {
             <img 
               src="/logo.png" 
               alt="Pradha Fashion Outlet" 
-              style={{ height: '48px', width: 'auto' }}
+              style={{ height: '48px', width: 'auto', maxWidth: '120px' }}
               onError={(e) => {
                 e.target.style.display = 'none';
                 e.target.nextSibling.style.display = 'flex';
               }}
             />
             <div style={{ display: 'none', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#8B1538' }}>Pradha</span>
-              <span style={{ fontSize: '18px', color: '#6b7280' }}>Fashion Outlet</span>
+              <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#8B1538' }}>Pradha</span>
+              <span style={{ fontSize: '14px', color: '#6b7280' }}>Fashion</span>
             </div>
           </Link>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+          <div className="hidden md:flex" style={{ alignItems: 'center', gap: '32px' }}>
             <Link to="/" style={{ textDecoration: 'none', color: '#374151', fontWeight: '500' }}>Home</Link>
             <Link to="/products" style={{ textDecoration: 'none', color: '#374151', fontWeight: '500' }}>Collections</Link>
+            <Link to="/rental" style={{ textDecoration: 'none', color: '#374151', fontWeight: '500' }}>Rentals</Link>
             <Link to="/about" style={{ textDecoration: 'none', color: '#374151', fontWeight: '500' }}>About</Link>
             <Link to="/contact" style={{ textDecoration: 'none', color: '#374151', fontWeight: '500' }}>Contact</Link>
             {user && user.role === 'ADMIN' && <Link to="/admin" style={{ textDecoration: 'none', color: '#374151', fontWeight: '500' }}>Admin</Link>}
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden"
+              style={{
+                padding: '8px',
+                backgroundColor: 'transparent',
+                border: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              <Menu style={{ width: '24px', height: '24px', color: '#8B1538' }} />
+            </button>
             {user ? (
               <>
                 <button onClick={() => navigate('/cart')} style={{ padding: '8px', backgroundColor: 'transparent', border: 'none', cursor: 'pointer' }}>
@@ -61,6 +75,91 @@ const Navbar = () => {
           </div>
         </div>
       </div>
+
+      {mobileMenuOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          zIndex: 60
+        }} onClick={() => setMobileMenuOpen(false)}>
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            right: 0,
+            height: '100vh',
+            width: '280px',
+            backgroundColor: 'white',
+            boxShadow: '-2px 0 10px rgba(0, 0, 0, 0.1)',
+            padding: '20px',
+            overflowY: 'auto'
+          }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+              <h3 style={{ margin: 0, color: '#8B1538', fontSize: '18px' }}>Menu</h3>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                <X style={{ width: '24px', height: '24px', color: '#666' }} />
+              </button>
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <Link 
+                to="/" 
+                style={{ textDecoration: 'none', color: '#374151', fontWeight: '500', padding: '10px 0', borderBottom: '1px solid #f3f4f6' }}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Home
+              </Link>
+              <Link 
+                to="/products" 
+                style={{ textDecoration: 'none', color: '#374151', fontWeight: '500', padding: '10px 0', borderBottom: '1px solid #f3f4f6' }}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Collections
+              </Link>
+              <Link 
+                to="/rental" 
+                style={{ textDecoration: 'none', color: '#374151', fontWeight: '500', padding: '10px 0', borderBottom: '1px solid #f3f4f6' }}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Rentals
+              </Link>
+              <Link 
+                to="/about" 
+                style={{ textDecoration: 'none', color: '#374151', fontWeight: '500', padding: '10px 0', borderBottom: '1px solid #f3f4f6' }}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                About
+              </Link>
+              <Link 
+                to="/contact" 
+                style={{ textDecoration: 'none', color: '#374151', fontWeight: '500', padding: '10px 0', borderBottom: '1px solid #f3f4f6' }}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Contact
+              </Link>
+              {user && user.role === 'ADMIN' && (
+                <Link 
+                  to="/admin" 
+                  style={{ textDecoration: 'none', color: '#374151', fontWeight: '500', padding: '10px 0', borderBottom: '1px solid #f3f4f6' }}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Admin
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 };
@@ -133,31 +232,27 @@ export default function Register() {
     <div>
       <Navbar />
       <main style={{ paddingTop: '80px' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', padding: '20px' }}>
-          <form onSubmit={handleSubmit} style={{
-            textAlign: 'center',
-            maxWidth: '400px',
-            width: '100%',
-            padding: '40px',
-            border: '1px solid #ddd',
-            borderRadius: '8px',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-            backgroundColor: 'white'
-          }}>
-            <h3 style={{ marginBottom: '30px', color: '#8B1538', fontSize: '24px' }}>Sign Up</h3>
+        <div className="auth-container">
+          <div className="auth-card">
+            <div className="auth-logo">
+              <img 
+                src="/logo.png" 
+                alt="Pradha Fashion Outlet"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'block';
+                }}
+              />
+              <div style={{display: 'none', fontSize: '24px', fontWeight: 'bold', color: '#8B1538'}}>Pradha</div>
+            </div>
+          <form onSubmit={handleSubmit} className="auth-form">
+            <h3 className="auth-title">Sign Up</h3>
             <input 
               name="name" 
               placeholder="Name" 
               onChange={handleChange} 
               required 
-              style={{
-                width: '100%',
-                padding: '12px',
-                marginBottom: '15px',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                fontSize: '16px'
-              }}
+              className="auth-input"
             />
             <input 
               type="email" 
@@ -165,44 +260,24 @@ export default function Register() {
               placeholder="Email" 
               onChange={handleChange} 
               required 
-              style={{
-                width: '100%',
-                padding: '12px',
-                marginBottom: '15px',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                fontSize: '16px'
-              }}
+              className="auth-input"
             />
             <input 
               name="phone" 
               placeholder="Phone" 
               onChange={handleChange} 
               required 
-              style={{
-                width: '100%',
-                padding: '12px',
-                marginBottom: '15px',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                fontSize: '16px'
-              }}
+              className="auth-input"
             />
-            <div style={{ position: 'relative', marginBottom: '10px' }}>
+            <div style={{ position: 'relative' }}>
               <input 
                 type={showPassword ? "text" : "password"}
                 name="password" 
                 placeholder="Password" 
                 onChange={handleChange} 
                 required 
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  paddingRight: '45px',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  fontSize: '16px'
-                }}
+                className="auth-input"
+                style={{ paddingRight: '45px' }}
               />
               <button
                 type="button"
@@ -244,24 +319,15 @@ export default function Register() {
             <button 
               type="submit"
               disabled={loading}
-              style={{
-                width: '100%',
-                padding: '12px',
-                backgroundColor: loading ? '#ccc' : '#8B1538',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                fontSize: '16px',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                marginBottom: '20px'
-              }}
+              className="auth-button"
             >
               {loading ? 'Registering...' : 'Register'}
             </button>
-            <p style={{ margin: 0, color: '#666' }}>
-              Already have an account? <Link to="/login" style={{ color: '#8B1538', textDecoration: 'none' }}>Sign in</Link>
+            <p style={{ margin: 0, color: '#666', textAlign: 'center' }}>
+              Already have an account? <Link to="/login" className="auth-link">Sign in</Link>
             </p>
           </form>
+          </div>
         </div>
       </main>
       <Footer />
