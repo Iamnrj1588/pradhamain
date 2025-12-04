@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, Star, Filter } from 'lucide-react';
+import { Calendar, Clock, Star, Filter, Menu, X } from 'lucide-react';
 import BookingModal from './BookingModal';
 
 const RentalDresses = () => {
@@ -12,6 +12,7 @@ const RentalDresses = () => {
   const [selectedSubcategory, setSelectedSubcategory] = useState('');
   const [selectedDress, setSelectedDress] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
+  const [showMobileCategories, setShowMobileCategories] = useState(false);
 
   const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081';
 
@@ -102,8 +103,62 @@ const RentalDresses = () => {
           <p className="text-lg text-gray-600">Rent beautiful outfits for your special occasions - Women's & Men's Collections</p>
         </div>
 
-        {/* Women's Category Sections */}
-        <div className="mb-8">
+        {/* Mobile Category Menu */}
+        <div className="md:hidden mb-6">
+          <button
+            onClick={() => setShowMobileCategories(!showMobileCategories)}
+            className="w-full bg-pink-600 text-white py-3 px-4 rounded-lg flex items-center justify-between"
+          >
+            <span>Browse Categories</span>
+            <Menu className="w-5 h-5" />
+          </button>
+          
+          {showMobileCategories && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50" onClick={() => setShowMobileCategories(false)}>
+              <div className="fixed left-0 top-0 h-full w-80 bg-white shadow-lg overflow-y-auto">
+                <div className="p-4 border-b">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">Categories</h3>
+                    <button onClick={() => setShowMobileCategories(false)}>
+                      <X className="w-6 h-6" />
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="p-4">
+                  <h4 className="font-semibold mb-3 text-pink-600">Women's Collection</h4>
+                  <div className="space-y-2 mb-6">
+                    {['Navratri', 'Wedding', 'Pre-Wedding', 'Reception', 'Sangam', 'Party', 'Designer Blouses', 'Maternity Outfits', 'Jewellery'].map(cat => (
+                      <button
+                        key={cat}
+                        onClick={() => { filterBySubcategory(cat); setShowMobileCategories(false); }}
+                        className="block w-full text-left py-2 px-3 rounded hover:bg-gray-100"
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                  
+                  <h4 className="font-semibold mb-3 text-blue-600">Men's Collection</h4>
+                  <div className="space-y-2">
+                    {['Wedding Outfit', 'Reception Outfit', 'Party Wears', 'Traditional Outfits'].map(cat => (
+                      <button
+                        key={cat}
+                        onClick={() => { filterBySubcategory(cat); setShowMobileCategories(false); }}
+                        className="block w-full text-left py-2 px-3 rounded hover:bg-gray-100"
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Women's Category Sections - Desktop */}
+        <div className="mb-8 hidden md:block">
           <h2 className="text-2xl font-semibold text-gray-900 mb-6 text-center">Women's Collection</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             <CategoryCard 
@@ -178,8 +233,8 @@ const RentalDresses = () => {
           </div>
         </div>
 
-        {/* Men's Category Sections */}
-        <div className="mb-8">
+        {/* Men's Category Sections - Desktop */}
+        <div className="mb-8 hidden md:block">
           <h2 className="text-2xl font-semibold text-gray-900 mb-6 text-center">Men's Collection</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <CategoryCard 

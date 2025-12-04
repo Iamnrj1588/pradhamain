@@ -25,8 +25,19 @@ const Navbar = () => {
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 16px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '80px' }}>
           <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
-            <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#8B1538' }}>Pradha</span>
-            <span style={{ fontSize: '18px', color: '#6b7280' }}>Fashion Outlet</span>
+            <img 
+              src="/logo.png" 
+              alt="Pradha Fashion Outlet" 
+              style={{ height: '48px', width: 'auto' }}
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+            <div style={{ display: 'none', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#8B1538' }}>Pradha</span>
+              <span style={{ fontSize: '18px', color: '#6b7280' }}>Fashion Outlet</span>
+            </div>
           </Link>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>

@@ -5,6 +5,7 @@ import com.pradha.main.repository.CustomerFeedbackRepository;
 import com.pradha.main.service.S3Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -69,15 +70,7 @@ public class CustomerFeedbackController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteFeedback(
-            @PathVariable String id,
-            @RequestHeader("Authorization") String authHeader) {
-        
-        // Basic admin check - you can enhance this with proper JWT validation
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(401).body("Unauthorized");
-        }
-        
+    public ResponseEntity<String> deleteFeedback(@PathVariable String id) {
         if (feedbackRepository.existsById(id)) {
             feedbackRepository.deleteById(id);
             return ResponseEntity.ok("Feedback deleted successfully");
