@@ -18,17 +18,23 @@ const RentalDresses = () => {
 
   useEffect(() => {
     fetchDresses();
-    
+  }, []);
+
+  useEffect(() => {
     // Check for subcategory parameter in URL
     const urlParams = new URLSearchParams(window.location.search);
     const subcategoryParam = urlParams.get('subcategory');
     if (subcategoryParam) {
       setSelectedSubcategory(subcategoryParam);
+      // Apply filter immediately when dresses are loaded
+      if (dresses.length > 0) {
+        applyFilters('', subcategoryParam);
+      }
     }
-  }, []);
+  }, [dresses]);
 
   useEffect(() => {
-    if (selectedSubcategory) {
+    if (selectedSubcategory && dresses.length > 0) {
       applyFilters('', selectedSubcategory);
     }
   }, [selectedSubcategory, dresses]);
