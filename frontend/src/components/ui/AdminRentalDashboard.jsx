@@ -561,12 +561,33 @@ const DressModal = ({ dress, onClose, onSuccess }) => {
                 value={Array.isArray(formData.availableSizes) ? formData.availableSizes.join(', ') : ''}
                 onChange={(e) => {
                   const value = e.target.value;
-                  const sizes = value ? value.split(',').map(s => s.trim()).filter(s => s) : [];
-                  setFormData({ ...formData, availableSizes: sizes });
+                  // Allow typing commas and update the display value immediately
+                  if (value.includes(',')) {
+                    const sizes = value.split(',').map(s => s.trim()).filter(s => s);
+                    setFormData({ ...formData, availableSizes: sizes });
+                  } else {
+                    // If no comma, treat as single size being typed
+                    setFormData({ ...formData, availableSizes: value ? [value.trim()] : [] });
+                  }
+                }}
+                onKeyDown={(e) => {
+                  // Ensure comma key is not blocked
+                  if (e.key === ',' || e.key === 'Comma') {
+                    e.stopPropagation();
+                  }
                 }}
                 placeholder="S, M, L, XL"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
               />
+              {formData.availableSizes && formData.availableSizes.length > 0 && (
+                <div className="mt-2 text-sm text-gray-600">
+                  Preview: {formData.availableSizes.map((size, idx) => (
+                    <span key={idx} className="inline-block bg-gray-100 px-2 py-1 rounded mr-1 mb-1">
+                      {size}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-3 gap-4">

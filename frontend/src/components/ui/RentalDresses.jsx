@@ -18,7 +18,20 @@ const RentalDresses = () => {
 
   useEffect(() => {
     fetchDresses();
+    
+    // Check for subcategory parameter in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const subcategoryParam = urlParams.get('subcategory');
+    if (subcategoryParam) {
+      setSelectedSubcategory(subcategoryParam);
+    }
   }, []);
+
+  useEffect(() => {
+    if (selectedSubcategory) {
+      applyFilters('', selectedSubcategory);
+    }
+  }, [selectedSubcategory, dresses]);
 
   const fetchDresses = async () => {
     try {
@@ -101,6 +114,23 @@ const RentalDresses = () => {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Outfit Rentals</h1>
           <p className="text-lg text-gray-600">Rent beautiful outfits for your special occasions - Women's & Men's Collections</p>
+        </div>
+
+        {/* Flash Notice */}
+        <div className="mb-8">
+          <div className="bg-gradient-to-r from-pink-500 to-red-500 text-white p-4 rounded-lg shadow-lg animate-pulse">
+            <div className="flex items-center justify-center">
+              <span className="text-2xl mr-3 animate-bounce">📍</span>
+              <div className="text-center">
+                <p className="font-bold text-lg mb-1">IMPORTANT FITTING NOTICE</p>
+                <p className="text-sm">
+                  <strong>For the best fitting, we request you to visit our store for a trial.</strong><br/>
+                  If you're sure about the sizes you gave, we can alter the dress as per your measurements.
+                </p>
+              </div>
+              <span className="text-2xl ml-3 animate-bounce">📍</span>
+            </div>
+          </div>
         </div>
 
         {/* Mobile Category Menu */}
