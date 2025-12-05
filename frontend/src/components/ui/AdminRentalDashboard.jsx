@@ -331,6 +331,31 @@ const DressModal = ({ dress, onClose, onSuccess }) => {
 
   const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081';
 
+  // Reset subcategory when category changes
+  useEffect(() => {
+    if (formData.category === "Women's Festival") {
+      setFormData(prev => ({...prev, subcategory: 'Navratri'}));
+    } else if (formData.category === "Women's Wedding") {
+      setFormData(prev => ({...prev, subcategory: 'Wedding'}));
+    } else if (formData.category === "Women's Party") {
+      setFormData(prev => ({...prev, subcategory: 'Party'}));
+    } else if (formData.category === "Women's Traditional") {
+      setFormData(prev => ({...prev, subcategory: 'Puja'}));
+    } else if (formData.category === "Women's Blouses") {
+      setFormData(prev => ({...prev, subcategory: 'Designer Blouses'}));
+    } else if (formData.category === "Women's Maternity") {
+      setFormData(prev => ({...prev, subcategory: 'Maternity Outfits'}));
+    } else if (formData.category === "Jewellery") {
+      setFormData(prev => ({...prev, subcategory: 'Jewellery'}));
+    } else if (formData.category === "Men's Wedding") {
+      setFormData(prev => ({...prev, subcategory: 'Wedding Outfit'}));
+    } else if (formData.category === "Men's Party") {
+      setFormData(prev => ({...prev, subcategory: 'Party Wears'}));
+    } else if (formData.category === "Men's Traditional") {
+      setFormData(prev => ({...prev, subcategory: 'Traditional Outfits'}));
+    }
+  }, [formData.category]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -472,15 +497,14 @@ const DressModal = ({ dress, onClose, onSuccess }) => {
                   onChange={(e) => setFormData({...formData, subcategory: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
                 >
-                  {formData.category === "Women's Festival" && (
+                  {formData.category === "Women's Festival" ? (
                     <>
                       <option value="Navratri">Navratri</option>
                       <option value="Diwali">Diwali</option>
                       <option value="Holi">Holi</option>
                       <option value="Karva Chauth">Karva Chauth</option>
                     </>
-                  )}
-                  {formData.category === "Women's Wedding" && (
+                  ) : formData.category === "Women's Wedding" ? (
                     <>
                       <option value="Wedding">Wedding</option>
                       <option value="Pre-Wedding">Pre-Wedding</option>
@@ -489,52 +513,46 @@ const DressModal = ({ dress, onClose, onSuccess }) => {
                       <option value="Mehendi">Mehendi</option>
                       <option value="Haldi">Haldi</option>
                     </>
-                  )}
-                  {formData.category === "Women's Party" && (
+                  ) : formData.category === "Women's Party" ? (
                     <>
                       <option value="Party">Party</option>
                       <option value="Cocktail">Cocktail</option>
                       <option value="Birthday">Birthday</option>
                       <option value="Anniversary">Anniversary</option>
                     </>
-                  )}
-                  {formData.category === "Women's Traditional" && (
+                  ) : formData.category === "Women's Traditional" ? (
                     <>
                       <option value="Puja">Puja</option>
                       <option value="Temple Visit">Temple Visit</option>
                       <option value="Cultural Event">Cultural Event</option>
                     </>
-                  )}
-                  {formData.category === "Women's Blouses" && (
+                  ) : formData.category === "Women's Blouses" ? (
                     <>
                       <option value="Designer Blouses">Designer Blouses</option>
                     </>
-                  )}
-                  {formData.category === "Women's Maternity" && (
+                  ) : formData.category === "Women's Maternity" ? (
                     <>
                       <option value="Maternity Outfits">Maternity Outfits</option>
                     </>
-                  )}
-                  {formData.category === "Jewellery" && (
+                  ) : formData.category === "Jewellery" ? (
                     <>
                       <option value="Jewellery">Jewellery</option>
                     </>
-                  )}
-                  {formData.category === "Men's Wedding" && (
+                  ) : formData.category === "Men's Wedding" ? (
                     <>
                       <option value="Wedding Outfit">Wedding Outfit</option>
                       <option value="Reception Outfit">Reception Outfit</option>
                     </>
-                  )}
-                  {formData.category === "Men's Party" && (
+                  ) : formData.category === "Men's Party" ? (
                     <>
                       <option value="Party Wears">Party Wears</option>
                     </>
-                  )}
-                  {formData.category === "Men's Traditional" && (
+                  ) : formData.category === "Men's Traditional" ? (
                     <>
                       <option value="Traditional Outfits">Traditional Outfits</option>
                     </>
+                  ) : (
+                    <option value="Navratri">Navratri</option>
                   )}
                 </select>
               </div>

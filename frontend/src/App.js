@@ -1225,30 +1225,6 @@ const HomePage = () => {
               </div>
             </div>
           </div>
-          
-          {/* Individual Collection Cards */}
-          <div className="mt-12">
-            <h3 className="text-2xl font-semibold text-center mb-6 text-[#8B1538]">Shop by Specific Collections</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {[
-                { name: 'Lehenga', category: 'Women', subcategory: 'Lehenga' },
-                { name: 'Blouses', category: 'Women', subcategory: 'Blouse' },
-                { name: 'Dresses', category: 'Women', subcategory: 'Dresses' },
-                { name: 'Khadi', category: 'Men', subcategory: 'Khadi' },
-                { name: 'Kurta', category: 'Men', subcategory: 'Kurta' },
-                { name: 'T-Shirts', category: 'Men', subcategory: 'T-Shirt' }
-              ].map((collection) => (
-                <div 
-                  key={collection.name}
-                  onClick={() => navigate(`/products?category=${collection.category}&subcategory=${collection.subcategory}`)}
-                  className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 cursor-pointer p-6 text-center border border-gray-200"
-                >
-                  <h4 className="font-semibold text-lg text-[#8B1538] mb-2">{collection.name}</h4>
-                  <p className="text-sm text-gray-600">{collection.category}'s {collection.subcategory}</p>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </section>
 
