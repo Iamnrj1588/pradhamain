@@ -238,6 +238,7 @@ const AdminPage = () => {
   const [inquiries, setInquiries] = useState([]);
   const [showProductForm, setShowProductForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [activeTab, setActiveTab] = useState('products');
   const [formData, setFormData] = useState({
     name: '',
     category: 'Women',
@@ -467,7 +468,7 @@ const AdminPage = () => {
     <div className="page-container" data-testid="admin-dashboard">
       <h1 className="page-title">Admin Dashboard</h1>
       
-      <Tabs defaultValue="products" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="hidden md:grid w-full max-w-3xl mx-auto grid-cols-5">
           <TabsTrigger value="products" data-testid="products-tab">Products</TabsTrigger>
           <TabsTrigger value="rentals" data-testid="rentals-tab">Rentals</TabsTrigger>
@@ -477,7 +478,7 @@ const AdminPage = () => {
         </TabsList>
         
         <div className="md:hidden mb-6">
-          <AdminMobileNav />
+          <AdminMobileNav currentTab={activeTab} onTabChange={setActiveTab} />
         </div>
 
         <TabsContent value="products" className="space-y-6">
@@ -944,9 +945,8 @@ const HeroContentManagement = () => {
   );
 };
 
-const AdminMobileNav = () => {
+const AdminMobileNav = ({ currentTab, onTabChange }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('products');
   
   const tabs = [
     { value: 'products', label: 'Products', icon: '📦' },
@@ -956,19 +956,11 @@ const AdminMobileNav = () => {
     { value: 'inquiries', label: 'Inquiries', icon: '📧' }
   ];
   
-  const currentTab = tabs.find(tab => tab.value === activeTab);
+  const activeTabData = tabs.find(tab => tab.value === currentTab);
   
   const handleTabClick = (tabValue) => {
-    setActiveTab(tabValue);
+    onTabChange(tabValue);
     setIsOpen(false);
-    
-    // Force trigger the tab change by dispatching a click event
-    setTimeout(() => {
-      const tabTrigger = document.querySelector(`[data-testid="${tabValue}-tab"]`);
-      if (tabTrigger) {
-        tabTrigger.click();
-      }
-    }, 100);
   };
   
   return (
@@ -978,8 +970,8 @@ const AdminMobileNav = () => {
         className="w-full bg-[#8B1538] text-white py-3 px-4 rounded-lg flex items-center justify-between"
       >
         <span className="flex items-center gap-2">
-          <span>{currentTab?.icon}</span>
-          <span>{currentTab?.label}</span>
+          <span>{activeTabData?.icon}</span>
+          <span>{activeTabData?.label}</span>
         </span>
         <Menu className="w-5 h-5" />
       </button>
@@ -991,7 +983,7 @@ const AdminMobileNav = () => {
               key={tab.value}
               onClick={() => handleTabClick(tab.value)}
               className={`w-full text-left py-3 px-4 flex items-center gap-3 hover:bg-gray-50 transition-colors ${
-                activeTab === tab.value ? 'bg-[#8B1538]/10 text-[#8B1538] font-medium' : 'text-gray-700'
+                currentTab === tab.value ? 'bg-[#8B1538]/10 text-[#8B1538] font-medium' : 'text-gray-700'
               } ${tab.value === tabs[tabs.length - 1].value ? '' : 'border-b border-gray-100'}`}
             >
               <span>{tab.icon}</span>
