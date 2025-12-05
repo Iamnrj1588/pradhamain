@@ -958,6 +958,19 @@ const AdminMobileNav = () => {
   
   const currentTab = tabs.find(tab => tab.value === activeTab);
   
+  const handleTabClick = (tabValue) => {
+    setActiveTab(tabValue);
+    setIsOpen(false);
+    
+    // Force trigger the tab change by dispatching a click event
+    setTimeout(() => {
+      const tabTrigger = document.querySelector(`[data-testid="${tabValue}-tab"]`);
+      if (tabTrigger) {
+        tabTrigger.click();
+      }
+    }, 100);
+  };
+  
   return (
     <div className="relative">
       <button
@@ -976,12 +989,7 @@ const AdminMobileNav = () => {
           {tabs.map((tab) => (
             <button
               key={tab.value}
-              onClick={() => {
-                setActiveTab(tab.value);
-                setIsOpen(false);
-                const tabTrigger = document.querySelector(`[data-testid="${tab.value}-tab"]`);
-                if (tabTrigger) tabTrigger.click();
-              }}
+              onClick={() => handleTabClick(tab.value)}
               className={`w-full text-left py-3 px-4 flex items-center gap-3 hover:bg-gray-50 transition-colors ${
                 activeTab === tab.value ? 'bg-[#8B1538]/10 text-[#8B1538] font-medium' : 'text-gray-700'
               } ${tab.value === tabs[tabs.length - 1].value ? '' : 'border-b border-gray-100'}`}
