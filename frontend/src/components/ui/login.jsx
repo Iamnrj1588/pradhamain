@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../../App";
+import { GoogleLogin } from '@react-oauth/google';
 import { ShoppingCart, Menu, X, CheckCircle, XCircle, Eye, EyeOff } from 'lucide-react';
 
 const API_URL = `${process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081'}/api/auth`;
@@ -273,6 +274,23 @@ export default function Login() {
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setLoading(true);
+    try {
+      const response = await axios.post(`${API_URL}/google`, {
+        token: credentialResponse.credential
+      });
+      
+      login(response.data.accessToken, response.data.user);
+      setMessage({ text: "Google login successful! Redirecting...", type: "success" });
+      setTimeout(() => navigate("/"), 1500);
+    } catch (error) {
+      setMessage({ text: "Google login failed", type: "error" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div>
       <Navbar />
@@ -353,6 +371,20 @@ export default function Login() {
             >
               {loading ? 'Logging in...' : 'Login'}
             </button>
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+              <div style={{ margin: '20px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ flex: 1, height: '1px', backgroundColor: '#e5e7eb' }}></div>
+                <span style={{ color: '#6b7280', fontSize: '14px' }}>or</span>
+                <div style={{ flex: 1, height: '1px', backgroundColor: '#e5e7eb' }}></div>
+              </div>
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setMessage({ text: 'Google login failed', type: 'error' })}
+                theme="outline"
+                size="large"
+                width="100%"
+              />
+            </div>
             <div style={{ textAlign: 'center' }}>
               <Link to="/forgot-password" className="auth-link" style={{ display: 'block', marginBottom: '15px' }}>Forgot Password?</Link>
               <p style={{ margin: 0, color: '#666' }}>

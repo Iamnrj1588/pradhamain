@@ -7,12 +7,18 @@ import com.pradha.main.entity.User;
 import com.pradha.main.repository.UserRepository;
 import com.pradha.main.security.JwtUtil;
 import com.pradha.main.service.EmailService;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Random;
 
@@ -32,6 +38,9 @@ public class AuthController {
     
     @Autowired
     private EmailService emailService;
+    
+    @Value("${google.client.id:}")
+    private String googleClientId;
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@Valid @RequestBody SignupRequest request) {
@@ -208,6 +217,63 @@ public class AuthController {
         userRepository.save(user);
         
         return ResponseEntity.ok(Map.of("message", "Password reset successfully"));
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<?> googleLogin(@RequestBody Map<String, String> request) {
+        System.out.println("=== Google OAuth Debug ===");
+        System.out.println("Google Client ID: " + googleClientId + " (length: " + (googleClientId != null ? googleClientId.length() : "null") + ")");
+        System.out.println("Request: " + request);
+        
+        if (googleClientId == null || googleClientId.trim().isEmpty()) {
+            System.out.println("Google OAuth not configured");
+            return ResponseEntity.status(501).body(Map.of("error", "Google OAuth not configured"));
+        }
+        
+        String token = request.get("token");
+        System.out.println("Token received: " + (token != null ? "[YES]" : "[NO]"));
+        
+        try {
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
+                new NetHttpTransport(), GsonFactory.getDefaultInstance())
+                .setAudience(Collections.singletonList(googleClientId))
+                .build();
+            
+            GoogleIdToken idToken = verifier.verify(token);
+            if (idToken != null) {
+                GoogleIdToken.Payload payload = idToken.getPayload();
+                String email = payload.getEmail();
+                String name = (String) payload.get("name");
+                System.out.println("Google user: " + email + " (" + name + ")");
+                
+                User user = userRepository.findByEmail(email).orElse(null);
+                if (user == null) {
+                    user = new User(email, name, null, "GOOGLE_USER");
+                    user.setEmailVerified(true);
+                    user.setRole("USER");
+                    userRepository.save(user);
+                    System.out.println("Created new user: " + email);
+                } else {
+                    System.out.println("Found existing user: " + email);
+                }
+                
+                String jwtToken = jwtUtil.generateToken(user.getEmail(), user.getRole());
+                System.out.println("JWT generated successfully");
+                return ResponseEntity.ok(new AuthResponse(
+                    jwtToken,
+                    "bearer",
+                    Map.of("id", user.getId(), "email", user.getEmail(), "name", user.getName(), "role", user.getRole())
+                ));
+            } else {
+                System.out.println("Google token verification failed - null token");
+            }
+        } catch (Exception e) {
+            System.out.println("Google OAuth error: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(401).body(Map.of("error", "Invalid Google token: " + e.getMessage()));
+        }
+        
+        return ResponseEntity.status(401).body(Map.of("error", "Google authentication failed"));
     }
 
     @GetMapping("/me")
