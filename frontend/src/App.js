@@ -997,35 +997,96 @@ const AdminMobileNav = ({ currentTab, onTabChange }) => {
 };
 
 const Footer = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
   return (
     <footer className="bg-[#8B1538] text-white mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-4 gap-8">
           <div>
             <h3 className="text-xl font-bold mb-4">Pradha Fashion Outlet</h3>
-            <p className="text-gray-200">Where Tradition Meets Elegance</p>
+            <p className="text-gray-200 mb-4">Where Tradition Meets Elegance</p>
+            {!user ? (
+              <div className="space-y-2">
+                <Button 
+                  onClick={() => navigate('/login')}
+                  className="w-full bg-[#DAA520] hover:bg-[#B8860B] text-white"
+                >
+                  Login
+                </Button>
+                <Button 
+                  onClick={() => navigate('/register')}
+                  variant="outline"
+                  className="w-full border-white text-white hover:bg-white hover:text-[#8B1538]"
+                >
+                  Sign Up
+                </Button>
+              </div>
+            ) : (
+              <div className="text-gray-200">
+                <p className="text-sm">Welcome, {user.name}!</p>
+                <Link to="/orders" className="text-[#DAA520] hover:underline text-sm">My Orders</Link>
+              </div>
+            )}
           </div>
+          
+          <div>
+            <h4 className="font-semibold mb-4">Visit Our Store</h4>
+            <div className="space-y-2 text-gray-200 text-sm">
+              <p className="font-medium">📍 Shop Address:</p>
+              <p>Shop No.3, 1st Floor<br />Youth Arcade, Cidco Waluj<br />Mahanagar - 1, Bajajnagar<br />Chh.Sambhajinagar</p>
+              <p className="font-medium mt-3">📞 Contact:</p>
+              <a href="tel:+918308721599" className="hover:text-[#DAA520] transition-colors">+91 83087 21599</a>
+              <p className="font-medium mt-3">🕒 Store Hours:</p>
+              <p>Mon-Sat: 10:00 AM - 8:00 PM<br />Sunday: 11:00 AM - 6:00 PM</p>
+              <a 
+                href="https://maps.app.goo.gl/gDQApHp49eYyBtGj8?g_st=ac" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="inline-block mt-2 text-[#DAA520] hover:underline"
+              >
+                📍 Get Directions
+              </a>
+            </div>
+          </div>
+          
           <div>
             <h4 className="font-semibold mb-4">Quick Links</h4>
             <div className="space-y-2">
               <Link to="/" className="block hover:text-[#DAA520] transition-colors">Home</Link>
               <Link to="/products" className="block hover:text-[#DAA520] transition-colors">Collections</Link>
+              <Link to="/rentals" className="block hover:text-[#DAA520] transition-colors">Rentals</Link>
+              <Link to="/reviews" className="block hover:text-[#DAA520] transition-colors">Reviews</Link>
               <Link to="/about" className="block hover:text-[#DAA520] transition-colors">About</Link>
               <Link to="/contact" className="block hover:text-[#DAA520] transition-colors">Contact</Link>
-              <Link to="/developer" className="block hover:text-[#DAA520] transition-colors">Developer</Link>
             </div>
           </div>
+          
           <div>
             <h4 className="font-semibold mb-4">Follow Us</h4>
             <div className="space-y-2">
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="block hover:text-[#DAA520] transition-colors">Instagram</a>
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="block hover:text-[#DAA520] transition-colors">Facebook</a>
-              <a href="https://wa.me/" target="_blank" rel="noopener noreferrer" className="block hover:text-[#DAA520] transition-colors">WhatsApp</a>
+              <a href="https://instagram.com/pradhafashion" target="_blank" rel="noopener noreferrer" className="block hover:text-[#DAA520] transition-colors">📱 Instagram</a>
+              <a href="https://facebook.com/pradhafashion" target="_blank" rel="noopener noreferrer" className="block hover:text-[#DAA520] transition-colors">📘 Facebook</a>
+              <a href="https://wa.me/918308721599" target="_blank" rel="noopener noreferrer" className="block hover:text-[#DAA520] transition-colors">💬 WhatsApp</a>
+              <a href="mailto:info@pradhafashion.com" className="block hover:text-[#DAA520] transition-colors">✉️ Email Us</a>
+            </div>
+            <div className="mt-4 text-gray-200 text-sm">
+              <p className="font-medium">💳 We Accept:</p>
+              <p>Cash, UPI, Cards<br />Online Payments</p>
             </div>
           </div>
         </div>
-        <div className="border-t border-white/20 mt-8 pt-8 text-center text-gray-200">
-          <p>© 2025 Pradha Fashion Outlet. All rights reserved.</p>
+        
+        <div className="border-t border-white/20 mt-8 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center text-gray-200 text-sm">
+            <p>© 2025 Pradha Fashion Outlet. All rights reserved.</p>
+            <div className="flex space-x-4 mt-2 md:mt-0">
+              <Link to="/" className="hover:text-[#DAA520] transition-colors">Privacy Policy</Link>
+              <Link to="/" className="hover:text-[#DAA520] transition-colors">Terms of Service</Link>
+              <Link to="/developer" className="hover:text-[#DAA520] transition-colors">Developer</Link>
+            </div>
+          </div>
         </div>
       </div>
     </footer>

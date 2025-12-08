@@ -165,34 +165,99 @@ const Navbar = () => {
 };
 
 const Footer = () => {
+  const navigate = useNavigate();
+
   return (
     <footer style={{ backgroundColor: '#8B1538', color: 'white', marginTop: '80px' }}>
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '48px 16px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '32px' }}>
           <div>
             <h3 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '16px' }}>Pradha Fashion Outlet</h3>
-            <p style={{ color: '#d1d5db' }}>Where Tradition Meets Elegance</p>
+            <p style={{ color: '#d1d5db', marginBottom: '16px' }}>Where Tradition Meets Elegance</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button 
+                onClick={() => navigate('/login')}
+                style={{
+                  width: '100%',
+                  padding: '8px 16px',
+                  backgroundColor: '#DAA520',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontWeight: '500'
+                }}
+              >
+                Login
+              </button>
+              <button 
+                onClick={() => navigate('/register')}
+                style={{
+                  width: '100%',
+                  padding: '8px 16px',
+                  backgroundColor: 'transparent',
+                  color: 'white',
+                  border: '1px solid white',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontWeight: '500'
+                }}
+              >
+                Sign Up
+              </button>
+            </div>
           </div>
+          
+          <div>
+            <h4 style={{ fontWeight: '600', marginBottom: '16px' }}>Visit Our Store</h4>
+            <div style={{ color: '#d1d5db', fontSize: '14px', lineHeight: '1.5' }}>
+              <p style={{ fontWeight: '500', margin: '0 0 8px 0' }}>📍 Shop Address:</p>
+              <p style={{ margin: '0 0 12px 0' }}>Shop No.3, 1st Floor<br />Youth Arcade, Cidco Waluj<br />Mahanagar - 1, Bajajnagar<br />Chh.Sambhajinagar</p>
+              <p style={{ fontWeight: '500', margin: '12px 0 4px 0' }}>📞 Contact:</p>
+              <a href="tel:+918308721599" style={{ color: '#DAA520', textDecoration: 'none' }}>+91 83087 21599</a>
+              <p style={{ fontWeight: '500', margin: '12px 0 4px 0' }}>🕒 Store Hours:</p>
+              <p style={{ margin: '0 0 12px 0' }}>Mon-Sat: 10:00 AM - 8:00 PM<br />Sunday: 11:00 AM - 6:00 PM</p>
+              <a 
+                href="https://maps.app.goo.gl/gDQApHp49eYyBtGj8?g_st=ac" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                style={{ color: '#DAA520', textDecoration: 'none', fontSize: '14px' }}
+              >
+                📍 Get Directions
+              </a>
+            </div>
+          </div>
+          
           <div>
             <h4 style={{ fontWeight: '600', marginBottom: '16px' }}>Quick Links</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <Link to="/" style={{ color: 'white', textDecoration: 'none' }}>Home</Link>
               <Link to="/products" style={{ color: 'white', textDecoration: 'none' }}>Collections</Link>
+              <Link to="/rentals" style={{ color: 'white', textDecoration: 'none' }}>Rentals</Link>
               <Link to="/about" style={{ color: 'white', textDecoration: 'none' }}>About</Link>
               <Link to="/contact" style={{ color: 'white', textDecoration: 'none' }}>Contact</Link>
             </div>
           </div>
+          
           <div>
             <h4 style={{ fontWeight: '600', marginBottom: '16px' }}>Follow Us</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" style={{ color: 'white', textDecoration: 'none' }}>Instagram</a>
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" style={{ color: 'white', textDecoration: 'none' }}>Facebook</a>
-              <a href="https://wa.me/" target="_blank" rel="noopener noreferrer" style={{ color: 'white', textDecoration: 'none' }}>WhatsApp</a>
+              <a href="https://instagram.com/pradhafashion" target="_blank" rel="noopener noreferrer" style={{ color: 'white', textDecoration: 'none' }}>📱 Instagram</a>
+              <a href="https://facebook.com/pradhafashion" target="_blank" rel="noopener noreferrer" style={{ color: 'white', textDecoration: 'none' }}>📘 Facebook</a>
+              <a href="https://wa.me/918308721599" target="_blank" rel="noopener noreferrer" style={{ color: 'white', textDecoration: 'none' }}>💬 WhatsApp</a>
+              <a href="mailto:info@pradhafashion.com" style={{ color: 'white', textDecoration: 'none' }}>✉️ Email Us</a>
             </div>
           </div>
         </div>
-        <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.2)', marginTop: '32px', paddingTop: '32px', textAlign: 'center', color: '#d1d5db' }}>
-          <p>© 2025 Pradha Fashion Outlet. All rights reserved.</p>
+        
+        <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.2)', marginTop: '32px', paddingTop: '32px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', color: '#d1d5db', fontSize: '14px', textAlign: 'center' }}>
+            <p style={{ margin: 0 }}>© 2025 Pradha Fashion Outlet. All rights reserved.</p>
+            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <Link to="/" style={{ color: '#DAA520', textDecoration: 'none' }}>Privacy Policy</Link>
+              <Link to="/" style={{ color: '#DAA520', textDecoration: 'none' }}>Terms of Service</Link>
+            </div>
+          </div>
         </div>
       </div>
     </footer>
