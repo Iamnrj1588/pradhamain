@@ -1081,8 +1081,8 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row justify-between items-center text-gray-200 text-sm">
             <p>© 2025 Pradha Fashion Outlet. All rights reserved.</p>
             <div className="flex space-x-4 mt-2 md:mt-0">
-              <Link to="/" className="hover:text-[#DAA520] transition-colors" onClick={() => window.scrollTo(0, 0)}>Privacy Policy</Link>
-              <Link to="/" className="hover:text-[#DAA520] transition-colors" onClick={() => window.scrollTo(0, 0)}>Terms of Service</Link>
+              <Link to="/privacy-policy" className="hover:text-[#DAA520] transition-colors" onClick={() => window.scrollTo(0, 0)}>Privacy Policy</Link>
+              <Link to="/terms-of-service" className="hover:text-[#DAA520] transition-colors" onClick={() => window.scrollTo(0, 0)}>Terms of Service</Link>
               <Link to="/developer" className="hover:text-[#DAA520] transition-colors" onClick={() => window.scrollTo(0, 0)}>Developer</Link>
             </div>
           </div>
@@ -1594,9 +1594,9 @@ const AboutPage = () => {
       <h1 className="page-title">About Pradha Fashion Outlet</h1>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-4xl mx-auto">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="fashion">About Pradha Fashion Outlet</TabsTrigger>
-          <TabsTrigger value="rental">About Pradha Rental Outlet</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 h-auto">
+          <TabsTrigger value="fashion" className="text-xs sm:text-sm p-2 sm:p-3">About Fashion Outlet</TabsTrigger>
+          <TabsTrigger value="rental" className="text-xs sm:text-sm p-2 sm:p-3">About Rental Outlet</TabsTrigger>
         </TabsList>
         
         <TabsContent value="fashion" className="space-y-6 text-gray-700 leading-relaxed mt-6">
@@ -1751,6 +1751,155 @@ const ContactPage = () => {
   );
 };
 
+const PrivacyPolicyPage = () => {
+  return (
+    <div className="page-container">
+      <h1 className="page-title">Privacy Policy</h1>
+      <div className="max-w-4xl mx-auto space-y-6 text-gray-700 leading-relaxed">
+        <p className="text-sm text-gray-500">Last Updated: 09/12/2025</p>
+        
+        <p className="text-lg">
+          At Pradha Fashion Outlet, your privacy is important to us. This Privacy Policy explains how we collect, use, and protect your personal information when you visit our website, make a purchase, or contact us.
+        </p>
+
+        <div>
+          <h2 className="text-2xl font-semibold text-[#8B1538] mb-4">Information We Collect</h2>
+          <p className="mb-3">We may collect the following details:</p>
+          <ul className="space-y-2 list-disc pl-6">
+            <li>Name, email address, phone number</li>
+            <li>Delivery and billing address</li>
+            <li>Order details and measurements for customization</li>
+            <li>Payment information (processed securely by our payment partners)</li>
+            <li>Website usage data to improve your experience</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 className="text-2xl font-semibold text-[#8B1538] mb-4">How We Use Your Information</h2>
+          <p className="mb-3">Your information is used to:</p>
+          <ul className="space-y-2 list-disc pl-6">
+            <li>Process and deliver orders</li>
+            <li>Provide customization & fitting services</li>
+            <li>Send order updates and customer support</li>
+            <li>Improve our products and website experience</li>
+            <li>Send promotions/offers (only if you opt-in)</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 className="text-2xl font-semibold text-[#8B1538] mb-4">How We Protect Your Data</h2>
+          <ul className="space-y-2 list-disc pl-6">
+            <li>We use secure servers and SSL encryption</li>
+            <li>Payment details are handled by trusted payment gateways (e.g., Razorpay)</li>
+            <li>We never sell or share your personal information with third parties, except for order processing (couriers, payment partners)</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 className="text-2xl font-semibold text-[#8B1538] mb-4">Your Rights</h2>
+          <p className="mb-3">You can:</p>
+          <ul className="space-y-2 list-disc pl-6">
+            <li>Request to update or delete your personal data</li>
+            <li>Opt-out of promotional messages anytime</li>
+            <li>Contact us for any privacy-related concerns</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 className="text-2xl font-semibold text-[#8B1538] mb-4">Contact Us</h2>
+          <p className="mb-3">If you have questions about this Privacy Policy, reach us at:</p>
+          <div className="space-y-2">
+            <p>📧 <a href="mailto:pradhafashionoutlet@gmail.com" className="text-[#8B1538] hover:underline">pradhafashionoutlet@gmail.com</a></p>
+            <p>📞 <a href="tel:+918308721599" className="text-[#8B1538] hover:underline">8308721599</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const TermsOfServicePage = () => {
+  return (
+    <div className="page-container">
+      <h1 className="page-title">Terms of Service</h1>
+      <div className="max-w-4xl mx-auto space-y-6 text-gray-700 leading-relaxed">
+        <p className="text-sm text-gray-500">Last Updated: 09/12/2025</p>
+        
+        <p className="text-lg">
+          Welcome to Pradha Fashion Outlet. By using our website, placing an order, or using our services, you agree to follow these Terms of Service.
+        </p>
+
+        <div>
+          <h2 className="text-2xl font-semibold text-[#8B1538] mb-4">Use of Our Website</h2>
+          <ul className="space-y-2 list-disc pl-6">
+            <li>You agree not to misuse our website or attempt to harm our systems.</li>
+            <li>All product images, designs, and text belong to Pradha Fashion Outlet and cannot be copied without permission.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 className="text-2xl font-semibold text-[#8B1538] mb-4">Orders & Payments</h2>
+          <ul className="space-y-2 list-disc pl-6">
+            <li>Prices are shown in INR and may change anytime.</li>
+            <li>Orders are confirmed only after payment is successfully received.</li>
+            <li>Customization orders may require additional time; we will keep you updated.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 className="text-2xl font-semibold text-[#8B1538] mb-4">Rentals (If applicable)</h2>
+          <ul className="space-y-2 list-disc pl-6">
+            <li>Rental items must be returned on or before the due date.</li>
+            <li>Damage charges may apply if the product is torn, stained, or heavily altered.</li>
+            <li>Advance payment and ID verification may be required for rentals.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 className="text-2xl font-semibold text-[#8B1538] mb-4">Refunds & Cancellation</h2>
+          <ul className="space-y-2 list-disc pl-6">
+            <li>Customized products are non-refundable and non-returnable.</li>
+            <li>Standard products may be eligible for return based on our return policy.</li>
+            <li>Rental fees are non-refundable once the item is collected.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 className="text-2xl font-semibold text-[#8B1538] mb-4">Shipping & Delivery</h2>
+          <ul className="space-y-2 list-disc pl-6">
+            <li>Delivery timelines may vary based on location.</li>
+            <li>We are not responsible for delays caused by courier/logistics providers.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 className="text-2xl font-semibold text-[#8B1538] mb-4">Limitation of Liability</h2>
+          <p className="mb-3">Pradha Fashion Outlet is not responsible for:</p>
+          <ul className="space-y-2 list-disc pl-6">
+            <li>Incorrect measurements provided by the customer</li>
+            <li>Damage after the product has been delivered</li>
+            <li>Delays due to unavoidable events (weather, courier issues, holidays)</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 className="text-2xl font-semibold text-[#8B1538] mb-4">Changes to Terms</h2>
+          <p>We may update these Terms occasionally. Continued use of the website means you accept the updated terms.</p>
+        </div>
+
+        <div>
+          <h2 className="text-2xl font-semibold text-[#8B1538] mb-4">Contact Us</h2>
+          <p className="mb-3">For inquiries related to these Terms, contact:</p>
+          <div className="space-y-2">
+            <p>📧 <a href="mailto:pradhafashionoutlet@gmail.com" className="text-[#8B1538] hover:underline">pradhafashionoutlet@gmail.com</a></p>
+            <p>📞 <a href="tel:+918308721599" className="text-[#8B1538] hover:underline">8308721599</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 function App() {
   return (
     <AuthProvider>
@@ -1767,6 +1916,8 @@ function App() {
           <Route path="/reviews" element={<Layout><CustomerReviews /></Layout>} />
           <Route path="/about" element={<Layout><AboutPage /></Layout>} />
           <Route path="/contact" element={<Layout><ContactPage /></Layout>} />
+          <Route path="/privacy-policy" element={<Layout><PrivacyPolicyPage /></Layout>} />
+          <Route path="/terms-of-service" element={<Layout><TermsOfServicePage /></Layout>} />
           <Route path="/admin" element={<Layout><AdminPage /></Layout>} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
