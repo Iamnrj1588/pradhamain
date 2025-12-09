@@ -242,10 +242,9 @@ const Footer = () => {
           <div>
             <h4 style={{ fontWeight: '600', marginBottom: '16px' }}>Follow Us</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <a href="https://instagram.com/pradhafashion" target="_blank" rel="noopener noreferrer" style={{ color: 'white', textDecoration: 'none' }}>📱 Instagram</a>
-              <a href="https://facebook.com/pradhafashion" target="_blank" rel="noopener noreferrer" style={{ color: 'white', textDecoration: 'none' }}>📘 Facebook</a>
-              <a href="https://wa.me/918308721599" target="_blank" rel="noopener noreferrer" style={{ color: 'white', textDecoration: 'none' }}>💬 WhatsApp</a>
-              <a href="mailto:info@pradhafashion.com" style={{ color: 'white', textDecoration: 'none' }}>✉️ Email Us</a>
+              <a href="https://www.instagram.com/pradha_fashion_outlet?igsh=cXplemF6eTZxYnY1" target="_blank" rel="noopener noreferrer" style={{ color: 'white', textDecoration: 'none' }}>📱 Instagram</a>
+              <a href="https://wa.me/917972177226" target="_blank" rel="noopener noreferrer" style={{ color: 'white', textDecoration: 'none' }}>💬 WhatsApp</a>
+              <a href="mailto:pradhafashionoutlet@gmail.com" style={{ color: 'white', textDecoration: 'none' }}>✉️ Email Us</a>
             </div>
           </div>
         </div>

@@ -12,49 +12,45 @@ export default function Developer() {
       <div className="mx-auto max-w-4xl">
         <header className="mb-8 text-center">
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
-            Meet the Developers — <span className="text-indigo-600">NextGen_Tech</span>
+            Meet the Developer — <span className="text-[#8B1538]">NextGen_Tech</span>
           </h1>
           <p className="mt-3 text-slate-600">
-            Behind every smooth click and secure checkout at <strong>Pradha Fashion Outlet</strong> is our
-            passionate dev team. We build fast, secure and delightful experiences using modern
-            technologies.
+            Behind every smooth click and secure checkout at <strong>Pradha Fashion Outlet</strong> is NextGen_Tech. We build fast, secure and delightful experiences using modern technologies.
           </p>
         </header>
 
         <section className="grid gap-6 md:grid-cols-2">
           <Card className="shadow-lg">
             <CardContent>
-              <h2 className="text-xl font-semibold">About the Team</h2>
+              <h2 className="text-xl font-semibold">About NextGen_Tech</h2>
               <p className="mt-3 text-slate-600 leading-relaxed text-sm">
-                <strong>NextGen_Tech</strong> is a cross-functional team of backend, frontend and
-                security engineers focused on building scalable commerce experiences for Pradha
-                Fashion Outlet. We prioritize performance, accessibility and data protection in
-                every release.
+                <strong>NextGen_Tech</strong> is a full-stack developer focused on building scalable commerce experiences for Pradha Fashion Outlet. From initial localhost setup to production deployment on EC2, every challenge was tackled with precision - debugging CORS issues, implementing Google OAuth, optimizing mobile responsiveness, and adding advanced features like rental systems and customer feedback.
               </p>
 
               <ul className="mt-4 space-y-2 text-sm">
-                <li>⚙️ Backend: Java (Spring Boot)</li>
-                <li>🗄️ Database: PostgreSQL</li>
-                <li>🎨 Frontend: React + Tailwind CSS</li>
-                <li>🔐 Security: OWASP best practices, secure secret storage</li>
+                <li>🚀 Backend: Java Spring Boot + PostgreSQL</li>
+                <li>⚛️ Frontend: React + Tailwind CSS</li>
+                <li>☁️ Cloud: AWS EC2 + S3 + Docker</li>
+                <li>🔐 Auth: JWT + Google OAuth + OTP verification</li>
+                <li>📱 Mobile-first responsive design</li>
               </ul>
             </CardContent>
           </Card>
 
           <Card className="shadow-lg">
             <CardContent>
-              <h2 className="text-xl font-semibold">Mission</h2>
+              <h2 className="text-xl font-semibold">Key Features Built</h2>
               <p className="mt-3 text-slate-600 leading-relaxed text-sm">
-                To empower Pradha Fashion Outlet with reliable, maintainable systems and delightful
-                user experiences. We build solutions that scale and keep customer security first.
+                From concept to production - we built a complete fashion e-commerce platform with advanced rental system, customer reviews, admin dashboard, and seamless mobile experience. Every feature was iteratively improved based on real-world needs.
               </p>
 
               <div className="mt-4 flex gap-2 flex-wrap">
-                <span className="rounded-full bg-indigo-50 px-3 py-1 text-indigo-700 text-xs">Java</span>
-                <span className="rounded-full bg-sky-50 px-3 py-1 text-sky-700 text-xs">PostgreSQL</span>
-                <span className="rounded-full bg-emerald-50 px-3 py-1 text-emerald-700 text-xs">React</span>
-                <span className="rounded-full bg-amber-50 px-3 py-1 text-amber-700 text-xs">Twilio WhatsApp</span>
-                <span className="rounded-full bg-rose-50 px-3 py-1 text-rose-700 text-xs">Razorpay</span>
+                <span className="rounded-full bg-[#8B1538]/10 px-3 py-1 text-[#8B1538] text-xs">Product Catalog</span>
+                <span className="rounded-full bg-[#DAA520]/10 px-3 py-1 text-[#DAA520] text-xs">Rental System</span>
+                <span className="rounded-full bg-blue-50 px-3 py-1 text-blue-700 text-xs">Customer Reviews</span>
+                <span className="rounded-full bg-green-50 px-3 py-1 text-green-700 text-xs">Admin Dashboard</span>
+                <span className="rounded-full bg-purple-50 px-3 py-1 text-purple-700 text-xs">Google OAuth</span>
+                <span className="rounded-full bg-orange-50 px-3 py-1 text-orange-700 text-xs">AWS S3 Storage</span>
               </div>
             </CardContent>
           </Card>
@@ -107,15 +103,15 @@ export default function Developer() {
         <section className="mt-8">
           <Card className="shadow-lg">
             <CardContent>
-              <h2 className="text-xl font-semibold">Contact the Developers</h2>
+              <h2 className="text-xl font-semibold">Contact NextGen_Tech</h2>
 
               <p className="mt-3 text-slate-600 text-sm">For tech requests, integration queries or bug reports:</p>
 
               <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:gap-4 gap-3">
-                <a href="mailto:nextgen_tech69@devmail.com" className="inline-flex items-center gap-2">
+                <a href="mailto:nextgen_tech@devmail.com" className="inline-flex items-center gap-2">
                   <Button variant="ghost" className="rounded-md">
                     <Mail size={16} />
-                    <span className="ml-1 text-xs">nextgen_tech69@devmail.com</span>
+                    <span className="ml-1 text-xs">nextgen_tech@devmail.com</span>
                   </Button>
                 </a>
 
@@ -134,7 +130,7 @@ export default function Developer() {
                 </a>
               </div>
 
-              <p className="mt-4 text-xs text-slate-500">© {new Date().getFullYear()} Pradha Fashion Outlet — Developed by NextGen_Tech</p>
+              <p className="mt-6 text-xs text-slate-500 text-center">© {new Date().getFullYear()} Pradha Fashion Outlet — Developed by NextGen_Tech</p>
             </CardContent>
           </Card>
         </section>

@@ -1054,22 +1054,21 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Quick Links</h4>
             <div className="space-y-2">
-              <Link to="/" className="block hover:text-[#DAA520] transition-colors">Home</Link>
-              <Link to="/products" className="block hover:text-[#DAA520] transition-colors">Collections</Link>
-              <Link to="/rentals" className="block hover:text-[#DAA520] transition-colors">Rentals</Link>
-              <Link to="/reviews" className="block hover:text-[#DAA520] transition-colors">Reviews</Link>
-              <Link to="/about" className="block hover:text-[#DAA520] transition-colors">About</Link>
-              <Link to="/contact" className="block hover:text-[#DAA520] transition-colors">Contact</Link>
+              <Link to="/" className="block hover:text-[#DAA520] transition-colors" onClick={() => window.scrollTo(0, 0)}>Home</Link>
+              <Link to="/products" className="block hover:text-[#DAA520] transition-colors" onClick={() => window.scrollTo(0, 0)}>Collections</Link>
+              <Link to="/rentals" className="block hover:text-[#DAA520] transition-colors" onClick={() => window.scrollTo(0, 0)}>Rentals</Link>
+              <Link to="/reviews" className="block hover:text-[#DAA520] transition-colors" onClick={() => window.scrollTo(0, 0)}>Reviews</Link>
+              <Link to="/about" className="block hover:text-[#DAA520] transition-colors" onClick={() => window.scrollTo(0, 0)}>About</Link>
+              <Link to="/contact" className="block hover:text-[#DAA520] transition-colors" onClick={() => window.scrollTo(0, 0)}>Contact</Link>
             </div>
           </div>
           
           <div>
             <h4 className="font-semibold mb-4">Follow Us</h4>
             <div className="space-y-2">
-              <a href="https://instagram.com/pradhafashion" target="_blank" rel="noopener noreferrer" className="block hover:text-[#DAA520] transition-colors">📱 Instagram</a>
-              <a href="https://facebook.com/pradhafashion" target="_blank" rel="noopener noreferrer" className="block hover:text-[#DAA520] transition-colors">📘 Facebook</a>
-              <a href="https://wa.me/918308721599" target="_blank" rel="noopener noreferrer" className="block hover:text-[#DAA520] transition-colors">💬 WhatsApp</a>
-              <a href="mailto:info@pradhafashion.com" className="block hover:text-[#DAA520] transition-colors">✉️ Email Us</a>
+              <a href="https://www.instagram.com/pradha_fashion_outlet?igsh=cXplemF6eTZxYnY1" target="_blank" rel="noopener noreferrer" className="block hover:text-[#DAA520] transition-colors">📱 Instagram</a>
+              <a href="https://wa.me/917972177226" target="_blank" rel="noopener noreferrer" className="block hover:text-[#DAA520] transition-colors">💬 WhatsApp</a>
+              <a href="mailto:pradhafashionoutlet@gmail.com" className="block hover:text-[#DAA520] transition-colors">✉️ Email Us</a>
             </div>
             <div className="mt-4 text-gray-200 text-sm">
               <p className="font-medium">💳 We Accept:</p>
@@ -1082,9 +1081,9 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row justify-between items-center text-gray-200 text-sm">
             <p>© 2025 Pradha Fashion Outlet. All rights reserved.</p>
             <div className="flex space-x-4 mt-2 md:mt-0">
-              <Link to="/" className="hover:text-[#DAA520] transition-colors">Privacy Policy</Link>
-              <Link to="/" className="hover:text-[#DAA520] transition-colors">Terms of Service</Link>
-              <Link to="/developer" className="hover:text-[#DAA520] transition-colors">Developer</Link>
+              <Link to="/" className="hover:text-[#DAA520] transition-colors" onClick={() => window.scrollTo(0, 0)}>Privacy Policy</Link>
+              <Link to="/" className="hover:text-[#DAA520] transition-colors" onClick={() => window.scrollTo(0, 0)}>Terms of Service</Link>
+              <Link to="/developer" className="hover:text-[#DAA520] transition-colors" onClick={() => window.scrollTo(0, 0)}>Developer</Link>
             </div>
           </div>
         </div>
@@ -1111,10 +1110,17 @@ const HomePage = () => {
   const [newArrivals, setNewArrivals] = useState([]);
   const [heroSections, setHeroSections] = useState([]);
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchProducts();
-    fetchHeroSections();
+    const loadData = async () => {
+      try {
+        await Promise.all([fetchProducts(), fetchHeroSections()]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
   }, []);
 
   useEffect(() => {
@@ -1146,7 +1152,7 @@ const HomePage = () => {
         setHeroSections([{
           title: 'Pradha Fashion Outlet',
           subtitle: 'Where Tradition Meets Elegance',
-          backgroundImageUrl: 'https://images.unsplash.com/photo-1756483510837-e79455e52188?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzB8MHwxfHNlYXJjaHwxfHxJbmRpYW4lMjB0cmFkaXRpb25hbCUyMGZhc2hpb258ZW58MHx8fHwxNzYwMDIyODcxfDA&ixlib=rb-4.1.0&q=85'
+          backgroundImageUrl: '/images/hero-default.jpg'
         }]);
       }
     } catch (error) {
@@ -1180,6 +1186,7 @@ const HomePage = () => {
                 src={product.images[currentImageIndex]}
                 alt={product.name}
                 className="w-full h-full object-cover"
+                loading="lazy"
               />
               {product.images.length > 1 && (
                 <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
@@ -1208,6 +1215,25 @@ const HomePage = () => {
       </Card>
     );
   };
+
+  if (loading) {
+    return (
+      <div className="home-page">
+        <div className="hero-section relative overflow-hidden bg-gray-200" style={{height: '500px'}}>
+          <div className="hero-overlay relative z-10">
+            <div className="hero-content">
+              <div className="h-12 bg-gray-300 rounded mb-4 mx-auto max-w-md animate-pulse"></div>
+              <div className="h-6 bg-gray-300 rounded mb-8 mx-auto max-w-sm animate-pulse"></div>
+              <div className="flex gap-4 justify-center">
+                <div className="h-10 w-32 bg-gray-300 rounded animate-pulse"></div>
+                <div className="h-10 w-40 bg-gray-300 rounded animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="home-page">
@@ -1453,6 +1479,7 @@ const ProductsPage = () => {
                 src={product.images[currentImageIndex]}
                 alt={product.name}
                 className="w-full h-full object-cover"
+                loading="lazy"
               />
               {product.images.length > 1 && (
                 <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
@@ -1560,49 +1587,101 @@ const ProductsPage = () => {
 };
 
 const AboutPage = () => {
+  const [activeTab, setActiveTab] = useState('fashion');
+
   return (
     <div className="page-container">
       <h1 className="page-title">About Pradha Fashion Outlet</h1>
-      <div className="max-w-4xl mx-auto space-y-6 text-gray-700 leading-relaxed">
-        <p className="text-lg">
-          Welcome to <span className="font-semibold text-[#8B1538]">Pradha Fashion Outlet</span>, where tradition meets elegance.
-          We are a premier boutique dedicated to providing exquisite traditional and modern fashion wear for both women and men.
-        </p>
-        <p>
-          Our boutique specializes in customization, ensuring that every piece of clothing reflects your unique style and personality.
-          Whether you're looking for a stunning lehenga for a wedding, a perfectly tailored blouse, or elegant ethnic wear for men,
-          we have you covered.
-        </p>
-        <h2 className="text-2xl font-semibold text-[#8B1538] mt-8 mb-4">Our Mission</h2>
-        <p>
-          At Pradha Fashion Outlet, our mission is to blend traditional Indian craftsmanship with contemporary fashion sensibilities.
-          We believe that every garment tells a story, and we're here to help you tell yours with elegance and grace.
-        </p>
-        <h2 className="text-2xl font-semibold text-[#8B1538] mt-8 mb-4">What We Offer</h2>
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="p-6 bg-[#F5F5DC]/30 rounded-lg">
-            <h3 className="font-semibold text-xl mb-2 text-[#8B1538]">Women's Collection</h3>
-            <ul className="space-y-2 text-sm">
-              <li>• Lehenga for festivals and weddings with customization</li>
-              <li>• Designer blouses tailored to your requirements</li>
-              <li>• One-piece and three-piece dresses</li>
-              <li>• Traditional and contemporary ethnic wear</li>
-            </ul>
+      
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-4xl mx-auto">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="fashion">About Pradha Fashion Outlet</TabsTrigger>
+          <TabsTrigger value="rental">About Pradha Rental Outlet</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="fashion" className="space-y-6 text-gray-700 leading-relaxed mt-6">
+          <p className="text-lg">
+            Welcome to <span className="font-semibold text-[#8B1538]">Pradha Fashion Outlet</span>, where tradition meets elegance.
+            We are a premier boutique dedicated to providing exquisite traditional and modern fashion wear for both women and men.
+          </p>
+          <p>
+            Our boutique specializes in customization, ensuring that every piece of clothing reflects your unique style and personality.
+            Whether you're looking for a stunning lehenga for a wedding, a perfectly tailored blouse, or elegant ethnic wear for men,
+            we have you covered.
+          </p>
+          <h2 className="text-2xl font-semibold text-[#8B1538] mt-8 mb-4">Our Mission</h2>
+          <p>
+            At Pradha Fashion Outlet, our mission is to blend traditional Indian craftsmanship with contemporary fashion sensibilities.
+            We believe that every garment tells a story, and we're here to help you tell yours with elegance and grace.
+          </p>
+          <h2 className="text-2xl font-semibold text-[#8B1538] mt-8 mb-4">What We Offer</h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="p-6 bg-[#F5F5DC]/30 rounded-lg">
+              <h3 className="font-semibold text-xl mb-2 text-[#8B1538]">Women's Collection</h3>
+              <ul className="space-y-2 text-sm">
+                <li>• Lehenga for festivals and weddings with customization</li>
+                <li>• Designer blouses tailored to your requirements</li>
+                <li>• One-piece and three-piece dresses</li>
+                <li>• Traditional and contemporary ethnic wear</li>
+              </ul>
+            </div>
+            <div className="p-6 bg-[#F5DEB3]/30 rounded-lg">
+              <h3 className="font-semibold text-xl mb-2 text-[#8B1538]">Men's Collection</h3>
+              <ul className="space-y-2 text-sm">
+                <li>• Premium Khadi wear collection</li>
+                <li>• Traditional kurtas for all occasions</li>
+                <li>• Modern printed t-shirts</li>
+                <li>• Ethnic and casual outfits</li>
+              </ul>
+            </div>
           </div>
-          <div className="p-6 bg-[#F5DEB3]/30 rounded-lg">
-            <h3 className="font-semibold text-xl mb-2 text-[#8B1538]">Men's Collection</h3>
-            <ul className="space-y-2 text-sm">
-              <li>• Premium Khadi wear collection</li>
-              <li>• Traditional kurtas for all occasions</li>
-              <li>• Modern printed t-shirts</li>
-              <li>• Ethnic and casual outfits</li>
-            </ul>
+          <p className="text-center italic mt-8 text-[#8B1538]">
+            "Your satisfaction is our success. Let us help you look your best!"
+          </p>
+        </TabsContent>
+        
+        <TabsContent value="rental" className="space-y-6 text-gray-700 leading-relaxed mt-6">
+          <h2 className="text-2xl font-semibold text-[#8B1538] mb-4">Rental Collection – Look Stunning Without the Stress!</h2>
+          <p className="text-lg">
+            At Pradha Fashion Outlet, we understand that every occasion deserves a special look—without always needing to buy and store expensive outfits. That's why we bring you our exclusive Rental Collection for both women and men. Enjoy premium designer wear at a fraction of the cost, perfectly maintained and ready to make you shine.
+          </p>
+          
+          <h3 className="text-xl font-semibold text-[#8B1538] mt-6 mb-4">Why Choose Our Rental Wear?</h3>
+          <ul className="space-y-2">
+            <li><strong>Affordable luxury</strong> – Wear high-end outfits without spending big.</li>
+            <li><strong>Wide variety</strong> – From bridal to festive, traditional to modern.</li>
+            <li><strong>Perfect fittings</strong> – Alterations available to ensure a flawless look.</li>
+            <li><strong>Hassle-free process</strong> – Easy selection, quick pickup, and smooth return.</li>
+            <li><strong>Premium quality</strong> – Every outfit is cleaned, refreshed, and handled with care.</li>
+          </ul>
+          
+          <div className="grid md:grid-cols-2 gap-6 mt-6">
+            <div className="p-6 bg-pink-50 rounded-lg">
+              <h3 className="font-semibold text-xl mb-2 text-[#8B1538]">Women's Rental Collection</h3>
+              <ul className="space-y-2 text-sm">
+                <li>• Designer lehengas for weddings, receptions & festive events</li>
+                <li>• Premium sarees with stylish ready-to-wear blouses</li>
+                <li>• Cocktail gowns, evening dresses & party-wear</li>
+                <li>• Bridal wear for a grand yet budget-friendly look</li>
+              </ul>
+            </div>
+            <div className="p-6 bg-blue-50 rounded-lg">
+              <h3 className="font-semibold text-xl mb-2 text-[#8B1538]">Men's Rental Collection</h3>
+              <ul className="space-y-2 text-sm">
+                <li>• Traditional sherwanis for weddings and cultural events</li>
+                <li>• Classic kurtas for ceremonies and festivals</li>
+                <li>• Indo-western outfits for receptions & parties</li>
+                <li>• Premium suits and tuxedos for formal occasions</li>
+              </ul>
+            </div>
           </div>
-        </div>
-        <p className="text-center italic mt-8 text-[#8B1538]">
-          "Your satisfaction is our success. Let us help you look your best!"
-        </p>
-      </div>
+          
+          <div className="text-center mt-8 p-6 bg-gradient-to-r from-[#8B1538]/10 to-[#DAA520]/10 rounded-lg">
+            <p className="text-lg font-semibold text-[#8B1538] mb-2">✨ Dress like royalty without the heavy price tag. Your dream outfit is just a rental away!</p>
+            <p className="text-[#8B1538] font-medium">Pradha Fashion Outlet – Style that fits every moment.</p>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
@@ -1656,14 +1735,14 @@ const ContactPage = () => {
         <div className="mt-8 text-center space-y-4">
           <h3 className="text-xl font-semibold text-[#8B1538]">Connect With Us</h3>
           <div className="flex justify-center space-x-6">
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="social-icon">
+            <a href="https://www.instagram.com/pradha_fashion_outlet?igsh=cXplemF6eTZxYnY1" target="_blank" rel="noopener noreferrer" className="social-icon">
               Instagram
             </a>
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="social-icon">
-              Facebook
-            </a>
-            <a href="https://wa.me/" target="_blank" rel="noopener noreferrer" className="social-icon">
+            <a href="https://wa.me/917972177226" target="_blank" rel="noopener noreferrer" className="social-icon">
               WhatsApp
+            </a>
+            <a href="mailto:pradhafashionoutlet@gmail.com" className="social-icon">
+              Email Us
             </a>
           </div>
         </div>
