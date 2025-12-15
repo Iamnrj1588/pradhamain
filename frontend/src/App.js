@@ -26,6 +26,7 @@ import Cart from './components/ui/Cart';
 import Developer from './components/ui/Developer';
 import CustomerFeedback from './components/ui/CustomerFeedback';
 import CustomerReviews from './components/ui/CustomerReviews';
+import AdminProfile from './components/ui/AdminProfile';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081';
 const API = `${BACKEND_URL}/api`;
@@ -469,12 +470,13 @@ const AdminPage = () => {
       <h1 className="page-title">Admin Dashboard</h1>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="hidden md:grid w-full max-w-3xl mx-auto grid-cols-5">
+        <TabsList className="hidden md:grid w-full max-w-4xl mx-auto grid-cols-6">
           <TabsTrigger value="products" data-testid="products-tab">Products</TabsTrigger>
           <TabsTrigger value="rentals" data-testid="rentals-tab">Rentals</TabsTrigger>
           <TabsTrigger value="feedback" data-testid="feedback-tab">Reviews</TabsTrigger>
           <TabsTrigger value="hero" data-testid="hero-tab">Hero Content</TabsTrigger>
           <TabsTrigger value="inquiries" data-testid="inquiries-tab">Inquiries</TabsTrigger>
+          <TabsTrigger value="profile" data-testid="profile-tab">Profile</TabsTrigger>
         </TabsList>
         
         <div className="md:hidden mb-6">
@@ -671,6 +673,10 @@ const AdminPage = () => {
               <div className="text-center py-12 text-gray-500">No inquiries yet</div>
             )}
           </div>
+        </TabsContent>
+
+        <TabsContent value="profile">
+          <AdminProfile />
         </TabsContent>
       </Tabs>
     </div>
@@ -953,7 +959,8 @@ const AdminMobileNav = ({ currentTab, onTabChange }) => {
     { value: 'rentals', label: 'Rentals', icon: '👗' },
     { value: 'feedback', label: 'Reviews', icon: '⭐' },
     { value: 'hero', label: 'Hero Content', icon: '🖼️' },
-    { value: 'inquiries', label: 'Inquiries', icon: '📧' }
+    { value: 'inquiries', label: 'Inquiries', icon: '📧' },
+    { value: 'profile', label: 'Profile', icon: '👤' }
   ];
   
   const activeTabData = tabs.find(tab => tab.value === currentTab);

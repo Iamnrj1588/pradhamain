@@ -276,6 +276,30 @@ public class AuthController {
         return ResponseEntity.status(401).body(Map.of("error", "Google authentication failed"));
     }
 
+    @PutMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody Map<String, String> request) {
+        String currentPassword = request.get("currentPassword");
+        String newPassword = request.get("newPassword");
+        
+        // Get current user from JWT token (you'll need to implement this)
+        // For now, assuming admin user
+        User user = userRepository.findByEmail("pradhafashionoutlet@gmail.com")
+            .orElse(userRepository.findByEmail("admin@pradha.com").orElse(null));
+        
+        if (user == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "User not found"));
+        }
+        
+        if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Current password is incorrect"));
+        }
+        
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        
+        return ResponseEntity.ok(Map.of("message", "Password updated successfully"));
+    }
+
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser() {
         return ResponseEntity.ok(Map.of(
