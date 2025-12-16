@@ -51,6 +51,8 @@ public class HeroContentController {
             if (backgroundImage != null && !backgroundImage.isEmpty()) {
                 String imageUrl = s3Service.uploadFile(backgroundImage, "hero-images");
                 heroContent.setBackgroundImageUrl(imageUrl);
+            } else {
+                heroContent.setBackgroundImageUrl("/images/default-hero-bg.jpg");
             }
 
             HeroContent savedHeroContent = heroContentRepository.save(heroContent);

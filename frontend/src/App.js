@@ -788,36 +788,45 @@ const HeroContentManagement = () => {
       return;
     }
 
-    const submitData = new FormData();
-    submitData.append('title', formData.title);
-    submitData.append('subtitle', formData.subtitle);
-    submitData.append('displayOrder', formData.displayOrder);
-    submitData.append('isActive', formData.isActive);
+    // Create FormData for form parameters
+    const formDataToSend = new FormData();
+    formDataToSend.append('title', formData.title);
+    formDataToSend.append('subtitle', formData.subtitle);
+    formDataToSend.append('displayOrder', formData.displayOrder || 0);
+    formDataToSend.append('isActive', formData.isActive);
     if (imageFile) {
-      submitData.append('backgroundImage', imageFile);
+      formDataToSend.append('backgroundImage', imageFile);
     }
 
     try {
+      let savedHero;
       if (editingHero) {
-        await axios.put(`${API}/admin/hero-content/${editingHero.id}`, submitData, {
-          headers: { 'Content-Type': 'multipart/form-data', 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        const response = await axios.put(`${API}/admin/hero-content/${editingHero.id}`, formDataToSend, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
+        savedHero = response.data;
         toast.success('Hero section updated!');
       } else {
-        await axios.post(`${API}/admin/hero-content`, submitData, {
-          headers: { 'Content-Type': 'multipart/form-data', 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        const response = await axios.post(`${API}/admin/hero-content`, formDataToSend, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
+        savedHero = response.data;
         toast.success('Hero section created!');
       }
+      
+
+      
       resetForm();
       fetchHeroSections();
     } catch (error) {
+      console.error('Hero section error:', error.response?.data);
       if (error.response?.status === 403) {
         toast.error('Session expired. Please login again.');
         logout();
         navigate('/login');
       } else {
-        toast.error('Failed to save hero section');
+        const errorMsg = error.response?.data?.message || error.response?.data?.error || 'Failed to save hero section';
+        toast.error(errorMsg);
       }
     }
   };
@@ -891,8 +900,9 @@ const HeroContentManagement = () => {
                 <Input required value={formData.subtitle} onChange={(e) => setFormData({...formData, subtitle: e.target.value})} />
               </div>
               <div>
-                <Label>Background Image</Label>
+                <Label>Background Image (Optional)</Label>
                 <Input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files[0])} />
+                <p className="text-xs text-gray-500 mt-1">Leave empty to use default background</p>
               </div>
               <div>
                 <label className="flex items-center space-x-2">
@@ -1306,16 +1316,32 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-8 text-[#8B1538]">Shop by Collection</h2>
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            <div className="collection-card women-collection" onClick={() => navigate('/products?category=Women')}>
-              <div className="collection-overlay">
-                <h3 className="collection-title">Women's Collection</h3>
-                <p className="collection-subtitle">Lehenga • Blouses • Dresses</p>
+            <div 
+              className="h-80 rounded-xl overflow-hidden cursor-pointer transition-transform hover:scale-105 relative" 
+              onClick={() => navigate('/products?category=Women')}
+            >
+              <img 
+                src="/images/categories/womens-collection.jpeg" 
+                alt="Women's Collection"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center text-white text-center p-8">
+                <h3 className="text-3xl font-bold mb-2">Women's Collection</h3>
+                <p className="text-lg opacity-90">Lehenga • Blouses • Dresses</p>
               </div>
             </div>
-            <div className="collection-card men-collection" onClick={() => navigate('/products?category=Men')}>
-              <div className="collection-overlay">
-                <h3 className="collection-title">Men's Collection</h3>
-                <p className="collection-subtitle">Khadi • Kurta • T-Shirts</p>
+            <div 
+              className="h-80 rounded-xl overflow-hidden cursor-pointer transition-transform hover:scale-105 relative" 
+              onClick={() => navigate('/products?category=Men')}
+            >
+              <img 
+                src="/images/categories/mens-collection.jpeg" 
+                alt="Men's Collection"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center text-white text-center p-8">
+                <h3 className="text-3xl font-bold mb-2">Men's Collection</h3>
+                <p className="text-lg opacity-90">Khadi • Kurta • T-Shirts</p>
               </div>
             </div>
           </div>

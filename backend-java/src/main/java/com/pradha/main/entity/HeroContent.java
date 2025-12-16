@@ -16,7 +16,7 @@ public class HeroContent {
     @Column(nullable = false)
     private String subtitle;
     
-    @Column(name = "background_image_url")
+    @Column(name = "background_image_url", nullable = true)
     private String backgroundImageUrl;
     
     @Column(name = "is_active")
