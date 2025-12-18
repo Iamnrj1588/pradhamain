@@ -308,8 +308,7 @@ public class CheckoutController {
             refundRequest.put("amount", order.getTotalAmount().multiply(BigDecimal.valueOf(100)).intValue());
             refundRequest.put("speed", "normal");
             
-            com.razorpay.Payment payment = razorpay.payments.fetch(order.getRazorpayPaymentId());
-            com.razorpay.Refund refund = payment.createRefund(refundRequest);
+            com.razorpay.Refund refund = razorpay.payments.refund(order.getRazorpayPaymentId(), refundRequest);
 
             // Update order status
             order.setPaymentStatus(Order.PaymentStatus.REFUNDED);
