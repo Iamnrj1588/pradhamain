@@ -9,7 +9,9 @@ const BookingModal = ({ dress, isOpen, onClose, onBookingSuccess }) => {
     chestMeasurement: '',
     waistMeasurement: '',
     hipMeasurement: '',
-    customerNotes: ''
+    customerNotes: '',
+    requiresDelivery: false,
+    deliveryAddress: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -63,7 +65,9 @@ const BookingModal = ({ dress, isOpen, onClose, onBookingSuccess }) => {
             chestMeasurement: '',
             waistMeasurement: '',
             hipMeasurement: '',
-            customerNotes: ''
+            customerNotes: '',
+            requiresDelivery: false,
+            deliveryAddress: ''
           });
         }, 2000);
       } else {
@@ -118,6 +122,21 @@ const BookingModal = ({ dress, isOpen, onClose, onBookingSuccess }) => {
             <div>
               <h3 className="font-semibold text-gray-900">{dress.name}</h3>
               <p className="text-pink-600 font-bold">₹{dress.pricePerDay}/day</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Delivery Notice */}
+        <div className="p-6 border-b bg-yellow-50">
+          <div className="flex items-start space-x-2">
+            <span className="text-yellow-600 text-lg">📦</span>
+            <div>
+              <h4 className="font-semibold text-yellow-800 mb-2">Delivery & Pickup Note:</h4>
+              <p className="text-sm text-yellow-700 leading-relaxed">
+                Rental delivery and pickup are not included in the rental price. 
+                If you require home delivery or pickup, additional charges will apply based on location and distance. 
+                Our team will contact you after booking to confirm delivery availability and charges.
+              </p>
             </div>
           </div>
         </div>
@@ -219,6 +238,35 @@ const BookingModal = ({ dress, isOpen, onClose, onBookingSuccess }) => {
                 </div>
               </div>
               <p className="text-xs text-gray-500 mt-1">Optional: Provide measurements for better fitting</p>
+            </div>
+          )}
+
+          {/* Delivery Option */}
+          <div className="mb-4">
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={formData.requiresDelivery}
+                onChange={(e) => setFormData({...formData, requiresDelivery: e.target.checked, deliveryAddress: e.target.checked ? formData.deliveryAddress : ''})}
+                className="rounded border-gray-300 text-pink-600 focus:ring-pink-500"
+              />
+              <span className="text-sm font-medium text-gray-700">I require home delivery/pickup (additional charges apply)</span>
+            </label>
+          </div>
+
+          {/* Delivery Address */}
+          {formData.requiresDelivery && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Delivery Address (Optional)
+              </label>
+              <textarea
+                value={formData.deliveryAddress}
+                onChange={(e) => setFormData({...formData, deliveryAddress: e.target.value})}
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
+                placeholder="Enter your complete address for delivery/pickup..."
+              />
             </div>
           )}
 

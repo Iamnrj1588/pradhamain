@@ -97,9 +97,16 @@ public class NotificationService {
             "%s" +
             "**Total Amount:** ₹%s\n" +
             "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n" +
-            "**IMPORTANT NOTE:** 📍\n" +
-            "**For the best fitting, we request you to visit our store for a trial.**\n" +
+            "**IMPORTANT NOTES:** 📍\n" +
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+            "**1. Fitting:**\n" +
+            "For the best fitting, we request you to visit our store for a trial.\n" +
             "If you're sure about the sizes you gave, we can alter the dress as per your measurements.\n\n" +
+            "**2. Delivery & Pickup:**\n" +
+            "Rental delivery and pickup are not included in the rental price.\n" +
+            "If you require home delivery or pickup, additional charges will apply based on location and distance.\n" +
+            "Our team will contact you after booking to confirm delivery availability and charges.\n" +
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n" +
             "**NEXT STEPS:**\n" +
             "• Confirmation call within 24 hours\n" +
             "• Store visit for fitting (if required)\n" +
@@ -145,6 +152,8 @@ public class NotificationService {
             "Size: %s\n" +
             "%s" +
             "Total Amount: ₹%s\n" +
+            "Requires Delivery: %s\n" +
+            "%s" +
             "Customer Notes: %s\n\n" +
             "Please review and confirm the booking.",
             booking.getUser().getName(),
@@ -156,6 +165,9 @@ public class NotificationService {
             booking.getSelectedSize(),
             measurements.length() > 0 ? "Measurements:\n" + measurements.toString() : "",
             booking.getTotalAmount(),
+            booking.getRequiresDelivery() != null && booking.getRequiresDelivery() ? "Yes" : "No",
+            booking.getRequiresDelivery() != null && booking.getRequiresDelivery() && booking.getDeliveryAddress() != null ? 
+                "Delivery Address: " + booking.getDeliveryAddress() + "\n" : "",
             booking.getCustomerNotes()
         );
     }

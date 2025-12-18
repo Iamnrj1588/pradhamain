@@ -43,6 +43,8 @@ public class RentalBooking {
 
     private String customerNotes;
     private String adminNotes;
+    private Boolean requiresDelivery = false;
+    private String deliveryAddress;
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public enum BookingStatus {
@@ -94,6 +96,12 @@ public class RentalBooking {
 
     public String getAdminNotes() { return adminNotes; }
     public void setAdminNotes(String adminNotes) { this.adminNotes = adminNotes; }
+
+    public Boolean getRequiresDelivery() { return requiresDelivery; }
+    public void setRequiresDelivery(Boolean requiresDelivery) { this.requiresDelivery = requiresDelivery; }
+
+    public String getDeliveryAddress() { return deliveryAddress; }
+    public void setDeliveryAddress(String deliveryAddress) { this.deliveryAddress = deliveryAddress; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

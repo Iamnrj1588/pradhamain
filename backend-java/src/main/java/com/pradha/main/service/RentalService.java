@@ -68,6 +68,8 @@ public class RentalService {
         booking.setHipMeasurement(request.getHipMeasurement());
         booking.setTotalAmount(totalAmount);
         booking.setCustomerNotes(request.getCustomerNotes());
+        booking.setRequiresDelivery(request.getRequiresDelivery());
+        booking.setDeliveryAddress(request.getDeliveryAddress());
 
         RentalBooking savedBooking = rentalBookingRepository.save(booking);
 

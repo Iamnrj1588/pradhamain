@@ -23,6 +23,8 @@ public class RentalBookingRequest {
     private String hipMeasurement;
     
     private String customerNotes;
+    private Boolean requiresDelivery;
+    private String deliveryAddress;
 
     // Constructors
     public RentalBookingRequest() {}
@@ -51,4 +53,10 @@ public class RentalBookingRequest {
 
     public String getCustomerNotes() { return customerNotes; }
     public void setCustomerNotes(String customerNotes) { this.customerNotes = customerNotes; }
+
+    public Boolean getRequiresDelivery() { return requiresDelivery; }
+    public void setRequiresDelivery(Boolean requiresDelivery) { this.requiresDelivery = requiresDelivery; }
+
+    public String getDeliveryAddress() { return deliveryAddress; }
+    public void setDeliveryAddress(String deliveryAddress) { this.deliveryAddress = deliveryAddress; }
 }
