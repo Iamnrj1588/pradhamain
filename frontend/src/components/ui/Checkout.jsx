@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 const Checkout = () => {
     const [cartItems, setCartItems] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [showFailureModal, setShowFailureModal] = useState(false);
+    const [failureReason, setFailureReason] = useState('');
+    const [successOrderId, setSuccessOrderId] = useState('');
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         shippingAddress: '',
         phone: '',
@@ -18,7 +25,7 @@ const Checkout = () => {
 
     const fetchCartItems = async () => {
         try {
-            const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081'}/api/cart`);
+            const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL || 'https://localhost:8081'}/api/cart`);
             setCartItems(response.data);
         } catch (error) {
             console.error('Failed to fetch cart items:', error);
@@ -36,6 +43,7 @@ const Checkout = () => {
     };
 
     const calculateTotal = () => {
+        // Client-side calculation for display only - server validates actual amount
         return cartItems.reduce((total, item) => {
             return total + (item.product?.price || 0) * item.quantity;
         }, 0);
@@ -70,7 +78,7 @@ const Checkout = () => {
                 }))
             };
 
-            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081'}/api/checkout/create-order`, checkoutData);
+            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL || 'https://localhost:8081'}/api/checkout/create-order`, checkoutData);
             const { orderId, amount, currency, keyId, mockPayment } = response.data;
 
             if (mockPayment) {
@@ -98,6 +106,12 @@ const Checkout = () => {
                     handler: async function (response) {
                         await verifyPayment(response);
                     },
+                    modal: {
+                        ondismiss: function() {
+                            setFailureReason('Payment was cancelled by user');
+                            setShowFailureModal(true);
+                        }
+                    },
                     prefill: {
                         name: formData.name,
                         email: formData.email,
@@ -113,7 +127,9 @@ const Checkout = () => {
             }
         } catch (error) {
             console.error('Checkout failed:', error);
-            alert('Checkout failed. Please try again.');
+            const errorMsg = error.response?.data?.error || 'Failed to create order. Please try again.';
+            setFailureReason(errorMsg);
+            setShowFailureModal(true);
         } finally {
             setLoading(false);
         }
@@ -121,24 +137,103 @@ const Checkout = () => {
 
     const verifyPayment = async (paymentResponse) => {
         try {
-            await axios.post(`${process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081'}/api/checkout/verify-payment`, {
+            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL || 'https://localhost:8081'}/api/checkout/verify-payment`, {
                 razorpay_order_id: paymentResponse.razorpay_order_id,
                 razorpay_payment_id: paymentResponse.razorpay_payment_id,
                 razorpay_signature: paymentResponse.razorpay_signature
             });
             
-            alert('Payment successful! Your order has been confirmed.');
-            // Clear cart and redirect
-            window.location.href = '/orders';
+            setSuccessOrderId(response.data.orderId || 'N/A');
+            setShowSuccessModal(true);
+            
+            // Clear cart after successful payment
+            setCartItems([]);
         } catch (error) {
             console.error('Payment verification failed:', error);
-            alert('Payment verification failed. Please contact support.');
+            const errorMsg = error.response?.data?.error || 'Payment verification failed. Please contact support.';
+            setFailureReason(errorMsg);
+            setShowFailureModal(true);
         }
     };
 
+    const handleSuccessClose = () => {
+        setShowSuccessModal(false);
+        navigate('/orders');
+    };
+
+    const handleFailureClose = () => {
+        setShowFailureModal(false);
+        setFailureReason('');
+    };
+
+    const handleRetryPayment = () => {
+        setShowFailureModal(false);
+        setFailureReason('');
+        handleCheckout();
+    };
+
     return (
-        <div className="max-w-4xl mx-auto p-6">
-            <h1 className="text-3xl font-bold mb-8">Checkout</h1>
+        <>
+            {/* Success Modal */}
+            {showSuccessModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-8 max-w-md mx-4 text-center shadow-2xl">
+                        <div className="text-green-500 text-6xl mb-4 animate-bounce">✓</div>
+                        <h2 className="text-2xl font-bold text-green-600 mb-2">Payment Successful!</h2>
+                        <p className="text-gray-600 mb-2">Your order has been confirmed and will be processed soon.</p>
+                        <p className="text-sm text-gray-500 mb-6">Order ID: {successOrderId}</p>
+                        <div className="space-y-3">
+                            <button
+                                onClick={handleSuccessClose}
+                                className="w-full bg-[#8B1538] text-white px-6 py-3 rounded-lg hover:bg-[#6B0F2A] font-semibold"
+                            >
+                                View My Orders
+                            </button>
+                            <button
+                                onClick={() => navigate('/')}
+                                className="w-full border border-[#8B1538] text-[#8B1538] px-6 py-2 rounded-lg hover:bg-[#8B1538] hover:text-white"
+                            >
+                                Continue Shopping
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Failure Modal */}
+            {showFailureModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-8 max-w-md mx-4 text-center shadow-2xl">
+                        <div className="text-red-500 text-6xl mb-4">✗</div>
+                        <h2 className="text-2xl font-bold text-red-600 mb-2">Payment Failed!</h2>
+                        <p className="text-gray-600 mb-2">Your payment could not be processed.</p>
+                        <p className="text-sm text-red-600 mb-6 bg-red-50 p-3 rounded">{failureReason}</p>
+                        <div className="space-y-3">
+                            <button
+                                onClick={handleRetryPayment}
+                                className="w-full bg-[#8B1538] text-white px-6 py-3 rounded-lg hover:bg-[#6B0F2A] font-semibold"
+                            >
+                                Retry Payment
+                            </button>
+                            <button
+                                onClick={handleFailureClose}
+                                className="w-full border border-gray-300 text-gray-600 px-6 py-2 rounded-lg hover:bg-gray-50"
+                            >
+                                Cancel
+                            </button>
+                            <div className="text-center pt-2">
+                                <p className="text-sm text-gray-500">Need help?</p>
+                                <a href="https://wa.me/917972177226" target="_blank" rel="noopener noreferrer" className="text-[#8B1538] hover:underline text-sm">
+                                    Contact Support
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="max-w-4xl mx-auto p-6">
+                <h1 className="text-3xl font-bold mb-8">Checkout</h1>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Order Summary */}
@@ -148,7 +243,9 @@ const Checkout = () => {
                         <div key={index} className="flex justify-between items-center py-2 border-b">
                             <div>
                                 <p className="font-medium">{item.product?.name}</p>
-                                <p className="text-sm text-gray-600">Size: {item.size}, Color: {item.color}</p>
+                                {item.product?.subcategory !== 'Jewellery' && (
+                                    <p className="text-sm text-gray-600">Size: {item.size}, Color: {item.color}</p>
+                                )}
                                 <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                             </div>
                             <p className="font-semibold">₹{(item.product?.price * item.quantity).toFixed(2)}</p>
@@ -201,15 +298,23 @@ const Checkout = () => {
                         <button
                             type="button"
                             onClick={handleCheckout}
-                            disabled={loading}
-                            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50"
+                            disabled={loading || cartItems.length === 0}
+                            className="w-full bg-[#8B1538] text-white py-3 rounded-lg font-semibold hover:bg-[#6B0F2A] disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {loading ? 'Processing...' : `Pay ₹${calculateTotal().toFixed(2)}`}
+                            {loading ? (
+                                <div className="flex items-center justify-center">
+                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                                    Processing...
+                                </div>
+                            ) : (
+                                `Pay ₹${calculateTotal().toFixed(2)}`
+                            )}
                         </button>
                     </form>
                 </div>
             </div>
-        </div>
+            </div>
+        </>
     );
 };
 

@@ -107,20 +107,15 @@ public class CheckoutController {
             // Mock Razorpay order for testing
             String mockOrderId = "order_" + System.currentTimeMillis();
             
-            // Skip Razorpay if credentials are not set
-            if ("rzp_test_your_key_id".equals(razorpayKeyId) || "your_secret_key".equals(razorpayKeySecret)) {
-                System.out.println("Using mock payment - Razorpay credentials not configured");
-            } else {
-                // Create real Razorpay order
-                RazorpayClient razorpay = new RazorpayClient(razorpayKeyId, razorpayKeySecret);
-                JSONObject orderRequest = new JSONObject();
-                orderRequest.put("amount", totalAmount.multiply(BigDecimal.valueOf(100)).intValue());
-                orderRequest.put("currency", "INR");
-                orderRequest.put("receipt", mockOrderId);
-                
-                com.razorpay.Order razorpayOrder = razorpay.orders.create(orderRequest);
-                mockOrderId = razorpayOrder.get("id");
-            }
+            // Create Razorpay order (LIVE MODE)
+            RazorpayClient razorpay = new RazorpayClient(razorpayKeyId, razorpayKeySecret);
+            JSONObject orderRequest = new JSONObject();
+            orderRequest.put("amount", totalAmount.multiply(BigDecimal.valueOf(100)).intValue());
+            orderRequest.put("currency", "INR");
+            orderRequest.put("receipt", mockOrderId);
+            
+            com.razorpay.Order razorpayOrder = razorpay.orders.create(orderRequest);
+            mockOrderId = razorpayOrder.get("id");
 
             // Create order in database
             Order order = new Order();
@@ -152,7 +147,7 @@ public class CheckoutController {
                 "amount", totalAmount.multiply(BigDecimal.valueOf(100)).intValue(),
                 "currency", "INR",
                 "keyId", razorpayKeyId,
-                "mockPayment", "rzp_test_your_key_id".equals(razorpayKeyId)
+                "mockPayment", false
             ));
 
         } catch (RazorpayException e) {
@@ -169,14 +164,40 @@ public class CheckoutController {
     @PostMapping("/verify-payment")
     public ResponseEntity<?> verifyPayment(@RequestBody Map<String, String> request) {
         try {
+            // Validate required fields
             String razorpayOrderId = request.get("razorpay_order_id");
             String razorpayPaymentId = request.get("razorpay_payment_id");
+            String razorpaySignature = request.get("razorpay_signature");
 
+            if (razorpayOrderId == null || razorpayOrderId.trim().isEmpty() ||
+                razorpayPaymentId == null || razorpayPaymentId.trim().isEmpty() ||
+                razorpaySignature == null || razorpaySignature.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Missing required payment verification fields"));
+            }
+
+            // Find order first to ensure it exists
             Order order = orderRepository.findByRazorpayOrderId(razorpayOrderId).orElse(null);
             if (order == null) {
                 return ResponseEntity.badRequest().body(Map.of("error", "Order not found"));
             }
 
+            // Verify Razorpay signature - CRITICAL SECURITY CHECK
+            String payload = razorpayOrderId + "|" + razorpayPaymentId;
+            String expectedSignature = calculateHMAC(payload, razorpayKeySecret);
+            
+            System.out.println("=== Payment Verification Debug ===");
+            System.out.println("Payload: " + payload);
+            System.out.println("Expected Signature: " + expectedSignature);
+            System.out.println("Received Signature: " + razorpaySignature);
+            
+            if (!expectedSignature.equals(razorpaySignature)) {
+                System.err.println("❌ SIGNATURE VERIFICATION FAILED - Payment rejected");
+                return ResponseEntity.badRequest().body(Map.of("error", "Payment signature verification failed"));
+            }
+
+            System.out.println("✅ Signature verified successfully");
+
+            // Only mark as paid AFTER signature verification passes
             order.setRazorpayPaymentId(razorpayPaymentId);
             order.setPaymentStatus(Order.PaymentStatus.PAID);
             order.setStatus(Order.OrderStatus.CONFIRMED);
@@ -185,13 +206,69 @@ public class CheckoutController {
             return ResponseEntity.ok(Map.of("message", "Payment verified successfully", "orderId", order.getId()));
 
         } catch (Exception e) {
+            System.err.println("❌ Payment verification error: " + e.getMessage());
             return ResponseEntity.status(500).body(Map.of("error", "Payment verification failed: " + e.getMessage()));
+        }
+    }
+
+    private String calculateHMAC(String data, String key) {
+        try {
+            javax.crypto.Mac mac = javax.crypto.Mac.getInstance("HmacSHA256");
+            javax.crypto.spec.SecretKeySpec secretKeySpec = new javax.crypto.spec.SecretKeySpec(key.getBytes("UTF-8"), "HmacSHA256");
+            mac.init(secretKeySpec);
+            byte[] hash = mac.doFinal(data.getBytes("UTF-8"));
+            
+            // Convert to hex string
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to calculate HMAC", e);
         }
     }
 
     @GetMapping("/test")
     public ResponseEntity<?> testEndpoint() {
         return ResponseEntity.ok(Map.of("message", "Checkout controller is working", "timestamp", System.currentTimeMillis()));
+    }
+
+    @PostMapping("/webhook")
+    public ResponseEntity<?> handleWebhook(@RequestBody String payload, @RequestHeader("X-Razorpay-Signature") String signature) {
+        try {
+            // Verify webhook signature
+            String expectedSignature = calculateHMAC(payload, razorpayKeySecret);
+            if (!expectedSignature.equals(signature)) {
+                return ResponseEntity.badRequest().body("Invalid signature");
+            }
+
+            // Process webhook payload
+            JSONObject webhookData = new JSONObject(payload);
+            String event = webhookData.getString("event");
+            
+            if ("payment.captured".equals(event)) {
+                JSONObject payment = webhookData.getJSONObject("payload").getJSONObject("payment").getJSONObject("entity");
+                String orderId = payment.getString("order_id");
+                String paymentId = payment.getString("id");
+                
+                Order order = orderRepository.findByRazorpayOrderId(orderId).orElse(null);
+                if (order != null) {
+                    order.setRazorpayPaymentId(paymentId);
+                    order.setPaymentStatus(Order.PaymentStatus.PAID);
+                    order.setStatus(Order.OrderStatus.CONFIRMED);
+                    orderRepository.save(order);
+                }
+            }
+            
+            return ResponseEntity.ok("OK");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Webhook processing failed");
+        }
     }
 
     @GetMapping("/orders")
@@ -210,6 +287,43 @@ public class CheckoutController {
 
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", "Failed to fetch orders: " + e.getMessage()));
+        }
+    }
+
+    @PostMapping("/refund/{orderId}")
+    public ResponseEntity<?> processRefund(@PathVariable String orderId, @RequestBody Map<String, Object> request) {
+        try {
+            Order order = orderRepository.findById(orderId).orElse(null);
+            if (order == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Order not found"));
+            }
+
+            if (!Order.PaymentStatus.PAID.equals(order.getPaymentStatus())) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Order not paid"));
+            }
+
+            // Create refund via Razorpay
+            RazorpayClient razorpay = new RazorpayClient(razorpayKeyId, razorpayKeySecret);
+            JSONObject refundRequest = new JSONObject();
+            refundRequest.put("amount", order.getTotalAmount().multiply(BigDecimal.valueOf(100)).intValue());
+            refundRequest.put("speed", "normal");
+            
+            com.razorpay.Payment payment = razorpay.payments.fetch(order.getRazorpayPaymentId());
+            com.razorpay.Refund refund = payment.createRefund(refundRequest);
+
+            // Update order status
+            order.setPaymentStatus(Order.PaymentStatus.REFUNDED);
+            order.setStatus(Order.OrderStatus.CANCELLED);
+            orderRepository.save(order);
+
+            return ResponseEntity.ok(Map.of(
+                "message", "Refund processed successfully",
+                "refundId", refund.get("id"),
+                "amount", refund.get("amount")
+            ));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Refund failed: " + e.getMessage()));
         }
     }
 }

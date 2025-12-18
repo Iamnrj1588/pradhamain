@@ -27,8 +27,10 @@ import Developer from './components/ui/Developer';
 import CustomerFeedback from './components/ui/CustomerFeedback';
 import CustomerReviews from './components/ui/CustomerReviews';
 import AdminProfile from './components/ui/AdminProfile';
+import RefundPolicyPage from './components/ui/RefundPolicy';
+import ShippingPolicyPage from './components/ui/ShippingPolicy';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081';
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://localhost:8081';
 const API = `${BACKEND_URL}/api`;
 
 // Add axios interceptor to ensure token is always sent
@@ -332,19 +334,19 @@ const AdminPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.price || !formData.sizes || !formData.colors || !formData.description) {
+    const isJewellery = formData.subcategory === 'Jewellery';
+    if (!formData.name || !formData.price || (!isJewellery && (!formData.sizes || !formData.colors)) || !formData.description) {
       toast.error('Please fill in all required fields');
       return;
     }
-
     const productData = {
       name: formData.name,
       category: formData.category,
       subcategory: formData.subcategory,
       description: formData.description,
       price: parseFloat(formData.price),
-      sizes: formData.sizes.split(',').map(s => s.trim()),
-      colors: formData.colors.split(',').map(c => c.trim()),
+      sizes: isJewellery ? ['One Size'] : formData.sizes.split(',').map(s => s.trim()),
+      colors: isJewellery ? ['Gold', 'Silver'] : formData.colors.split(',').map(c => c.trim()),
       customizable: formData.customizable,
       featured: formData.featured,
       newArrival: formData.new_arrival,
@@ -531,25 +533,31 @@ const AdminPage = () => {
                               <SelectItem value="Lehenga">Lehenga</SelectItem>
                               <SelectItem value="Blouse">Blouse</SelectItem>
                               <SelectItem value="Dresses">Dresses</SelectItem>
+                              <SelectItem value="Jewellery">Jewellery</SelectItem>
                             </>
                           ) : (
                             <>
                               <SelectItem value="Khadi">Khadi</SelectItem>
                               <SelectItem value="Kurta">Kurta</SelectItem>
                               <SelectItem value="T-Shirt">T-Shirt</SelectItem>
+                              <SelectItem value="Jewellery">Jewellery</SelectItem>
                             </>
                           )}
                         </SelectContent>
                       </Select>
                     </div>
-                    <div>
-                      <Label>Sizes (comma separated) *</Label>
-                      <Input required placeholder="S, M, L, XL" value={formData.sizes} onChange={(e) => setFormData({ ...formData, sizes: e.target.value })} />
-                    </div>
-                    <div>
-                      <Label>Colors (comma separated) *</Label>
-                      <Input required placeholder="Red, Blue, Green" value={formData.colors} onChange={(e) => setFormData({ ...formData, colors: e.target.value })} />
-                    </div>
+                    {formData.subcategory !== 'Jewellery' && (
+                      <>
+                        <div>
+                          <Label>Sizes (comma separated) *</Label>
+                          <Input required placeholder="S, M, L, XL" value={formData.sizes} onChange={(e) => setFormData({ ...formData, sizes: e.target.value })} />
+                        </div>
+                        <div>
+                          <Label>Colors (comma separated) *</Label>
+                          <Input required placeholder="Red, Blue, Green" value={formData.colors} onChange={(e) => setFormData({ ...formData, colors: e.target.value })} />
+                        </div>
+                      </>
+                    )}
                   </div>
                   <div>
                     <Label>Description *</Label>
@@ -1097,9 +1105,11 @@ const Footer = () => {
         <div className="border-t border-white/20 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center text-gray-200 text-sm">
             <p>© 2025 Pradha Fashion Outlet. All rights reserved.</p>
-            <div className="flex space-x-4 mt-2 md:mt-0">
+            <div className="flex flex-wrap gap-4 mt-2 md:mt-0 text-xs md:text-sm">
               <Link to="/privacy-policy" className="hover:text-[#DAA520] transition-colors" onClick={() => window.scrollTo(0, 0)}>Privacy Policy</Link>
               <Link to="/terms-of-service" className="hover:text-[#DAA520] transition-colors" onClick={() => window.scrollTo(0, 0)}>Terms of Service</Link>
+              <Link to="/refund-policy" className="hover:text-[#DAA520] transition-colors" onClick={() => window.scrollTo(0, 0)}>Refund Policy</Link>
+              <Link to="/shipping-policy" className="hover:text-[#DAA520] transition-colors" onClick={() => window.scrollTo(0, 0)}>Shipping Policy</Link>
               <Link to="/developer" className="hover:text-[#DAA520] transition-colors" onClick={() => window.scrollTo(0, 0)}>Developer</Link>
             </div>
           </div>
@@ -1544,12 +1554,16 @@ const ProductsPage = () => {
           <p className="text-sm text-gray-600 mb-2">{product.category} - {product.subcategory}</p>
           <p className="text-lg font-bold text-[#8B1538] mb-2">₹{product.price}</p>
           <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
-          <div className="flex flex-wrap gap-1 mb-2">
-            <span className="text-xs text-gray-500">Sizes: {product.sizes.join(', ')}</span>
-          </div>
-          <div className="flex flex-wrap gap-1 mb-3">
-            <span className="text-xs text-gray-500">Colors: {product.colors.join(', ')}</span>
-          </div>
+          {product.subcategory !== 'Jewellery' && (
+            <>
+              <div className="flex flex-wrap gap-1 mb-2">
+                <span className="text-xs text-gray-500">Sizes: {product.sizes.join(', ')}</span>
+              </div>
+              <div className="flex flex-wrap gap-1 mb-3">
+                <span className="text-xs text-gray-500">Colors: {product.colors.join(', ')}</span>
+              </div>
+            </>
+          )}
           {product.customizable && (
             <Badge variant="outline" className="mb-3 text-xs">Customizable</Badge>
           )}
@@ -1951,6 +1965,8 @@ function App() {
           <Route path="/contact" element={<Layout><ContactPage /></Layout>} />
           <Route path="/privacy-policy" element={<Layout><PrivacyPolicyPage /></Layout>} />
           <Route path="/terms-of-service" element={<Layout><TermsOfServicePage /></Layout>} />
+          <Route path="/refund-policy" element={<Layout><RefundPolicyPage /></Layout>} />
+          <Route path="/shipping-policy" element={<Layout><ShippingPolicyPage /></Layout>} />
           <Route path="/admin" element={<Layout><AdminPage /></Layout>} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
