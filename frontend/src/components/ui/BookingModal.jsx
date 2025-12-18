@@ -163,60 +163,64 @@ const BookingModal = ({ dress, isOpen, onClose, onBookingSuccess }) => {
             </div>
           </div>
 
-          {/* Size Selection */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select Size
-            </label>
-            <select
-              required
-              value={formData.selectedSize}
-              onChange={(e) => setFormData({...formData, selectedSize: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
-            >
-              <option value="">Choose Size</option>
-              {dress.availableSizes && dress.availableSizes.map((size) => (
-                <option key={size} value={size}>{size}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Measurements */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Body Measurements (for customization)
-            </label>
-            <div className="grid grid-cols-3 gap-3">
-              <div>
-                <input
-                  type="text"
-                  placeholder="Chest (inches)"
-                  value={formData.chestMeasurement}
-                  onChange={(e) => setFormData({...formData, chestMeasurement: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm"
-                />
-              </div>
-              <div>
-                <input
-                  type="text"
-                  placeholder="Waist (inches)"
-                  value={formData.waistMeasurement}
-                  onChange={(e) => setFormData({...formData, waistMeasurement: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm"
-                />
-              </div>
-              <div>
-                <input
-                  type="text"
-                  placeholder="Hip (inches)"
-                  value={formData.hipMeasurement}
-                  onChange={(e) => setFormData({...formData, hipMeasurement: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm"
-                />
-              </div>
+          {/* Size Selection - Hidden for Jewellery */}
+          {dress.subcategory !== 'Jewellery' && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Select Size
+              </label>
+              <select
+                required
+                value={formData.selectedSize}
+                onChange={(e) => setFormData({...formData, selectedSize: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
+              >
+                <option value="">Choose Size</option>
+                {dress.availableSizes && dress.availableSizes.map((size) => (
+                  <option key={size} value={size}>{size}</option>
+                ))}
+              </select>
             </div>
-            <p className="text-xs text-gray-500 mt-1">Optional: Provide measurements for better fitting</p>
-          </div>
+          )}
+
+          {/* Measurements - Hidden for Jewellery */}
+          {dress.subcategory !== 'Jewellery' && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Body Measurements (for customization)
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <input
+                    type="text"
+                    placeholder="Chest (inches)"
+                    value={formData.chestMeasurement}
+                    onChange={(e) => setFormData({...formData, chestMeasurement: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm"
+                  />
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    placeholder="Waist (inches)"
+                    value={formData.waistMeasurement}
+                    onChange={(e) => setFormData({...formData, waistMeasurement: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm"
+                  />
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    placeholder="Hip (inches)"
+                    value={formData.hipMeasurement}
+                    onChange={(e) => setFormData({...formData, hipMeasurement: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm"
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Optional: Provide measurements for better fitting</p>
+            </div>
+          )}
 
           {/* Customer Notes */}
           <div className="mb-4">

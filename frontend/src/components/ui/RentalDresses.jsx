@@ -497,16 +497,18 @@ const DressCard = ({ dress, onBookNow }) => {
           <span className="text-sm text-gray-500">per day</span>
         </div>
 
-        <div className="flex flex-wrap gap-1 mb-3">
-          {dress.availableSizes && dress.availableSizes.map((size) => (
-            <span
-              key={size}
-              className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
-            >
-              {size}
-            </span>
-          ))}
-        </div>
+        {dress.subcategory !== 'Jewellery' && (
+          <div className="flex flex-wrap gap-1 mb-3">
+            {dress.availableSizes && dress.availableSizes.map((size) => (
+              <span
+                key={size}
+                className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
+              >
+                {size}
+              </span>
+            ))}
+          </div>
+        )}
 
         <button 
           onClick={() => onBookNow(dress)}
