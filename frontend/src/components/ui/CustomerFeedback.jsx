@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Star, Upload, X } from 'lucide-react';
+import { Star, Upload, X, CheckCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 const CustomerFeedback = () => {
   const [feedbacks, setFeedbacks] = useState([]);
@@ -32,7 +33,7 @@ const CustomerFeedback = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.rating === 0) {
-      alert('Please select a rating');
+      toast.error('Please select a rating');
       return;
     }
 
@@ -61,14 +62,19 @@ const CustomerFeedback = () => {
           });
         }
 
-        alert('Feedback submitted successfully!');
+        toast.success(
+          <div className="flex items-center space-x-2">
+            <CheckCircle className="w-5 h-5 text-green-600" />
+            <span>Thank you for your feedback!</span>
+          </div>
+        );
         setFormData({ name: '', email: '', rating: 0, comment: '', images: [] });
         setShowForm(false);
         fetchFeedbacks();
       }
     } catch (error) {
       console.error('Error submitting feedback:', error);
-      alert('Failed to submit feedback');
+      toast.error('Failed to submit feedback');
     } finally {
       setLoading(false);
     }

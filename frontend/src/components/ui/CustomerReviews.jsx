@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Star, Upload, X } from 'lucide-react';
+import { Star, Upload, X, CheckCircle } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081';
 const API = `${BACKEND_URL}/api`;
@@ -264,7 +264,9 @@ const CustomerReviews = () => {
       {showThankYou && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-8 max-w-md mx-4 text-center">
-            <div className="text-6xl mb-4">🎉</div>
+            <div className="flex justify-center mb-4">
+              <CheckCircle className="w-16 h-16 text-green-600" />
+            </div>
             <h2 className="text-2xl font-bold text-gray-800 mb-2">Thank You!</h2>
             <p className="text-gray-600 mb-4">Your review has been submitted successfully. We appreciate your feedback!</p>
             <button
