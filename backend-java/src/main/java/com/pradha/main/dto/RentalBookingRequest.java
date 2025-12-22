@@ -15,7 +15,6 @@ public class RentalBookingRequest {
     @NotNull
     private LocalDate endDate;
     
-    @NotBlank
     private String selectedSize;
     
     private String chestMeasurement;

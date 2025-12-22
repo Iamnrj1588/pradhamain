@@ -14,7 +14,7 @@ const RentalDresses = () => {
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showMobileCategories, setShowMobileCategories] = useState(false);
 
-  const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081';
+  const API_URL = process.env.REACT_APP_BACKEND_URL || 'https://localhost:8081';
 
   useEffect(() => {
     fetchDresses();
@@ -122,19 +122,17 @@ const RentalDresses = () => {
           <p className="text-lg text-gray-600">Rent beautiful outfits for your special occasions - Women's & Men's Collections</p>
         </div>
 
-        {/* Flash Notice */}
+        {/* Important Fitting Notice */}
         <div className="mb-8">
-          <div className="bg-gradient-to-r from-pink-500 to-red-500 text-white p-4 rounded-lg shadow-lg animate-pulse">
-            <div className="flex items-center justify-center">
-              <span className="text-2xl mr-3 animate-bounce">📍</span>
-              <div className="text-center">
-                <p className="font-bold text-lg mb-1">IMPORTANT FITTING NOTICE</p>
-                <p className="text-sm">
-                  <strong>For the best fitting, we request you to visit our store for a trial.</strong><br/>
-                  If you're sure about the sizes you gave, we can alter the dress as per your measurements.
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
+            <div className="flex items-start">
+              <span className="text-yellow-600 text-xl mr-3">⚠️</span>
+              <div>
+                <p className="font-semibold text-yellow-800 mb-2">IMPORTANT FITTING NOTICE</p>
+                <p className="text-yellow-700 text-sm leading-relaxed">
+                  For the best fitting, we request you to visit our store for a trial. If you're sure about the sizes you gave, we can alter the dress as per your measurements.
                 </p>
               </div>
-              <span className="text-2xl ml-3 animate-bounce">📍</span>
             </div>
           </div>
         </div>

@@ -17,7 +17,7 @@ const BookingModal = ({ dress, isOpen, onClose, onBookingSuccess }) => {
   const [error, setError] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081';
+  const API_URL = process.env.REACT_APP_BACKEND_URL || 'https://localhost:8081';
 
   const calculateTotal = () => {
     if (!formData.startDate || !formData.endDate) return 0;
@@ -189,7 +189,6 @@ const BookingModal = ({ dress, isOpen, onClose, onBookingSuccess }) => {
                 Select Size
               </label>
               <select
-                required
                 value={formData.selectedSize}
                 onChange={(e) => setFormData({...formData, selectedSize: e.target.value})}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
