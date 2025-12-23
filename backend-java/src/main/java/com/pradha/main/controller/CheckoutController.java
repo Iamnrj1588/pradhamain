@@ -126,7 +126,7 @@ public class CheckoutController {
                     
                     CouponValidationResponse validationResponse = couponService.validateCoupon(validationRequest);
                     if (!validationResponse.isValid()) {
-                        return ResponseEntity.badRequest().body(Map.of("error", "Coupon error: " + validationResponse.getMessage()));
+                        return ResponseEntity.badRequest().body(Map.of("error", "Coupon error: " + validationResponse.getError()));
                     }
                     
                     appliedCoupon = validationResponse.getCoupon();
