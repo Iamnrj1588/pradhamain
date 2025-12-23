@@ -1,6 +1,8 @@
 package com.pradha.main.controller;
 
 import com.pradha.main.dto.CheckoutRequest;
+import com.pradha.main.dto.CouponValidationRequest;
+import com.pradha.main.dto.CouponValidationResponse;
 import com.pradha.main.entity.*;
 import com.pradha.main.repository.*;
 import com.pradha.main.service.CouponService;
@@ -36,6 +38,9 @@ public class CheckoutController {
     
     @Autowired
     private CouponRepository couponRepository;
+    
+    @Autowired
+    private UserRepository userRepository;
     
     @Autowired
     private CouponService couponService;
@@ -113,8 +118,19 @@ public class CheckoutController {
             Coupon appliedCoupon = null;
             if (request.getCouponCode() != null && !request.getCouponCode().trim().isEmpty()) {
                 try {
-                    appliedCoupon = couponService.validateAndApplyCoupon(request.getCouponCode(), totalAmount);
-                    discountAmount = couponService.calculateDiscount(appliedCoupon, totalAmount);
+                    // Create validation request
+                    CouponValidationRequest validationRequest = new CouponValidationRequest();
+                    validationRequest.setCode(request.getCouponCode());
+                    validationRequest.setOrderAmount(totalAmount);
+                    validationRequest.setOrderType(request.getOrderType());
+                    
+                    CouponValidationResponse validationResponse = couponService.validateCoupon(validationRequest);
+                    if (!validationResponse.isValid()) {
+                        return ResponseEntity.badRequest().body(Map.of("error", "Coupon error: " + validationResponse.getMessage()));
+                    }
+                    
+                    appliedCoupon = validationResponse.getCoupon();
+                    discountAmount = validationResponse.getDiscountAmount();
                     totalAmount = totalAmount.subtract(discountAmount);
                 } catch (Exception e) {
                     return ResponseEntity.badRequest().body(Map.of("error", "Coupon error: " + e.getMessage()));
