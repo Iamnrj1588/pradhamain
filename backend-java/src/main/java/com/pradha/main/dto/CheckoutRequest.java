@@ -8,6 +8,7 @@ public class CheckoutRequest {
     private String shippingAddress;
     private String phone;
     private String email;
+    private String couponCode;
     private LocalDate rentalStartDate;
     private LocalDate rentalEndDate;
     private List<CheckoutItem> items;
@@ -52,6 +53,9 @@ public class CheckoutRequest {
     
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+    
+    public String getCouponCode() { return couponCode; }
+    public void setCouponCode(String couponCode) { this.couponCode = couponCode; }
     
     public LocalDate getRentalStartDate() { return rentalStartDate; }
     public void setRentalStartDate(LocalDate rentalStartDate) { this.rentalStartDate = rentalStartDate; }

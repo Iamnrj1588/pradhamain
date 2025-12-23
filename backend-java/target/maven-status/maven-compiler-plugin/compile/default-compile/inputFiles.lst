@@ -16,6 +16,7 @@ E:\pradhamain\backend-java\src\main\java\com\pradha\main\config\DataInitializer.
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\PradhaMainApplication.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\entity\RentalBooking.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\repository\RentalBookingRepository.java
+E:\pradhamain\backend-java\src\main\java\com\pradha\main\service\CouponService.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\service\NotificationService.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\dto\InquiryRequest.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\security\JwtUtil.java
@@ -24,10 +25,13 @@ E:\pradhamain\backend-java\src\main\java\com\pradha\main\entity\CustomerFeedback
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\repository\EmailOTPRepository.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\security\SecurityConfig.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\entity\EmailOTP.java
+E:\pradhamain\backend-java\src\main\java\com\pradha\main\repository\CouponRepository.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\controller\HomeController.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\controller\RentalController.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\dto\LoginRequest.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\controller\ProductController.java
+E:\pradhamain\backend-java\src\main\java\com\pradha\main\dto\CouponValidationRequest.java
+E:\pradhamain\backend-java\src\main\java\com\pradha\main\dto\CouponValidationResponse.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\entity\OrderItem.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\entity\Product.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\controller\AdminRentalController.java
@@ -42,6 +46,7 @@ E:\pradhamain\backend-java\src\main\java\com\pradha\main\controller\HeroContentC
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\dto\CheckoutRequest.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\controller\InquiryController.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\dto\AuthResponse.java
+E:\pradhamain\backend-java\src\main\java\com\pradha\main\controller\CouponController.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\controller\HealthController.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\entity\HeroContent.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\controller\CartController.java
@@ -51,3 +56,4 @@ E:\pradhamain\backend-java\src\main\java\com\pradha\main\repository\CustomerFeed
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\repository\RentalDressRepository.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\controller\AuthController.java
 E:\pradhamain\backend-java\src\main\java\com\pradha\main\service\RentalService.java
+E:\pradhamain\backend-java\src\main\java\com\pradha\main\entity\Coupon.java

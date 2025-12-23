@@ -243,7 +243,6 @@ const CustomerReviews = () => {
       {reviews.length === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">No reviews yet. Be the first to share your experience!</p>
-          <p className="text-sm text-gray-400 mt-2">Make sure the backend server is running on port 8081</p>
         </div>
       )}
 

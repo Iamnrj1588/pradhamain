@@ -30,11 +30,11 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                .cors()
-                .and()
-                .csrf().disable()
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/products",
@@ -51,6 +51,8 @@ public class SecurityConfig {
                                 "/api/cart",
                                 "/api/cart/**",
                                 "/api/checkout/**",
+                                "/api/coupons/validate",
+                                "/api/coupons/*/increment",
                                 "/api/test-db",
                                 "/error",
                                 "/",
@@ -74,13 +76,12 @@ public class SecurityConfig {
         cors.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",
                 "http://127.0.0.1:3000",
-
                 "http://18.205.19.24",
-		"http://18.205.19.24"
+                "http://18.205.19.24:80"
         ));
         cors.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
-        cors.setAllowedHeaders(Arrays.asList("*"));
-        cors.setAllowCredentials(true);
+        cors.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
+        cors.setAllowCredentials(false);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", cors);

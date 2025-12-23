@@ -24,6 +24,7 @@ public class RentalBookingRequest {
     private String customerNotes;
     private Boolean requiresDelivery;
     private String deliveryAddress;
+    private String couponCode;
 
     // Constructors
     public RentalBookingRequest() {}
@@ -58,4 +59,7 @@ public class RentalBookingRequest {
 
     public String getDeliveryAddress() { return deliveryAddress; }
     public void setDeliveryAddress(String deliveryAddress) { this.deliveryAddress = deliveryAddress; }
+    
+    public String getCouponCode() { return couponCode; }
+    public void setCouponCode(String couponCode) { this.couponCode = couponCode; }
 }

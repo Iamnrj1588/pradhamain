@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import ConfettiAnimation from './ConfettiAnimation';
 
 const Checkout = () => {
     const [cartItems, setCartItems] = useState([]);
@@ -10,6 +11,11 @@ const Checkout = () => {
     const [showFailureModal, setShowFailureModal] = useState(false);
     const [failureReason, setFailureReason] = useState('');
     const [successOrderId, setSuccessOrderId] = useState('');
+    const [couponCode, setCouponCode] = useState('');
+    const [appliedCoupon, setAppliedCoupon] = useState(null);
+    const [appliedDiscount, setAppliedDiscount] = useState(0);
+    const [couponLoading, setCouponLoading] = useState(false);
+    const [showConfetti, setShowConfetti] = useState(false);
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         shippingAddress: '',
@@ -43,10 +49,53 @@ const Checkout = () => {
     };
 
     const calculateTotal = () => {
-        // Client-side calculation for display only - server validates actual amount
-        return cartItems.reduce((total, item) => {
+        const subtotal = cartItems.reduce((total, item) => {
             return total + (item.product?.price || 0) * item.quantity;
         }, 0);
+        
+        return Math.max(0, subtotal - appliedDiscount);
+    };
+
+    const getDiscount = () => {
+        return appliedDiscount || 0;
+    };
+
+    const applyCoupon = async () => {
+        if (!couponCode.trim()) {
+            toast.error('Please enter a coupon code');
+            return;
+        }
+
+        setCouponLoading(true);
+        try {
+            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL || 'https://localhost:8081'}/api/coupons/validate`, {
+                code: couponCode.trim(),
+                orderAmount: cartItems.reduce((total, item) => total + (item.product?.price || 0) * item.quantity, 0),
+                orderType: 'PURCHASE',
+                productCategory: cartItems[0]?.product?.subcategory || cartItems[0]?.product?.category
+            });
+            
+            console.log('Coupon response:', response.data);
+            setAppliedCoupon(response.data.coupon);
+            setAppliedDiscount(response.data.discountAmount);
+            
+            const discountAmount = response.data.discountAmount || 0;
+            console.log('Discount amount from response:', discountAmount);
+            
+            setShowConfetti(true);
+            toast.success(`Coupon applied! You saved ₹${discountAmount}`);
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Invalid coupon code');
+        } finally {
+            setCouponLoading(false);
+        }
+    };
+
+    const removeCoupon = () => {
+        setAppliedCoupon(null);
+        setAppliedDiscount(0);
+        setCouponCode('');
+        toast.success('Coupon removed');
     };
 
     const handleInputChange = (e) => {
@@ -69,6 +118,7 @@ const Checkout = () => {
                 shippingAddress: formData.shippingAddress,
                 phone: formData.phone,
                 email: formData.email,
+                couponCode: appliedCoupon?.code || null,
                 items: cartItems.map(item => ({
                     productId: item.product?.id,
                     quantity: item.quantity,
@@ -174,6 +224,10 @@ const Checkout = () => {
 
     return (
         <>
+            <ConfettiAnimation 
+                show={showConfetti} 
+                onComplete={() => setShowConfetti(false)} 
+            />
             {/* Success Modal */}
             {showSuccessModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -251,10 +305,58 @@ const Checkout = () => {
                             <p className="font-semibold">₹{(item.product?.price * item.quantity).toFixed(2)}</p>
                         </div>
                     ))}
-                    <div className="mt-4 pt-4 border-t">
+                    <div className="mt-4 pt-4 border-t space-y-2">
+                        {appliedCoupon && (
+                            <>
+                                <div className="flex justify-between text-gray-600">
+                                    <span>Subtotal:</span>
+                                    <span>₹{cartItems.reduce((total, item) => total + (item.product?.price || 0) * item.quantity, 0).toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between text-green-600">
+                                    <span>Discount ({appliedCoupon.code}):</span>
+                                    <span>-₹{getDiscount().toFixed(2)}</span>
+                                </div>
+                            </>
+                        )}
                         <div className="flex justify-between items-center text-xl font-bold">
                             <span>Total: ₹{calculateTotal().toFixed(2)}</span>
                         </div>
+                    </div>
+                    
+                    {/* Coupon Section */}
+                    <div className="mt-6 pt-4 border-t">
+                        <h3 className="font-semibold mb-3">Have a coupon?</h3>
+                        {!appliedCoupon ? (
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={couponCode}
+                                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                    placeholder="Enter coupon code"
+                                    className="flex-1 p-2 border rounded"
+                                />
+                                <button
+                                    onClick={applyCoupon}
+                                    disabled={couponLoading}
+                                    className="bg-[#8B1538] text-white px-4 py-2 rounded hover:bg-[#6B0F2A] disabled:opacity-50"
+                                >
+                                    {couponLoading ? 'Applying...' : 'Apply'}
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex items-center justify-between bg-green-50 p-3 rounded">
+                                <div>
+                                    <span className="font-medium text-green-700">{appliedCoupon.code}</span>
+                                    <p className="text-sm text-green-600">You saved ₹{getDiscount().toFixed(2)}!</p>
+                                </div>
+                                <button
+                                    onClick={removeCoupon}
+                                    className="text-red-600 hover:text-red-800 text-sm"
+                                >
+                                    Remove
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
 

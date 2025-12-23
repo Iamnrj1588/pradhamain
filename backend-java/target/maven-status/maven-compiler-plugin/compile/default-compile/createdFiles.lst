@@ -16,17 +16,20 @@ com\pradha\main\dto\RentalBookingRequest.class
 com\pradha\main\repository\RentalDressRepository.class
 com\pradha\main\config\WebConfig.class
 com\pradha\main\entity\Order.class
+com\pradha\main\dto\CouponValidationResponse.class
 com\pradha\main\dto\SignupRequest.class
 com\pradha\main\entity\Order$PaymentStatus.class
 com\pradha\main\repository\CustomerFeedbackRepository.class
 com\pradha\main\repository\UserRepository.class
 com\pradha\main\PradhaMainApplication.class
+com\pradha\main\service\CouponService.class
 com\pradha\main\dto\ProductRequest.class
 com\pradha\main\entity\RentalDress.class
 com\pradha\main\entity\RentalBooking.class
 com\pradha\main\config\AppConfig.class
 com\pradha\main\controller\RentalController.class
 com\pradha\main\service\EmailService.class
+com\pradha\main\repository\CouponRepository.class
 com\pradha\main\service\S3Service.class
 com\pradha\main\repository\OrderRepository.class
 com\pradha\main\service\RentalService.class
@@ -35,6 +38,7 @@ com\pradha\main\service\NotificationService.class
 com\pradha\main\repository\InquiryRepository.class
 com\pradha\main\dto\CheckoutRequest$CheckoutItem.class
 com\pradha\main\config\DataInitializer.class
+com\pradha\main\entity\Coupon.class
 com\pradha\main\controller\ProductController.class
 com\pradha\main\controller\AuthController.class
 com\pradha\main\entity\Order$OrderType.class
@@ -44,6 +48,7 @@ com\pradha\main\entity\User.class
 com\pradha\main\service\OTPService.class
 com\pradha\main\controller\CustomerFeedbackController.class
 com\pradha\main\controller\CheckoutController.class
+com\pradha\main\dto\CouponValidationRequest.class
 com\pradha\main\repository\EmailOTPRepository.class
 com\pradha\main\dto\CheckoutRequest.class
 com\pradha\main\repository\ProductRepository.class
@@ -53,6 +58,7 @@ com\pradha\main\config\S3Config.class
 com\pradha\main\dto\AuthResponse.class
 com\pradha\main\controller\HomeController.class
 com\pradha\main\repository\CartRepository.class
+com\pradha\main\controller\CouponController.class
 com\pradha\main\controller\HeroContentController.class
 com\pradha\main\repository\RentalBookingRepository.class
 com\pradha\main\repository\HeroContentRepository.class

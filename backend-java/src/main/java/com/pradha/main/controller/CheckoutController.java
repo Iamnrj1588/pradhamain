@@ -3,6 +3,7 @@ package com.pradha.main.controller;
 import com.pradha.main.dto.CheckoutRequest;
 import com.pradha.main.entity.*;
 import com.pradha.main.repository.*;
+import com.pradha.main.service.CouponService;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
 import org.json.JSONObject;
@@ -34,7 +35,10 @@ public class CheckoutController {
     private RentalDressRepository rentalDressRepository;
     
     @Autowired
-    private UserRepository userRepository;
+    private CouponRepository couponRepository;
+    
+    @Autowired
+    private CouponService couponService;
     
     @Value("${razorpay.key.id}")
     private String razorpayKeyId;
@@ -104,6 +108,19 @@ public class CheckoutController {
                 orderItems.add(orderItem);
             }
 
+            // Apply coupon if provided
+            BigDecimal discountAmount = BigDecimal.ZERO;
+            Coupon appliedCoupon = null;
+            if (request.getCouponCode() != null && !request.getCouponCode().trim().isEmpty()) {
+                try {
+                    appliedCoupon = couponService.validateAndApplyCoupon(request.getCouponCode(), totalAmount);
+                    discountAmount = couponService.calculateDiscount(appliedCoupon, totalAmount);
+                    totalAmount = totalAmount.subtract(discountAmount);
+                } catch (Exception e) {
+                    return ResponseEntity.badRequest().body(Map.of("error", "Coupon error: " + e.getMessage()));
+                }
+            }
+
             // Mock Razorpay order for testing
             String mockOrderId = "order_" + System.currentTimeMillis();
             
@@ -122,6 +139,8 @@ public class CheckoutController {
             order.setUserId(userId);
             order.setOrderType(Order.OrderType.valueOf(request.getOrderType()));
             order.setTotalAmount(totalAmount);
+            order.setDiscountAmount(discountAmount);
+            order.setCouponCode(appliedCoupon != null ? appliedCoupon.getCode() : null);
             order.setRazorpayOrderId(mockOrderId);
             order.setShippingAddress(request.getShippingAddress());
             order.setPhone(request.getPhone());

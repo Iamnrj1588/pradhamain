@@ -29,6 +29,7 @@ import CustomerReviews from './components/ui/CustomerReviews';
 import AdminProfile from './components/ui/AdminProfile';
 import RefundPolicyPage from './components/ui/RefundPolicy';
 import ShippingPolicyPage from './components/ui/ShippingPolicy';
+import OffersPage from './components/ui/OffersPage';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://localhost:8081';
 const API = `${BACKEND_URL}/api`;
@@ -155,6 +156,7 @@ const Navbar = () => {
             <Link to="/" className="nav-link">Home</Link>
             <Link to="/products" className="nav-link">Collections</Link>
             <Link to="/rentals" className="nav-link">Rentals</Link>
+            <Link to="/offers" className="nav-link">Offers</Link>
             <Link to="/reviews" className="nav-link">Reviews</Link>
             <Link to="/about" className="nav-link">About</Link>
             <Link to="/contact" className="nav-link">Contact</Link>
@@ -215,6 +217,7 @@ const Navbar = () => {
             <Link to="/" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Home</Link>
             <Link to="/products" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Collections</Link>
             <Link to="/rentals" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Rentals</Link>
+            <Link to="/offers" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Offers</Link>
             <Link to="/reviews" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Reviews</Link>
             <Link to="/about" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>About</Link>
             <Link to="/contact" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
@@ -472,9 +475,10 @@ const AdminPage = () => {
       <h1 className="page-title">Admin Dashboard</h1>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="hidden md:grid w-full max-w-4xl mx-auto grid-cols-6">
+        <TabsList className="hidden md:grid w-full max-w-5xl mx-auto grid-cols-7">
           <TabsTrigger value="products" data-testid="products-tab">Products</TabsTrigger>
           <TabsTrigger value="rentals" data-testid="rentals-tab">Rentals</TabsTrigger>
+          <TabsTrigger value="coupons" data-testid="coupons-tab">Coupons</TabsTrigger>
           <TabsTrigger value="feedback" data-testid="feedback-tab">Reviews</TabsTrigger>
           <TabsTrigger value="hero" data-testid="hero-tab">Hero Content</TabsTrigger>
           <TabsTrigger value="inquiries" data-testid="inquiries-tab">Inquiries</TabsTrigger>
@@ -653,6 +657,10 @@ const AdminPage = () => {
 
         <TabsContent value="rentals">
           <AdminRentalDashboard />
+        </TabsContent>
+
+        <TabsContent value="coupons">
+          <CouponManagement />
         </TabsContent>
 
         <TabsContent value="feedback">
@@ -969,12 +977,324 @@ const HeroContentManagement = () => {
   );
 };
 
+const CouponManagement = () => {
+  const [coupons, setCoupons] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editingCoupon, setEditingCoupon] = useState(null);
+  const [formData, setFormData] = useState({
+    code: '',
+    description: '',
+    discountType: 'PERCENTAGE',
+    discountValue: '',
+    applicableTo: 'ALL',
+    specificProductId: '',
+    specificCategory: '',
+    minOrderAmount: '',
+    maxDiscount: '',
+    usageLimit: '',
+    validFrom: '',
+    validUntil: '',
+    isActive: true
+  });
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchCoupons();
+  }, []);
+
+  const fetchCoupons = async () => {
+    try {
+      const response = await axios.get(`${API}/admin/coupons`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      setCoupons(response.data);
+    } catch (error) {
+      console.error('Failed to fetch coupons:', error);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.code || !formData.discountValue) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    const couponData = {
+      ...formData,
+      discountValue: parseFloat(formData.discountValue),
+      minOrderAmount: formData.minOrderAmount ? parseFloat(formData.minOrderAmount) : null,
+      maxDiscount: formData.maxDiscount ? parseFloat(formData.maxDiscount) : null,
+      usageLimit: formData.usageLimit ? parseInt(formData.usageLimit) : null,
+      validFrom: formData.validFrom ? formData.validFrom + 'T00:00:00' : null,
+      validUntil: formData.validUntil ? formData.validUntil + 'T23:59:59' : null
+    };
+
+    try {
+      if (editingCoupon) {
+        await axios.put(`${API}/admin/coupons/${editingCoupon.id}`, couponData, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        toast.success('Coupon updated!');
+      } else {
+        await axios.post(`${API}/admin/coupons`, couponData, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        toast.success('Coupon created!');
+      }
+      resetForm();
+      fetchCoupons();
+    } catch (error) {
+      if (error.response?.status === 403) {
+        toast.error('Session expired. Please login again.');
+        logout();
+        navigate('/login');
+      } else {
+        toast.error('Failed to save coupon');
+      }
+    }
+  };
+
+  const handleEdit = (coupon) => {
+    setEditingCoupon(coupon);
+    setFormData({
+      code: coupon.code,
+      description: coupon.description,
+      discountType: coupon.discountType,
+      discountValue: coupon.discountValue.toString(),
+      applicableTo: coupon.applicableTo || 'ALL',
+      specificProductId: coupon.specificProductId || '',
+      specificCategory: coupon.specificCategory || '',
+      minOrderAmount: coupon.minOrderAmount?.toString() || '',
+      maxDiscount: coupon.maxDiscount?.toString() || '',
+      usageLimit: coupon.usageLimit?.toString() || '',
+      validFrom: coupon.validFrom?.split('T')[0] || '',
+      validUntil: coupon.validUntil?.split('T')[0] || '',
+      isActive: coupon.isActive
+    });
+    setShowForm(true);
+  };
+
+  const handleDelete = async (couponId) => {
+    if (!window.confirm('Are you sure you want to delete this coupon?')) return;
+    try {
+      await axios.delete(`${API}/admin/coupons/${couponId}`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      toast.success('Coupon deleted!');
+      fetchCoupons();
+    } catch (error) {
+      if (error.response?.status === 403) {
+        toast.error('Session expired. Please login again.');
+        logout();
+        navigate('/login');
+      } else {
+        toast.error('Failed to delete coupon');
+      }
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      code: '',
+      description: '',
+      discountType: 'PERCENTAGE',
+      discountValue: '',
+      applicableTo: 'ALL',
+      specificProductId: '',
+      specificCategory: '',
+      minOrderAmount: '',
+      maxDiscount: '',
+      usageLimit: '',
+      validFrom: '',
+      validUntil: '',
+      isActive: true
+    });
+    setEditingCoupon(null);
+    setShowForm(false);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-[#8B1538]">Coupon Management</h2>
+        <Button onClick={() => setShowForm(!showForm)} className="bg-[#8B1538] hover:bg-[#6B0F2A]">
+          <Plus className="w-4 h-4 mr-2" />
+          Add Coupon
+        </Button>
+      </div>
+
+      {showForm && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{editingCoupon ? 'Edit Coupon' : 'Create New Coupon'}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Coupon Code *</Label>
+                  <Input required value={formData.code} onChange={(e) => setFormData({...formData, code: e.target.value.toUpperCase()})} placeholder="FIRST10" />
+                </div>
+                <div>
+                  <Label>Applicable To *</Label>
+                  <Select value={formData.applicableTo || 'ALL'} onValueChange={(value) => setFormData({...formData, applicableTo: value, specificProductId: '', specificCategory: ''})}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ALL">All Products</SelectItem>
+                      <SelectItem value="PURCHASE_ONLY">Purchase Items Only</SelectItem>
+                      <SelectItem value="RENTAL_ONLY">Rental Items Only</SelectItem>
+                      <SelectItem value="SPECIFIC_CATEGORY">Specific Category</SelectItem>
+                      <SelectItem value="SPECIFIC_PRODUCT">Specific Product</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Discount Type *</Label>
+                  <Select value={formData.discountType} onValueChange={(value) => setFormData({...formData, discountType: value})}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PERCENTAGE">Percentage (%)</SelectItem>
+                      <SelectItem value="FIXED">Fixed Amount (₹)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Discount Value *</Label>
+                  <Input type="number" required value={formData.discountValue} onChange={(e) => setFormData({...formData, discountValue: e.target.value})} placeholder={formData.discountType === 'PERCENTAGE' ? '10' : '100'} />
+                </div>
+                
+                {/* Conditional fields for specific applicability */}
+                {formData.applicableTo === 'SPECIFIC_CATEGORY' && (
+                  <div>
+                    <Label>Select Category *</Label>
+                    <Select value={formData.specificCategory} onValueChange={(value) => setFormData({...formData, specificCategory: value})}>
+                      <SelectTrigger><SelectValue placeholder="Choose category" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Women">Women (Purchase)</SelectItem>
+                        <SelectItem value="Men">Men (Purchase)</SelectItem>
+                        <SelectItem value="Lehenga">Lehenga (Purchase)</SelectItem>
+                        <SelectItem value="Blouse">Blouse (Purchase)</SelectItem>
+                        <SelectItem value="Dresses">Dresses (Purchase)</SelectItem>
+                        <SelectItem value="Jewellery">Jewellery (Purchase)</SelectItem>
+                        <SelectItem value="Khadi">Khadi (Purchase)</SelectItem>
+                        <SelectItem value="Kurta">Kurta (Purchase)</SelectItem>
+                        <SelectItem value="T-Shirt">T-Shirt (Purchase)</SelectItem>
+                        <SelectItem value="Navratri">Navratri (Rental)</SelectItem>
+                        <SelectItem value="Wedding">Wedding (Rental)</SelectItem>
+                        <SelectItem value="Pre-Wedding">Pre-Wedding (Rental)</SelectItem>
+                        <SelectItem value="Reception">Reception (Rental)</SelectItem>
+                        <SelectItem value="Sangam">Sangam (Rental)</SelectItem>
+                        <SelectItem value="Party">Party (Rental)</SelectItem>
+                        <SelectItem value="Designer Blouses">Designer Blouses (Rental)</SelectItem>
+                        <SelectItem value="Maternity Outfits">Maternity Outfits (Rental)</SelectItem>
+                        <SelectItem value="Wedding Outfit">Wedding Outfit (Rental)</SelectItem>
+                        <SelectItem value="Reception Outfit">Reception Outfit (Rental)</SelectItem>
+                        <SelectItem value="Party Wears">Party Wears (Rental)</SelectItem>
+                        <SelectItem value="Traditional Outfits">Traditional Outfits (Rental)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                
+                {formData.applicableTo === 'SPECIFIC_PRODUCT' && (
+                  <div>
+                    <Label>Product ID *</Label>
+                    <Input 
+                      value={formData.specificProductId} 
+                      onChange={(e) => setFormData({...formData, specificProductId: e.target.value})} 
+                      placeholder="Enter product ID"
+                    />
+                  </div>
+                )}
+                <div>
+                  <Label>Min Order Amount</Label>
+                  <Input type="number" value={formData.minOrderAmount} onChange={(e) => setFormData({...formData, minOrderAmount: e.target.value})} placeholder="500" />
+                </div>
+                <div>
+                  <Label>Max Discount (for %)</Label>
+                  <Input type="number" value={formData.maxDiscount} onChange={(e) => setFormData({...formData, maxDiscount: e.target.value})} placeholder="200" />
+                </div>
+                <div>
+                  <Label>Usage Limit</Label>
+                  <Input type="number" value={formData.usageLimit} onChange={(e) => setFormData({...formData, usageLimit: e.target.value})} placeholder="100" />
+                </div>
+                <div>
+                  <Label>Valid From</Label>
+                  <Input type="date" value={formData.validFrom} onChange={(e) => setFormData({...formData, validFrom: e.target.value})} />
+                </div>
+                <div>
+                  <Label>Valid Until</Label>
+                  <Input type="date" value={formData.validUntil} onChange={(e) => setFormData({...formData, validUntil: e.target.value})} />
+                </div>
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Textarea value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} placeholder="First booking discount" />
+              </div>
+              <div>
+                <label className="flex items-center space-x-2">
+                  <input type="checkbox" checked={formData.isActive} onChange={(e) => setFormData({...formData, isActive: e.target.checked})} />
+                  <span>Active</span>
+                </label>
+              </div>
+              <div className="flex gap-2">
+                <Button type="submit" className="bg-[#8B1538] hover:bg-[#6B0F2A]">{editingCoupon ? 'Update' : 'Create'}</Button>
+                <Button type="button" variant="outline" onClick={resetForm}>Cancel</Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="grid gap-4">
+        {coupons.map((coupon) => (
+          <Card key={coupon.id}>
+            <CardContent className="p-4">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className="font-semibold text-lg">{coupon.code}</h3>
+                  <p className="text-gray-600">{coupon.description}</p>
+                  <div className="flex items-center gap-4 mt-2 text-sm">
+                    <Badge variant={coupon.isActive ? "default" : "secondary"}>
+                      {coupon.isActive ? 'Active' : 'Inactive'}
+                    </Badge>
+                    <span className="text-[#8B1538] font-medium">
+                      {coupon.discountType === 'PERCENTAGE' ? `${coupon.discountValue}%` : `₹${coupon.discountValue}`} OFF
+                    </span>
+                    {coupon.minOrderAmount && <span className="text-gray-500">Min: ₹{coupon.minOrderAmount}</span>}
+                    {coupon.usageLimit && <span className="text-gray-500">Limit: {coupon.usageLimit}</span>}
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" onClick={() => handleEdit(coupon)}>Edit</Button>
+                  <Button size="sm" variant="destructive" onClick={() => handleDelete(coupon.id)}>Delete</Button>
+                </div>
+              </div>
+              {(coupon.validFrom || coupon.validUntil) && (
+                <div className="text-xs text-gray-500">
+                  Valid: {coupon.validFrom ? new Date(coupon.validFrom).toLocaleDateString() : 'Always'} - {coupon.validUntil ? new Date(coupon.validUntil).toLocaleDateString() : 'Forever'}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+        {coupons.length === 0 && (
+          <div className="text-center py-12 text-gray-500">No coupons created yet</div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const AdminMobileNav = ({ currentTab, onTabChange }) => {
   const [isOpen, setIsOpen] = useState(false);
   
   const tabs = [
     { value: 'products', label: 'Products', icon: '📦' },
     { value: 'rentals', label: 'Rentals', icon: '👗' },
+    { value: 'coupons', label: 'Coupons', icon: '🎫' },
     { value: 'feedback', label: 'Reviews', icon: '⭐' },
     { value: 'hero', label: 'Hero Content', icon: '🖼️' },
     { value: 'inquiries', label: 'Inquiries', icon: '📧' },
@@ -1080,6 +1400,7 @@ const Footer = () => {
               <Link to="/" className="hover:text-[#DAA520] transition-colors font-medium" onClick={() => window.scrollTo(0, 0)}>Home</Link>
               <Link to="/products" className="hover:text-[#DAA520] transition-colors font-medium" onClick={() => window.scrollTo(0, 0)}>Collections</Link>
               <Link to="/rentals" className="hover:text-[#DAA520] transition-colors font-medium" onClick={() => window.scrollTo(0, 0)}>Rentals</Link>
+              <Link to="/offers" className="hover:text-[#DAA520] transition-colors font-medium" onClick={() => window.scrollTo(0, 0)}>Offers</Link>
               <Link to="/reviews" className="hover:text-[#DAA520] transition-colors font-medium" onClick={() => window.scrollTo(0, 0)}>Reviews</Link>
               <Link to="/about" className="hover:text-[#DAA520] transition-colors font-medium" onClick={() => window.scrollTo(0, 0)}>About</Link>
               <Link to="/contact" className="hover:text-[#DAA520] transition-colors font-medium" onClick={() => window.scrollTo(0, 0)}>Contact</Link>
@@ -1982,6 +2303,7 @@ function App() {
           <Route path="/developer" element={<Layout><Developer /></Layout>} />
           <Route path="/rentals" element={<Layout><RentalDresses /></Layout>} />
           <Route path="/reviews" element={<Layout><CustomerReviews /></Layout>} />
+          <Route path="/offers" element={<Layout><OffersPage /></Layout>} />
           <Route path="/about" element={<Layout><AboutPage /></Layout>} />
           <Route path="/contact" element={<Layout><ContactPage /></Layout>} />
           <Route path="/privacy-policy" element={<Layout><PrivacyPolicyPage /></Layout>} />

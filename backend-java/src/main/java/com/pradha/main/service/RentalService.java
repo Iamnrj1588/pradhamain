@@ -9,10 +9,16 @@ import com.pradha.main.repository.RentalDressRepository;
 import com.pradha.main.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class RentalService {
@@ -52,10 +58,43 @@ public class RentalService {
             throw new RuntimeException("Dress is not available for selected dates");
         }
 
-        // Calculate total amount
+        // Calculate original amount
         long daysBetween = ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate());
         long days = Math.max(1, daysBetween);
-        BigDecimal totalAmount = dress.getPricePerDay().multiply(BigDecimal.valueOf(days));
+        BigDecimal originalAmount = dress.getPricePerDay().multiply(BigDecimal.valueOf(days));
+        
+        // Apply coupon if provided
+        BigDecimal discountAmount = BigDecimal.ZERO;
+        String couponCode = null;
+        if (request.getCouponCode() != null && !request.getCouponCode().trim().isEmpty()) {
+            try {
+                Map<String, Object> couponRequest = Map.of(
+                    "code", request.getCouponCode().trim().toUpperCase(),
+                    "orderAmount", originalAmount
+                );
+                
+                RestTemplate restTemplate = new RestTemplate();
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                HttpEntity<Map<String, Object>> entity = new HttpEntity<>(couponRequest, headers);
+                
+                ResponseEntity<Map> response = restTemplate.postForEntity(
+                    "http://localhost:8081/api/coupons/validate", entity, Map.class);
+                
+                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                    Map<String, Object> responseBody = response.getBody();
+                    if (responseBody.get("discountAmount") != null) {
+                        discountAmount = new BigDecimal(responseBody.get("discountAmount").toString());
+                        couponCode = request.getCouponCode().trim().toUpperCase();
+                    }
+                }
+            } catch (Exception e) {
+                // If coupon validation fails, continue without discount
+                System.out.println("Coupon validation failed: " + e.getMessage());
+            }
+        }
+        
+        BigDecimal totalAmount = originalAmount.subtract(discountAmount);
 
         RentalBooking booking = new RentalBooking();
         booking.setUser(user);
@@ -66,12 +105,27 @@ public class RentalService {
         booking.setChestMeasurement(request.getChestMeasurement());
         booking.setWaistMeasurement(request.getWaistMeasurement());
         booking.setHipMeasurement(request.getHipMeasurement());
+        booking.setOriginalAmount(originalAmount);
+        booking.setDiscountAmount(discountAmount);
+        booking.setCouponCode(couponCode);
         booking.setTotalAmount(totalAmount);
         booking.setCustomerNotes(request.getCustomerNotes());
         booking.setRequiresDelivery(request.getRequiresDelivery());
         booking.setDeliveryAddress(request.getDeliveryAddress());
 
         RentalBooking savedBooking = rentalBookingRepository.save(booking);
+        
+        // Increment coupon usage if coupon was applied
+        if (couponCode != null) {
+            try {
+                RestTemplate restTemplate = new RestTemplate();
+                restTemplate.postForEntity(
+                    "http://localhost:8081/api/coupons/" + couponCode + "/increment", 
+                    null, String.class);
+            } catch (Exception e) {
+                System.out.println("Failed to increment coupon usage: " + e.getMessage());
+            }
+        }
 
         // Send notifications
         notificationService.sendBookingConfirmation(savedBooking);
