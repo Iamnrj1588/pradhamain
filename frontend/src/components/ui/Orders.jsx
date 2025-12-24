@@ -37,8 +37,8 @@ const Orders = () => {
     }
 
     return (
-        <div className="max-w-6xl mx-auto p-6">
-            <h1 className="text-3xl font-bold mb-8">My Orders</h1>
+        <div className="max-w-6xl mx-auto p-4 sm:p-6">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">My Orders</h1>
             
             {orders.length === 0 ? (
                 <div className="text-center py-12">
@@ -48,13 +48,13 @@ const Orders = () => {
                     </a>
                 </div>
             ) : (
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                     {orders.map((order) => (
-                        <div key={order.id} className="bg-white rounded-lg shadow p-6">
-                            <div className="flex justify-between items-start mb-4">
+                        <div key={order.id} className="bg-white rounded-lg shadow p-4 sm:p-6">
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 space-y-2 sm:space-y-0">
                                 <div>
                                     <h3 className="text-lg font-semibold">Order #{order.id.slice(-8)}</h3>
-                                    <p className="text-gray-600">
+                                    <p className="text-gray-600 text-sm">
                                         {new Date(order.createdAt).toLocaleDateString()}
                                     </p>
                                     <p className="text-sm text-gray-500">
@@ -62,26 +62,31 @@ const Orders = () => {
                                         {order.rentalDays && ` (${order.rentalDays} days)`}
                                     </p>
                                 </div>
-                                <div className="text-right">
+                                <div className="flex sm:flex-col sm:text-right items-center sm:items-end justify-between sm:justify-start">
                                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
                                         {order.status}
                                     </span>
-                                    <p className="text-lg font-bold mt-2">₹{order.totalAmount}</p>
+                                    <p className="text-lg font-bold sm:mt-2">₹{order.totalAmount}</p>
                                 </div>
                             </div>
                             
                             <div className="border-t pt-4">
-                                <p className="text-sm text-gray-600 mb-2">
-                                    <strong>Shipping Address:</strong> {order.shippingAddress}
-                                </p>
-                                <p className="text-sm text-gray-600">
-                                    <strong>Contact:</strong> {order.phone} | {order.email}
-                                </p>
-                                {order.rentalStartDate && (
-                                    <p className="text-sm text-gray-600">
-                                        <strong>Rental Period:</strong> {order.rentalStartDate} to {order.rentalEndDate}
+                                <div className="space-y-2 text-sm text-gray-600">
+                                    <p>
+                                        <strong>Shipping Address:</strong><br className="sm:hidden" />
+                                        <span className="sm:ml-1">{order.shippingAddress}</span>
                                     </p>
-                                )}
+                                    <p>
+                                        <strong>Contact:</strong><br className="sm:hidden" />
+                                        <span className="sm:ml-1">{order.phone} | {order.email}</span>
+                                    </p>
+                                    {order.rentalStartDate && (
+                                        <p>
+                                            <strong>Rental Period:</strong><br className="sm:hidden" />
+                                            <span className="sm:ml-1">{order.rentalStartDate} to {order.rentalEndDate}</span>
+                                        </p>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     ))}
