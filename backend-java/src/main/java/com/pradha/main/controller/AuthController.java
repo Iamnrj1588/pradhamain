@@ -44,9 +44,35 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@Valid @RequestBody SignupRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            return ResponseEntity.badRequest()
-                .body(Map.of("error", "This email is already registered. Please try with a different email address or login if you already have an account."));
+        User existingUser = userRepository.findByEmail(request.getEmail()).orElse(null);
+        
+        if (existingUser != null) {
+            if (existingUser.isEmailVerified()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "This email is already registered. Please try with a different email address or login if you already have an account."));
+            } else {
+                // User exists but not verified - update their details and resend OTP
+                existingUser.setName(request.getName());
+                existingUser.setPhone(request.getPhone());
+                existingUser.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+                
+                // Generate new OTP
+                String otp = String.format("%06d", new Random().nextInt(1000000));
+                existingUser.setOtp(otp);
+                existingUser.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
+                
+                userRepository.save(existingUser);
+                
+                try {
+                    emailService.sendOTP(request.getEmail(), otp);
+                    return ResponseEntity.ok(Map.of(
+                        "message", "Account updated. Please check your email for OTP verification.",
+                        "email", request.getEmail()
+                    ));
+                } catch (Exception e) {
+                    return ResponseEntity.status(500).body(Map.of("error", "Failed to send OTP"));
+                }
+            }
         }
 
         User user = new User(
