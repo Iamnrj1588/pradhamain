@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, Star, Filter, Menu, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import BookingModal from './BookingModal';
 
 const RentalDresses = () => {
@@ -13,6 +14,7 @@ const RentalDresses = () => {
   const [selectedDress, setSelectedDress] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showMobileCategories, setShowMobileCategories] = useState(false);
+  const navigate = useNavigate();
 
   const API_URL = process.env.REACT_APP_BACKEND_URL || 'https://localhost:8081';
 
@@ -433,6 +435,7 @@ const CategoryCard = ({ title, image, onClick }) => {
 const DressCard = ({ dress, onBookNow }) => {
   const [selectedImage, setSelectedImage] = useState(0);
   const images = dress.imageUrls || [];
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (images.length > 1) {
@@ -443,8 +446,16 @@ const DressCard = ({ dress, onBookNow }) => {
     }
   }, [images.length]);
 
+  const handleBookNow = (e) => {
+    e.stopPropagation(); // Prevent card click when clicking book now
+    onBookNow(dress);
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+    <div 
+      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+      onClick={() => navigate(`/rental/${dress.id}`)}
+    >
       {/* Image */}
       <div className="relative aspect-square sm:aspect-[4/5] bg-gray-200">
         {dress.imageUrls && dress.imageUrls.length > 0 ? (
@@ -459,7 +470,10 @@ const DressCard = ({ dress, onBookNow }) => {
                 {dress.imageUrls.map((_, index) => (
                   <button
                     key={index}
-                    onClick={() => setSelectedImage(index)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedImage(index);
+                    }}
                     className={`w-2 h-2 rounded-full ${
                       selectedImage === index ? 'bg-white' : 'bg-white/50'
                     }`}
@@ -485,18 +499,17 @@ const DressCard = ({ dress, onBookNow }) => {
       </div>
 
       {/* Content */}
-      <div className="p-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">{dress.name}</h3>
-        <p className="text-sm text-gray-500 mb-2">{dress.category} • {dress.subcategory}</p>
-        <p className="text-gray-600 text-sm mb-3 line-clamp-2">{dress.description}</p>
+      <div className="p-3 sm:p-4">
+        <h3 className="text-sm sm:text-lg font-semibold text-gray-900 mb-1 line-clamp-2">{dress.name}</h3>
+        <p className="text-xs sm:text-sm text-gray-500 mb-2">{dress.category} • {dress.subcategory}</p>
         
         <div className="flex items-center justify-between mb-3">
-          <span className="text-2xl font-bold text-pink-600">₹{dress.pricePerDay}</span>
-          <span className="text-sm text-gray-500">per day</span>
+          <span className="text-lg sm:text-2xl font-bold text-pink-600">₹{dress.pricePerDay}</span>
+          <span className="text-xs sm:text-sm text-gray-500">per day</span>
         </div>
 
         {dress.subcategory !== 'Jewellery' && (
-          <div className="flex flex-wrap gap-1 mb-3">
+          <div className="flex flex-wrap gap-1 mb-3 hidden sm:flex">
             {dress.availableSizes && dress.availableSizes.map((size) => (
               <span
                 key={size}
@@ -509,8 +522,8 @@ const DressCard = ({ dress, onBookNow }) => {
         )}
 
         <button 
-          onClick={() => onBookNow(dress)}
-          className="w-full bg-pink-600 text-white py-2 px-4 rounded-md hover:bg-pink-700 transition duration-200"
+          onClick={handleBookNow}
+          className="w-full bg-pink-600 text-white py-2 px-4 rounded-md hover:bg-pink-700 transition duration-200 text-xs sm:text-sm"
         >
           Book Now
         </button>

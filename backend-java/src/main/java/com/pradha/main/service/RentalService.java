@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class RentalService {
@@ -37,6 +38,10 @@ public class RentalService {
 
     public List<RentalDress> getAllAvailableDresses() {
         return rentalDressRepository.findByAvailableTrue();
+    }
+
+    public Optional<RentalDress> getDressById(String id) {
+        return rentalDressRepository.findById(id);
     }
 
     public List<RentalDress> getAvailableDressesForDateRange(LocalDate startDate, LocalDate endDate) {

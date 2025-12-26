@@ -40,6 +40,7 @@ public class SecurityConfig {
                                 "/api/products",
                                 "/api/products/{id}",
                                 "/api/rental/dresses",
+                                "/api/rental/dresses/{id}",
                                 "/api/rental/dresses/available",
                                 "/api/rental/bookings",
                                 "/api/admin/rental/dresses",

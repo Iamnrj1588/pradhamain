@@ -30,6 +30,8 @@ import AdminProfile from './components/ui/AdminProfile';
 import RefundPolicyPage from './components/ui/RefundPolicy';
 import ShippingPolicyPage from './components/ui/ShippingPolicy';
 import OffersPage from './components/ui/OffersPage';
+import ProductDetail from './components/ui/ProductDetail';
+import RentalDetail from './components/ui/RentalDetail';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://localhost:8081';
 const API = `${BACKEND_URL}/api`;
@@ -1466,6 +1468,7 @@ const HomePage = () => {
   const navigate = useNavigate();
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [newArrivals, setNewArrivals] = useState([]);
+  const [rentalDresses, setRentalDresses] = useState([]);
   const [heroSections, setHeroSections] = useState([]);
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -1473,7 +1476,7 @@ const HomePage = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        await Promise.all([fetchProducts(), fetchHeroSections()]);
+        await Promise.all([fetchProducts(), fetchHeroSections(), fetchRentalDresses()]);
       } finally {
         setLoading(false);
       }
@@ -1490,12 +1493,27 @@ const HomePage = () => {
     }
   }, [heroSections]);
 
+  const fetchRentalDresses = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/rental/dresses`);
+      const dresses = await response.json();
+      if (Array.isArray(dresses)) {
+        const jewellery = dresses.filter(d => d.subcategory === 'Jewellery').slice(0, 2);
+        const blouses = dresses.filter(d => d.subcategory === 'Designer Blouses').slice(0, 2);
+        const mixed = [...jewellery, ...blouses];
+        setRentalDresses(mixed);
+      }
+    } catch (error) {
+      console.error('Failed to fetch rental dresses:', error);
+    }
+  };
+
   const fetchProducts = async () => {
     try {
       const response = await axios.get(`${API}/products`);
       const products = response.data;
-      setFeaturedProducts(products.filter(p => p.featured).slice(0, 4));
-      setNewArrivals(products.filter(p => p.newArrival).slice(0, 4));
+      setFeaturedProducts(products.filter(p => p.featured).slice(0, 3));
+      setNewArrivals(products.filter(p => p.newArrival).slice(0, 3));
     } catch (error) {
       console.error('Failed to fetch products:', error);
     }
@@ -1523,6 +1541,68 @@ const HomePage = () => {
     }
   };
 
+  const RentalCard = ({ dress }) => {
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+    useEffect(() => {
+      if (dress.imageUrls && dress.imageUrls.length > 1) {
+        const interval = setInterval(() => {
+          setCurrentImageIndex((prev) => (prev + 1) % dress.imageUrls.length);
+        }, 3000);
+        return () => clearInterval(interval);
+      }
+    }, [dress.imageUrls]);
+
+    return (
+      <Card 
+        className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+        onClick={() => navigate(`/rental/${dress.id}`)}
+      >
+        <div className="relative h-48">
+          {dress.imageUrls && dress.imageUrls.length > 0 ? (
+            <>
+              <img
+                src={dress.imageUrls[currentImageIndex]}
+                alt={dress.name}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+              {dress.imageUrls.length > 1 && (
+                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
+                  {dress.imageUrls.map((_, idx) => (
+                    <div
+                      key={idx}
+                      className={`w-2 h-2 rounded-full ${
+                        idx === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+              <span className="text-gray-400">No Image</span>
+            </div>
+          )}
+          <div className="absolute top-2 left-2">
+            <span className="bg-pink-600 text-white px-2 py-1 rounded-full text-xs font-medium">
+              {dress.subcategory}
+            </span>
+          </div>
+        </div>
+        <CardContent className="p-4">
+          <h3 className="font-semibold text-lg mb-1">{dress.name}</h3>
+          <p className="text-sm text-gray-600 mb-2">{dress.category} • {dress.subcategory}</p>
+          <div className="flex items-center justify-between">
+            <p className="text-lg font-bold text-pink-600">₹{dress.pricePerDay}</p>
+            <span className="text-sm text-gray-500">per day</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   const ProductCard = ({ product }) => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -1530,13 +1610,16 @@ const HomePage = () => {
       if (product.images && product.images.length > 1) {
         const interval = setInterval(() => {
           setCurrentImageIndex((prev) => (prev + 1) % product.images.length);
-        }, 2000);
+        }, 3000);
         return () => clearInterval(interval);
       }
     }, [product.images]);
 
     return (
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+      <Card 
+        className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+        onClick={() => navigate(`/product/${product.id}`)}
+      >
         <div className="relative h-48">
           {product.images && product.images.length > 0 ? (
             <>
@@ -1636,7 +1719,7 @@ const HomePage = () => {
         <section className="py-16 px-4">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-3xl font-bold text-center mb-8 text-[#8B1538]">Featured Products</h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {featuredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
@@ -1649,10 +1732,31 @@ const HomePage = () => {
         <section className="py-16 px-4 bg-gray-50">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-3xl font-bold text-center mb-8 text-[#8B1538]">New Arrivals</h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {newArrivals.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {rentalDresses.length > 0 && (
+        <section className="py-16 px-4">
+          <div className="max-w-7xl mx-auto">
+            <h2 className="text-3xl font-bold text-center mb-8 text-pink-600">Featured Rentals</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {rentalDresses.map((dress) => (
+                <RentalCard key={dress.id} dress={dress} />
+              ))}
+            </div>
+            <div className="text-center">
+              <Button 
+                onClick={() => navigate('/rentals')} 
+                className="bg-pink-600 hover:bg-pink-700 text-white px-8 py-3 text-lg"
+              >
+                Explore All Rentals
+              </Button>
             </div>
           </div>
         </section>
@@ -1823,6 +1927,7 @@ const ProductsPage = () => {
   const ProductCard = ({ product }) => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const { user } = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
       if (product.images && product.images.length > 1) {
@@ -1833,7 +1938,8 @@ const ProductsPage = () => {
       }
     }, [product.images]);
 
-    const addToCart = async () => {
+    const addToCart = async (e) => {
+      e.stopPropagation(); // Prevent card click when clicking add to cart
       if (!user) {
         toast.error('Please login to add items to cart');
         return;
@@ -1850,8 +1956,11 @@ const ProductsPage = () => {
     };
 
     return (
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-        <div className="relative h-64">
+      <Card 
+        className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+        onClick={() => navigate(`/product/${product.id}`)}
+      >
+        <div className="relative h-48 sm:h-64">
           {product.images && product.images.length > 0 ? (
             <>
               <img
@@ -1885,29 +1994,28 @@ const ProductsPage = () => {
             <Badge className="absolute top-2 right-2 bg-[#8B1538] text-white">New</Badge>
           )}
         </div>
-        <CardContent className="p-4">
-          <h3 className="font-semibold text-lg mb-1">{product.name}</h3>
-          <p className="text-sm text-gray-600 mb-2">{product.category} - {product.subcategory}</p>
-          <p className="text-lg font-bold text-[#8B1538] mb-2">₹{product.price}</p>
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
+        <CardContent className="p-3 sm:p-4">
+          <h3 className="font-semibold text-sm sm:text-lg mb-1 line-clamp-2">{product.name}</h3>
+          <p className="text-xs sm:text-sm text-gray-600 mb-2">{product.category} - {product.subcategory}</p>
+          <p className="text-sm sm:text-lg font-bold text-[#8B1538] mb-2">₹{product.price}</p>
           {product.subcategory !== 'Jewellery' && (
             <>
-              <div className="flex flex-wrap gap-1 mb-2">
+              <div className="flex flex-wrap gap-1 mb-2 hidden sm:block">
                 <span className="text-xs text-gray-500">Sizes: {product.sizes.join(', ')}</span>
               </div>
-              <div className="flex flex-wrap gap-1 mb-3">
+              <div className="flex flex-wrap gap-1 mb-3 hidden sm:block">
                 <span className="text-xs text-gray-500">Colors: {product.colors.join(', ')}</span>
               </div>
             </>
           )}
           {product.customizable && (
-            <Badge variant="outline" className="mb-3 text-xs">Customizable</Badge>
+            <Badge variant="outline" className="mb-3 text-xs hidden sm:inline-flex">Customizable</Badge>
           )}
           <Button 
             onClick={addToCart}
-            className="w-full bg-[#8B1538] hover:bg-[#6B0F2A] text-white"
+            className="w-full bg-[#8B1538] hover:bg-[#6B0F2A] text-white text-xs sm:text-sm py-2"
           >
-            <ShoppingCart className="w-4 h-4 mr-2" />
+            <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
             Add to Cart
           </Button>
         </CardContent>
@@ -2310,6 +2418,8 @@ function App() {
           <Route path="/terms-of-service" element={<Layout><TermsOfServicePage /></Layout>} />
           <Route path="/refund-policy" element={<Layout><RefundPolicyPage /></Layout>} />
           <Route path="/shipping-policy" element={<Layout><ShippingPolicyPage /></Layout>} />
+          <Route path="/product/:id" element={<Layout><ProductDetail /></Layout>} />
+          <Route path="/rental/:id" element={<Layout><RentalDetail /></Layout>} />
           <Route path="/admin" element={<Layout><AdminPage /></Layout>} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify-email" element={<VerifyEmail />} />

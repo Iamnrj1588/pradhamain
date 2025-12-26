@@ -15,7 +15,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/rental")
-@CrossOrigin(origins = {"http://localhost:3000", "http://127.0.0.1:3000", "http://18.205.19.24"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://127.0.0.1:3000", "http://18.205.19.24"}, allowCredentials = "true")
 public class RentalController {
 
     @Autowired
@@ -24,6 +24,13 @@ public class RentalController {
     @GetMapping("/dresses")
     public ResponseEntity<List<RentalDress>> getAllDresses() {
         return ResponseEntity.ok(rentalService.getAllAvailableDresses());
+    }
+
+    @GetMapping("/dresses/{id}")
+    public ResponseEntity<RentalDress> getDressById(@PathVariable String id) {
+        return rentalService.getDressById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/dresses/available")
