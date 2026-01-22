@@ -448,6 +448,12 @@ const DressCard = ({ dress, onBookNow }) => {
 
   const handleBookNow = (e) => {
     e.stopPropagation(); // Prevent card click when clicking book now
+    // Check if user is logged in
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    if (!user) {
+      window.location.href = '/login';
+      return;
+    }
     onBookNow(dress);
   };
 

@@ -105,7 +105,12 @@ const BookingModal = ({ dress, isOpen, onClose, onBookingSuccess }) => {
 
     try {
       // Get user from localStorage (assuming user is logged in)
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      
+      if (!user || !user.id) {
+        window.location.href = '/login';
+        return;
+      }
       
       const response = await fetch(`${API_URL}/api/rental/bookings?userId=${user.id}`, {
         method: 'POST',
