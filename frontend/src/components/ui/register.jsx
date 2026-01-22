@@ -14,17 +14,82 @@ export default function Register() {
   const [message, setMessage] = useState({ text: "", type: "" });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({});
 
-  const handleChange = (e) =>
-    setUser({ ...user, [e.target.name]: e.target.value });
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePhone = (phone) => {
+    const phoneRegex = /^[6-9]\d{9}$/;
+    return phoneRegex.test(phone);
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setUser({ ...user, [name]: value });
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: '' });
+    }
+    
+    // Real-time validation
+    if (name === 'email' && value) {
+      if (!validateEmail(value)) {
+        setErrors({ ...errors, email: 'Please enter a valid email address' });
+      }
+    }
+    
+    if (name === 'phone' && value) {
+      if (!validatePhone(value)) {
+        setErrors({ ...errors, phone: 'Please enter a valid 10-digit Indian mobile number' });
+      }
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate all fields
+    const newErrors = {};
+    
+    if (!user.name.trim()) {
+      newErrors.name = 'Name is required';
+    }
+    
+    if (!user.email) {
+      newErrors.email = 'Email is required';
+    } else if (!validateEmail(user.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+    
+    if (!user.phone) {
+      newErrors.phone = 'Phone number is required';
+    } else if (!validatePhone(user.phone)) {
+      newErrors.phone = 'Please enter a valid 10-digit Indian mobile number';
+    }
+    
+    if (!user.password) {
+      newErrors.password = 'Password is required';
+    } else if (user.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters long';
+    }
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    
     setLoading(true);
     setMessage({ text: "", type: "" });
+    setErrors({});
 
     try {
-      await axios.post(`${API_URL}/signup`, user);
+      // Create a copy without exposing password in logs
+      const userData = { ...user };
+      await axios.post(`${API_URL}/signup`, userData);
 
       setMessage({ text: "OTP sent to email! Redirecting to verification...", type: "success" });
       setTimeout(() => {
@@ -94,10 +159,14 @@ export default function Register() {
                 name="name" 
                 type="text"
                 placeholder="Full Name" 
+                value={user.name}
                 onChange={handleChange} 
                 required 
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B1538] focus:border-transparent outline-none transition-all"
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#8B1538] focus:border-transparent outline-none transition-all ${
+                  errors.name ? 'border-red-500' : 'border-gray-300'
+                }`}
               />
+              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
             </div>
             
             <div>
@@ -105,31 +174,44 @@ export default function Register() {
                 type="email" 
                 name="email" 
                 placeholder="Email Address" 
+                value={user.email}
                 onChange={handleChange} 
                 required 
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B1538] focus:border-transparent outline-none transition-all"
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#8B1538] focus:border-transparent outline-none transition-all ${
+                  errors.email ? 'border-red-500' : 'border-gray-300'
+                }`}
               />
+              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
             </div>
             
             <div>
               <input 
                 name="phone" 
                 type="tel"
-                placeholder="Phone Number" 
+                placeholder="Phone Number (10 digits)" 
+                value={user.phone}
                 onChange={handleChange} 
                 required 
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B1538] focus:border-transparent outline-none transition-all"
+                maxLength="10"
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#8B1538] focus:border-transparent outline-none transition-all ${
+                  errors.phone ? 'border-red-500' : 'border-gray-300'
+                }`}
               />
+              {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
             </div>
             
             <div className="relative">
               <input 
                 type={showPassword ? "text" : "password"}
                 name="password" 
-                placeholder="Password" 
+                placeholder="Password (min 6 characters)" 
+                value={user.password}
                 onChange={handleChange} 
                 required 
-                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B1538] focus:border-transparent outline-none transition-all"
+                minLength="6"
+                className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-[#8B1538] focus:border-transparent outline-none transition-all ${
+                  errors.password ? 'border-red-500' : 'border-gray-300'
+                }`}
               />
               <button
                 type="button"
@@ -138,6 +220,7 @@ export default function Register() {
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
+              {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
             </div>
 
             {message.text && (

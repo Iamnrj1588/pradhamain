@@ -32,6 +32,7 @@ import ShippingPolicyPage from './components/ui/ShippingPolicy';
 import OffersPage from './components/ui/OffersPage';
 import ProductDetail from './components/ui/ProductDetail';
 import RentalDetail from './components/ui/RentalDetail';
+import Loader from './components/ui/Loader';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://localhost:8081';
 const API = `${BACKEND_URL}/api`;
@@ -1874,6 +1875,7 @@ const ProductsPage = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedSubcategory, setSelectedSubcategory] = useState('All');
+  const [loading, setLoading] = useState(true);
   const location = useLocation();
   const { user } = useAuth();
 
@@ -1900,6 +1902,8 @@ const ProductsPage = () => {
       setProducts(response.data);
     } catch (error) {
       console.error('Failed to fetch products:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -1918,6 +1922,8 @@ const ProductsPage = () => {
   const subcategories = selectedCategory === 'All' 
     ? ['All', ...new Set(products.map(p => p.subcategory))]
     : ['All', ...new Set(products.filter(p => p.category === selectedCategory).map(p => p.subcategory))];
+
+  if (loading) return <Loader />;
 
   const ProductCard = ({ product }) => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -2074,6 +2080,14 @@ const ProductsPage = () => {
 
 const AboutPage = () => {
   const [activeTab, setActiveTab] = useState('fashion');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) return <Loader />;
 
   return (
     <div className="page-container">
@@ -2085,7 +2099,7 @@ const AboutPage = () => {
           <TabsTrigger value="rental" className="text-xs sm:text-sm p-2 sm:p-3">About Rental Outlet</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="fashion" className="space-y-6 text-gray-700 leading-relaxed mt-6">
+        <TabsContent value="fashion" className="space-y-6 text-gray-700 leading-relaxed mt-6 text-left">
           <p className="text-lg">
             Welcome to <span className="font-semibold text-[#8B1538]">Pradha Fashion Outlet</span>, where tradition meets elegance.
             We are a premier boutique dedicated to providing exquisite traditional and modern fashion wear for both women and men.
@@ -2102,7 +2116,7 @@ const AboutPage = () => {
           </p>
           <h2 className="text-2xl font-semibold text-[#8B1538] mt-8 mb-4">What We Offer</h2>
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="p-6 bg-[#F5F5DC]/30 rounded-lg">
+            <div className="p-6 bg-gray-50 rounded-lg">
               <h3 className="font-semibold text-xl mb-2 text-[#8B1538]">Women's Collection</h3>
               <ul className="space-y-2 text-sm">
                 <li>• Lehenga for festivals and weddings with customization</li>
@@ -2111,7 +2125,7 @@ const AboutPage = () => {
                 <li>• Traditional and contemporary ethnic wear</li>
               </ul>
             </div>
-            <div className="p-6 bg-[#F5DEB3]/30 rounded-lg">
+            <div className="p-6 bg-gray-50 rounded-lg">
               <h3 className="font-semibold text-xl mb-2 text-[#8B1538]">Men's Collection</h3>
               <ul className="space-y-2 text-sm">
                 <li>• Premium Khadi wear collection</li>
@@ -2126,7 +2140,7 @@ const AboutPage = () => {
           </p>
         </TabsContent>
         
-        <TabsContent value="rental" className="space-y-6 text-gray-700 leading-relaxed mt-6">
+        <TabsContent value="rental" className="space-y-6 text-gray-700 leading-relaxed mt-6 text-left">
           <h2 className="text-2xl font-semibold text-[#8B1538] mb-4">Rental Collection – Look Stunning Without the Stress!</h2>
           <p className="text-lg">
             At Pradha Fashion Outlet, we understand that every occasion deserves a special look—without always needing to buy and store expensive outfits. That's why we bring you our exclusive Rental Collection for both women and men. Enjoy premium designer wear at a fraction of the cost, perfectly maintained and ready to make you shine.
@@ -2142,7 +2156,7 @@ const AboutPage = () => {
           </ul>
           
           <div className="grid md:grid-cols-2 gap-6 mt-6">
-            <div className="p-6 bg-pink-50 rounded-lg">
+            <div className="p-6 bg-gray-50 rounded-lg">
               <h3 className="font-semibold text-xl mb-2 text-[#8B1538]">Women's Rental Collection</h3>
               <ul className="space-y-2 text-sm">
                 <li>• Designer lehengas for weddings, receptions & festive events</li>
@@ -2151,7 +2165,7 @@ const AboutPage = () => {
                 <li>• Bridal wear for a grand yet budget-friendly look</li>
               </ul>
             </div>
-            <div className="p-6 bg-blue-50 rounded-lg">
+            <div className="p-6 bg-gray-50 rounded-lg">
               <h3 className="font-semibold text-xl mb-2 text-[#8B1538]">Men's Rental Collection</h3>
               <ul className="space-y-2 text-sm">
                 <li>• Traditional sherwanis for weddings and cultural events</li>
@@ -2174,15 +2188,90 @@ const AboutPage = () => {
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => setPageLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
+  
+  if (pageLoading) return <Loader />;
+  
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePhone = (phone) => {
+    const phoneRegex = /^[6-9]\d{9}$/;
+    return phoneRegex.test(phone);
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: '' });
+    }
+    
+    // Real-time validation
+    if (name === 'email' && value) {
+      if (!validateEmail(value)) {
+        setErrors({ ...errors, email: 'Please enter a valid email address' });
+      }
+    }
+    
+    if (name === 'phone' && value) {
+      if (!validatePhone(value)) {
+        setErrors({ ...errors, phone: 'Please enter a valid 10-digit Indian mobile number' });
+      }
+    }
+  };
   
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate all fields
+    const newErrors = {};
+    
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
+    }
+    
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!validateEmail(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+    
+    if (formData.phone && !validatePhone(formData.phone)) {
+      newErrors.phone = 'Please enter a valid 10-digit Indian mobile number';
+    }
+    
+    if (!formData.message.trim()) {
+      newErrors.message = 'Message is required';
+    }
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    
+    setLoading(true);
+    setErrors({});
+    
     try {
       await axios.post(`${API}/inquiries`, formData);
       toast.success('Thank you! We will get back to you soon.');
       setFormData({ name: '', email: '', phone: '', message: '' });
     } catch (error) {
       toast.error('Failed to submit inquiry');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -2198,22 +2287,64 @@ const ContactPage = () => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="name">Name *</Label>
-                <Input id="name" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+                <Label htmlFor="name" className="block text-left mb-1">Name *</Label>
+                <Input 
+                  id="name" 
+                  name="name"
+                  required 
+                  value={formData.name} 
+                  onChange={handleChange}
+                  className={errors.name ? 'border-red-500' : ''}
+                />
+                {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
               </div>
               <div>
-                <Label htmlFor="email">Email *</Label>
-                <Input id="email" type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+                <Label htmlFor="email" className="block text-left mb-1">Email *</Label>
+                <Input 
+                  id="email" 
+                  name="email"
+                  type="email" 
+                  required 
+                  value={formData.email} 
+                  onChange={handleChange}
+                  className={errors.email ? 'border-red-500' : ''}
+                />
+                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
               </div>
               <div>
-                <Label htmlFor="phone">Phone</Label>
-                <Input id="phone" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
+                <Label htmlFor="phone" className="block text-left mb-1">Phone (10 digits)</Label>
+                <Input 
+                  id="phone" 
+                  name="phone"
+                  type="tel"
+                  maxLength="10"
+                  placeholder="Enter 10-digit mobile number"
+                  value={formData.phone} 
+                  onChange={handleChange}
+                  className={errors.phone ? 'border-red-500' : ''}
+                />
+                {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
               </div>
               <div>
-                <Label htmlFor="message">Message *</Label>
-                <Textarea id="message" required rows={5} value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} />
+                <Label htmlFor="message" className="block text-left mb-1">Message *</Label>
+                <Textarea 
+                  id="message" 
+                  name="message"
+                  required 
+                  rows={5} 
+                  value={formData.message} 
+                  onChange={handleChange}
+                  className={errors.message ? '' : ''}
+                />
+                {errors.message && <p className="text-red-500 text-sm mt-1">{errors.message}</p>}
               </div>
-              <Button type="submit" className="w-full bg-[#8B1538] hover:bg-[#6B0F2A] text-white">Send Message</Button>
+              <Button 
+                type="submit" 
+                disabled={loading}
+                className="w-full bg-[#8B1538] hover:bg-[#6B0F2A] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Sending...' : 'Send Message'}
+              </Button>
             </form>
           </CardContent>
         </Card>
@@ -2244,10 +2375,19 @@ const ContactPage = () => {
 };
 
 const PrivacyPolicyPage = () => {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) return <Loader />;
+
   return (
     <div className="page-container">
       <h1 className="page-title">Privacy Policy</h1>
-      <div className="max-w-4xl mx-auto space-y-6 text-gray-700 leading-relaxed">
+      <div className="max-w-4xl mx-auto space-y-6 text-gray-700 leading-relaxed text-left">
         <p className="text-sm text-gray-500">Last Updated: 09/12/2025</p>
         
         <p className="text-lg">
@@ -2311,10 +2451,19 @@ const PrivacyPolicyPage = () => {
 };
 
 const TermsOfServicePage = () => {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) return <Loader />;
+
   return (
     <div className="page-container">
       <h1 className="page-title">Terms of Service</h1>
-      <div className="max-w-4xl mx-auto space-y-6 text-gray-700 leading-relaxed">
+      <div className="max-w-4xl mx-auto space-y-6 text-gray-700 leading-relaxed text-left">
         <p className="text-sm text-gray-500">Last Updated: 09/12/2025</p>
         
         <p className="text-lg">

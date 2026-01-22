@@ -1,8 +1,20 @@
+import { useState, useEffect } from 'react';
+import Loader from './Loader';
+
 const ShippingPolicyPage = () => {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) return <Loader />;
+
   return (
     <div className="page-container">
       <h1 className="page-title">Shipping Policy</h1>
-      <div className="max-w-4xl mx-auto space-y-6 text-gray-700 leading-relaxed">
+      <div className="max-w-4xl mx-auto space-y-6 text-gray-700 leading-relaxed text-left">
         <p className="text-sm text-gray-500">Last Updated: 09/12/2025</p>
         
         <p className="text-lg">

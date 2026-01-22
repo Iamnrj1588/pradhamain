@@ -17,17 +17,59 @@ export default function Login() {
   const [message, setMessage] = useState({ text: "", type: "" });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({});
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: '' });
+    }
+    
+    // Real-time email validation
+    if (name === 'email' && value) {
+      if (!validateEmail(value)) {
+        setErrors({ ...errors, email: 'Please enter a valid email address' });
+      }
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate fields
+    const newErrors = {};
+    
+    if (!form.email) {
+      newErrors.email = 'Email is required';
+    } else if (!validateEmail(form.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+    
+    if (!form.password) {
+      newErrors.password = 'Password is required';
+    }
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    
     setLoading(true);
     setMessage({ text: "", type: "" });
+    setErrors({});
     
     try {
-      const res = await axios.post(`${API_URL}/login`, form);
+      // Create a copy without exposing password in logs
+      const loginData = { ...form };
+      const res = await axios.post(`${API_URL}/login`, loginData);
 
       login(res.data.accessToken, res.data.user);
 
@@ -120,10 +162,14 @@ export default function Login() {
                 name="email" 
                 type="email"
                 placeholder="Email Address" 
+                value={form.email}
                 onChange={handleChange} 
                 required 
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B1538] focus:border-transparent outline-none transition-all"
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#8B1538] focus:border-transparent outline-none transition-all ${
+                  errors.email ? 'border-red-500' : 'border-gray-300'
+                }`}
               />
+              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
             </div>
             
             <div className="relative">
@@ -131,9 +177,12 @@ export default function Login() {
                 type={showPassword ? "text" : "password"}
                 name="password" 
                 placeholder="Password" 
+                value={form.password}
                 onChange={handleChange} 
                 required 
-                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B1538] focus:border-transparent outline-none transition-all"
+                className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-[#8B1538] focus:border-transparent outline-none transition-all ${
+                  errors.password ? 'border-red-500' : 'border-gray-300'
+                }`}
               />
               <button
                 type="button"
@@ -142,6 +191,7 @@ export default function Login() {
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
+              {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
             </div>
 
             {message.text && (

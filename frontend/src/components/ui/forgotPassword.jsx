@@ -15,11 +15,29 @@ export default function ForgotPassword() {
   const [message, setMessage] = useState({ text: "", type: "" });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!email) {
+      setErrors({ email: 'Email is required' });
+      return;
+    }
+    
+    if (!validateEmail(email)) {
+      setErrors({ email: 'Please enter a valid email address' });
+      return;
+    }
+    
     setLoading(true);
     setMessage({ text: "", type: "" });
+    setErrors({});
 
     try {
       await axios.post(`${API_URL}/forgot-password`, { email });
@@ -130,10 +148,16 @@ export default function ForgotPassword() {
               type="email"
               placeholder="Enter your email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (errors.email) setErrors({});
+              }}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B1538] focus:border-transparent outline-none transition-all"
+              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#8B1538] focus:border-transparent outline-none transition-all ${
+                errors.email ? 'border-red-500' : 'border-gray-300'
+              }`}
             />
+            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
             {message.text && (
               <div className={`flex items-center gap-2 p-3 rounded-lg ${
                 message.type === 'success' 
