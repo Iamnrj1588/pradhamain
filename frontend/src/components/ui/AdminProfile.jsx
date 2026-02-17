@@ -33,15 +33,21 @@ const AdminProfile = () => {
 
     setLoading(true);
     try {
+      const token = localStorage.getItem('token');
       await axios.put(`${BACKEND_URL}/api/auth/change-password`, {
         currentPassword: formData.currentPassword,
         newPassword: formData.newPassword
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       
       toast.success('Password updated successfully');
       setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (error) {
-      if (error.response?.status === 400) {
+      if (error.response?.status === 401) {
+        toast.error('Session expired. Please login again');
+        logout();
+      } else if (error.response?.status === 400) {
         toast.error('Current password is incorrect');
       } else {
         toast.error('Failed to update password');
