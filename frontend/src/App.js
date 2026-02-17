@@ -34,7 +34,7 @@ import ProductDetail from './components/ui/ProductDetail';
 import RentalDetail from './components/ui/RentalDetail';
 import Loader from './components/ui/Loader';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://localhost:8081';
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://18.205.19.24:8081';
 const API = `${BACKEND_URL}/api`;
 
 // Add axios interceptor to ensure token is always sent

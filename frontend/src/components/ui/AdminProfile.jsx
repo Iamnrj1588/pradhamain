@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { useAuth } from '../../App';
 import axios from 'axios';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081';
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://18.205.19.24:8081';
 
 const AdminProfile = () => {
   const { user, logout } = useAuth();
