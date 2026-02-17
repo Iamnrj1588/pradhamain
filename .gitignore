@@ -83,6 +83,11 @@ backend-java/src/main/resources/application-prod.properties
 *.nar
 hs_err_pid*
 
+# Sonar
+sonar-project.properties
+sonar-issues.json
+*.bat
+
 # Docker
 .dockerignore
 docker-compose.override.yml
