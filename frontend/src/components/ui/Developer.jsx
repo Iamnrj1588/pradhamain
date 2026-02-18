@@ -10,7 +10,7 @@ export default function Developer() {
   return (
     <main className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-12">
       <div className="mx-auto max-w-4xl">
-        <header className="mb-8 text-center">
+        <header className="mb-8 text-left">
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
             Meet the Developer — <span className="text-[#8B1538]">NextGen_Tech</span>
           </h1>
@@ -130,7 +130,7 @@ export default function Developer() {
                 </a>
               </div>
 
-              <p className="mt-6 text-xs text-slate-500 text-center">© {new Date().getFullYear()} Pradha Fashion Outlet — Developed by NextGen_Tech</p>
+              <p className="mt-6 text-xs text-slate-500 text-left">© {new Date().getFullYear()} Pradha Fashion Outlet — Developed by NextGen_Tech</p>
             </CardContent>
           </Card>
         </section>

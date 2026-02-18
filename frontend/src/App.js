@@ -34,7 +34,7 @@ import ProductDetail from './components/ui/ProductDetail';
 import RentalDetail from './components/ui/RentalDetail';
 import ScrollToTop from './components/ScrollToTop';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://localhost:8081';
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://18.205.19.24:8081';
 const API = `${BACKEND_URL}/api`;
 
 // Add axios interceptor to ensure token is always sent
@@ -116,6 +116,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -135,7 +136,29 @@ const Navbar = () => {
     }
   };
 
+  const handleLogout = () => {
+    setShowLogoutDialog(true);
+  };
+
+  const confirmLogout = () => {
+    logout();
+    setShowLogoutDialog(false);
+  };
+
   return (
+    <>
+    {showLogoutDialog && (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]">
+        <div className="bg-white rounded-lg p-6 max-w-sm mx-4 shadow-xl">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Confirm Logout</h3>
+          <p className="text-gray-600 mb-6">Are you sure you want to logout?</p>
+          <div className="flex gap-3 justify-end">
+            <Button variant="outline" onClick={() => setShowLogoutDialog(false)}>Cancel</Button>
+            <Button className="bg-[#8B1538] hover:bg-[#6B0F2A]" onClick={confirmLogout}>Logout</Button>
+          </div>
+        </div>
+      </div>
+    )}
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-[#8B1538]/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
@@ -189,7 +212,7 @@ const Navbar = () => {
                 </button>
                 <Button
                   variant="ghost"
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="text-[#8B1538]"
                   data-testid="logout-btn"
                 >
@@ -228,7 +251,7 @@ const Navbar = () => {
             {user ? (
               <>
                 <Link to="/cart" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Cart ({cartCount})</Link>
-                <button onClick={logout} className="block nav-link text-left w-full">Logout</button>
+                <button onClick={handleLogout} className="block nav-link text-left w-full">Logout</button>
               </>
             ) : (
               <Link to="/login" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Login</Link>
@@ -237,6 +260,7 @@ const Navbar = () => {
         )}
       </div>
     </nav>
+    </>
   );
 };
 
@@ -1352,34 +1376,12 @@ const Footer = () => {
     <footer className="bg-gradient-to-br from-[#8B1538] via-[#A0185A] to-[#8B1538] text-white mt-20 rounded-t-3xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-          <div className="text-center">
+          <div className="text-left">
             <h3 className="text-lg sm:text-xl lg:text-2xl font-extrabold mb-2 sm:mb-3 lg:mb-4 bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent">Pradha Fashion Outlet</h3>
             <p className="text-gray-100 mb-3 sm:mb-4 text-sm sm:text-base lg:text-lg font-medium italic">Where Tradition Meets Elegance</p>
-            {!user ? (
-              <div className="space-y-2">
-                <Button 
-                  onClick={() => navigate('/login')}
-                  className="w-full bg-[#DAA520] hover:bg-[#B8860B] text-white text-sm font-semibold shadow-lg"
-                >
-                  Login
-                </Button>
-                <Button 
-                  onClick={() => navigate('/register')}
-                  variant="outline"
-                  className="w-full border-white text-white hover:bg-white hover:text-[#8B1538] text-sm font-semibold"
-                >
-                  Sign Up
-                </Button>
-              </div>
-            ) : (
-              <div className="text-gray-100">
-                <p className="text-sm font-medium">Welcome, {user.name}!</p>
-                <Link to="/orders" className="text-[#DAA520] hover:underline text-sm font-semibold">My Orders</Link>
-              </div>
-            )}
           </div>
           
-          <div className="text-center">
+          <div className="text-left">
             <h4 className="font-bold mb-2 sm:mb-3 lg:mb-4 text-sm sm:text-base lg:text-lg text-[#DAA520]">Visit Our Store</h4>
             <div className="space-y-1 sm:space-y-2 text-gray-100 text-xs sm:text-sm lg:text-base">
               <p className="font-semibold text-white">📞 Contact:</p>
@@ -1397,7 +1399,7 @@ const Footer = () => {
             </div>
           </div>
           
-          <div className="text-center">
+          <div className="text-left">
             <h4 className="font-bold mb-2 sm:mb-3 lg:mb-4 text-sm sm:text-base lg:text-lg text-[#DAA520]">Quick Links</h4>
             <div className="grid grid-cols-2 gap-1 sm:space-y-0 sm:grid-cols-1 sm:gap-0 sm:space-y-2 text-xs sm:text-sm lg:text-base">
               <Link to="/" className="hover:text-[#DAA520] transition-colors font-medium" onClick={() => window.scrollTo(0, 0)}>Home</Link>
@@ -1410,9 +1412,9 @@ const Footer = () => {
             </div>
           </div>
           
-          <div className="text-center">
+          <div className="text-left">
             <h4 className="font-bold mb-2 sm:mb-3 lg:mb-4 text-sm sm:text-base lg:text-lg text-[#DAA520]">Follow Us</h4>
-            <div className="flex justify-center space-x-6 mb-3 sm:mb-4">
+            <div className="flex justify-start space-x-6 mb-3 sm:mb-4">
               <a href="https://www.instagram.com/pradha_fashion_outlet?igsh=cXplemF6eTZxYnY1" target="_blank" rel="noopener noreferrer" className="text-white hover:text-[#DAA520] transition-colors">
                 <svg className="w-6 h-6 sm:w-7 sm:h-7" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
@@ -1437,7 +1439,7 @@ const Footer = () => {
         </div>
         
         <div className="border-t border-white/20 mt-4 sm:mt-6 lg:mt-8 pt-4 sm:pt-6 lg:pt-8">
-          <div className="flex flex-col items-center text-center space-y-2 sm:space-y-0 sm:flex-row sm:justify-between sm:text-left">
+          <div className="flex flex-col items-start text-left space-y-2 sm:space-y-0 sm:flex-row sm:justify-between">
             <p className="text-gray-100 text-xs sm:text-sm lg:text-base font-medium">© 2025 Pradha Fashion Outlet. All rights reserved.</p>
             <div className="flex flex-wrap justify-center gap-2 sm:gap-3 lg:gap-4 text-xs sm:text-sm font-medium">
               <Link to="/privacy-policy" className="hover:text-[#DAA520] transition-colors" onClick={() => window.scrollTo(0, 0)}>Privacy</Link>
@@ -1470,19 +1472,17 @@ const HomePage = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [newArrivals, setNewArrivals] = useState([]);
   const [rentalDresses, setRentalDresses] = useState([]);
-  const [heroSections, setHeroSections] = useState([]);
+  const [heroSections, setHeroSections] = useState([{
+    title: 'Pradha Fashion Outlet',
+    subtitle: 'Where Tradition Meets Elegance',
+    backgroundImageUrl: 'https://images.unsplash.com/photo-1756483510837-e79455e52188?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzB8MHwxfHNlYXJjaHwxfHxJbmRpYW4lMjB0cmFkaXRpb25hbCUyMGZhc2hpb258ZW58MHx8fHwxNzYwMDIyODcxfDA&ixlib=rb-4.1.0&q=85'
+  }]);
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        await Promise.all([fetchProducts(), fetchHeroSections(), fetchRentalDresses()]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadData();
+    fetchProducts();
+    fetchHeroSections();
+    fetchRentalDresses();
   }, []);
 
   useEffect(() => {
@@ -1499,10 +1499,7 @@ const HomePage = () => {
       const response = await fetch(`${BACKEND_URL}/api/rental/dresses`);
       const dresses = await response.json();
       if (Array.isArray(dresses)) {
-        const jewellery = dresses.filter(d => d.subcategory === 'Jewellery').slice(0, 2);
-        const blouses = dresses.filter(d => d.subcategory === 'Designer Blouses').slice(0, 2);
-        const mixed = [...jewellery, ...blouses];
-        setRentalDresses(mixed);
+        setRentalDresses(dresses.slice(0, 4));
       }
     } catch (error) {
       console.error('Failed to fetch rental dresses:', error);
@@ -1525,20 +1522,9 @@ const HomePage = () => {
       const response = await axios.get(`${API}/hero-content`);
       if (response.data.length > 0) {
         setHeroSections(response.data);
-      } else {
-        setHeroSections([{
-          title: 'Pradha Fashion Outlet',
-          subtitle: 'Where Tradition Meets Elegance',
-          backgroundImageUrl: '/images/hero-default.jpg'
-        }]);
       }
     } catch (error) {
       console.error('Failed to fetch hero sections:', error);
-      setHeroSections([{
-        title: 'Pradha Fashion Outlet',
-        subtitle: 'Where Tradition Meets Elegance',
-        backgroundImageUrl: 'https://images.unsplash.com/photo-1756483510837-e79455e52188?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzB8MHwxfHNlYXJjaHwxfHxJbmRpYW4lMjB0cmFkaXRpb25hbCUyMGZhc2hpb258ZW58MHx8fHwxNzYwMDIyODcxfDA&ixlib=rb-4.1.0&q=85'
-      }]);
     }
   };
 
@@ -1652,25 +1638,6 @@ const HomePage = () => {
       </Card>
     );
   };
-
-  if (loading) {
-    return (
-      <div className="home-page">
-        <div className="hero-section relative overflow-hidden bg-gray-200" style={{height: '500px'}}>
-          <div className="hero-overlay relative z-10">
-            <div className="hero-content">
-              <div className="h-12 bg-gray-300 rounded mb-4 mx-auto max-w-md animate-pulse"></div>
-              <div className="h-6 bg-gray-300 rounded mb-8 mx-auto max-w-sm animate-pulse"></div>
-              <div className="flex gap-4 justify-center">
-                <div className="h-10 w-32 bg-gray-300 rounded animate-pulse"></div>
-                <div className="h-10 w-40 bg-gray-300 rounded animate-pulse"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="home-page">
@@ -2357,7 +2324,7 @@ const PrivacyPolicyPage = () => {
   return (
     <div className="page-container">
       <h1 className="page-title">Privacy Policy</h1>
-      <div className="max-w-4xl mx-auto space-y-6 text-gray-700 leading-relaxed">
+      <div className="max-w-4xl mx-auto space-y-6 text-gray-700 leading-relaxed text-left">
         <p className="text-sm text-gray-500">Last Updated: 09/12/2025</p>
         
         <p className="text-lg">
@@ -2424,7 +2391,7 @@ const TermsOfServicePage = () => {
   return (
     <div className="page-container">
       <h1 className="page-title">Terms of Service</h1>
-      <div className="max-w-4xl mx-auto space-y-6 text-gray-700 leading-relaxed">
+      <div className="max-w-4xl mx-auto space-y-6 text-gray-700 leading-relaxed text-left">
         <p className="text-sm text-gray-500">Last Updated: 09/12/2025</p>
         
         <p className="text-lg">
