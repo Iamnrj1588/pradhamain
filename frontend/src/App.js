@@ -251,7 +251,8 @@ const Navbar = () => {
             {user ? (
               <>
                 <Link to="/cart" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Cart ({cartCount})</Link>
-                <button onClick={handleLogout} className="block nav-link text-left w-full">Logout</button>
+                <Link to="/orders" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>My Orders</Link>
+                <button onClick={handleLogout} className="block nav-link text-center w-full">Logout</button>
               </>
             ) : (
               <Link to="/login" className="block nav-link" onClick={() => setMobileMenuOpen(false)}>Login</Link>
@@ -581,11 +582,23 @@ const AdminPage = () => {
                       <>
                         <div>
                           <Label>Sizes (comma separated) *</Label>
-                          <Input required placeholder="S, M, L, XL" value={formData.sizes} onChange={(e) => setFormData({ ...formData, sizes: e.target.value })} />
+                          <Input 
+                            required 
+                            placeholder="S, M, L, XL" 
+                            value={formData.sizes} 
+                            onChange={(e) => setFormData({ ...formData, sizes: e.target.value })}
+                            onKeyDown={(e) => e.stopPropagation()}
+                          />
                         </div>
                         <div>
                           <Label>Colors (comma separated) *</Label>
-                          <Input required placeholder="Red, Blue, Green" value={formData.colors} onChange={(e) => setFormData({ ...formData, colors: e.target.value })} />
+                          <Input 
+                            required 
+                            placeholder="Red, Blue, Green" 
+                            value={formData.colors} 
+                            onChange={(e) => setFormData({ ...formData, colors: e.target.value })}
+                            onKeyDown={(e) => e.stopPropagation()}
+                          />
                         </div>
                       </>
                     )}
@@ -1682,7 +1695,7 @@ const HomePage = () => {
         <section className="py-16 px-4">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-3xl font-bold text-center mb-8 text-[#8B1538]">Featured Products</h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {featuredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
@@ -1695,7 +1708,7 @@ const HomePage = () => {
         <section className="py-16 px-4 bg-gray-50">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-3xl font-bold text-center mb-8 text-[#8B1538]">New Arrivals</h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {newArrivals.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
@@ -1768,67 +1781,71 @@ const HomePage = () => {
           {/* Women's Rental Categories */}
           <div className="mb-12">
             <h3 className="text-2xl font-semibold text-center mb-6 text-pink-600">Women's Rental Collection</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {[
-                { name: 'Navratri', image: '/images/categories/womens-navratri-outfit.jpeg' },
-                { name: 'Wedding', image: '/images/categories/womens-wedding-outfit.jpeg' },
-                { name: 'Pre-Wedding', image: '/images/categories/womens-pre-wedding.jpeg' },
-                { name: 'Reception', image: '/images/categories/womens-reception.jpeg' },
-                { name: 'Sangam', image: '/images/categories/womens-sangam.jpeg' },
-                { name: 'Party', image: '/images/categories/womens-party-wear.jpeg' },
-                { name: 'Designer Blouses', image: '/images/categories/womens-designer-blouses.jpeg' },
-                { name: 'Maternity Outfits', image: '/images/categories/womens-maternity-outfits.jpeg' },
-                { name: 'Jewellery', image: '/images/categories/womens-jewellery.jpeg' }
-              ].map((category) => (
-                <div 
-                  key={category.name}
-                  onClick={() => navigate(`/rentals?subcategory=${encodeURIComponent(category.name)}`)}
-                  className="rental-category-card cursor-pointer group overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-                >
-                  <div className="aspect-square relative">
-                    <img 
-                      src={category.image} 
-                      alt={category.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-40 group-hover:bg-opacity-30 transition-all duration-300"></div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <h4 className="text-white font-semibold text-center px-2 text-sm">{category.name}</h4>
+            <div className="overflow-x-auto pb-4">
+              <div className="flex gap-4 min-w-max px-4">
+                {[
+                  { name: 'Navratri', image: '/images/categories/womens-navratri-outfit.jpeg' },
+                  { name: 'Wedding', image: '/images/categories/womens-wedding-outfit.jpeg' },
+                  { name: 'Pre-Wedding', image: '/images/categories/womens-pre-wedding.jpeg' },
+                  { name: 'Reception', image: '/images/categories/womens-reception.jpeg' },
+                  { name: 'Sangam', image: '/images/categories/womens-sangam.jpeg' },
+                  { name: 'Party', image: '/images/categories/womens-party-wear.jpeg' },
+                  { name: 'Designer Blouses', image: '/images/categories/womens-designer-blouses.jpeg' },
+                  { name: 'Maternity Outfits', image: '/images/categories/womens-maternity-outfits.jpeg' },
+                  { name: 'Jewellery', image: '/images/categories/womens-jewellery.jpeg' }
+                ].map((category) => (
+                  <div 
+                    key={category.name}
+                    onClick={() => navigate(`/rentals?subcategory=${encodeURIComponent(category.name)}`)}
+                    className="rental-category-card cursor-pointer group overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex-shrink-0 w-40"
+                  >
+                    <div className="aspect-square relative">
+                      <img 
+                        src={category.image} 
+                        alt={category.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-40 group-hover:bg-opacity-30 transition-all duration-300"></div>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <h4 className="text-white font-semibold text-center px-2 text-sm">{category.name}</h4>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
           
           {/* Men's Rental Categories */}
           <div>
             <h3 className="text-2xl font-semibold text-center mb-6 text-blue-600">Men's Rental Collection</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-              {[
-                { name: 'Wedding Outfit', image: '/images/categories/mens-wedding-outfit.jpeg' },
-                { name: 'Reception Outfit', image: '/images/categories/mens-reception-outfit.jpeg' },
-                { name: 'Party Wears', image: '/images/categories/mens-party-wear.jpeg' },
-                { name: 'Traditional Outfits', image: '/images/categories/mens-traditional-outfit.jpeg' }
-              ].map((category) => (
-                <div 
-                  key={category.name}
-                  onClick={() => navigate(`/rentals?subcategory=${encodeURIComponent(category.name)}`)}
-                  className="rental-category-card cursor-pointer group overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-                >
-                  <div className="aspect-square relative">
-                    <img 
-                      src={category.image} 
-                      alt={category.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-40 group-hover:bg-opacity-30 transition-all duration-300"></div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <h4 className="text-white font-semibold text-center px-2 text-sm">{category.name}</h4>
+            <div className="overflow-x-auto pb-4">
+              <div className="flex gap-4 min-w-max px-4">
+                {[
+                  { name: 'Wedding Outfit', image: '/images/categories/mens-wedding-outfit.jpeg' },
+                  { name: 'Reception Outfit', image: '/images/categories/mens-reception-outfit.jpeg' },
+                  { name: 'Party Wears', image: '/images/categories/mens-party-wear.jpeg' },
+                  { name: 'Traditional Outfits', image: '/images/categories/mens-traditional-outfit.jpeg' }
+                ].map((category) => (
+                  <div 
+                    key={category.name}
+                    onClick={() => navigate(`/rentals?subcategory=${encodeURIComponent(category.name)}`)}
+                    className="rental-category-card cursor-pointer group overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex-shrink-0 w-40"
+                  >
+                    <div className="aspect-square relative">
+                      <img 
+                        src={category.image} 
+                        alt={category.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-40 group-hover:bg-opacity-30 transition-all duration-300"></div>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <h4 className="text-white font-semibold text-center px-2 text-sm">{category.name}</h4>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
