@@ -178,8 +178,71 @@ const AdminRentalDashboard = () => {
 };
 
 const DressesTab = ({ dresses, onAddDress, onEditDress, onRefresh }) => {
+  const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081';
+  const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
+  const [dressToDelete, setDressToDelete] = React.useState(null);
+
+  const handleDeleteClick = (dress) => {
+    setDressToDelete(dress);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!dressToDelete) return;
+    
+    try {
+      const response = await fetch(`${API_URL}/api/admin/rental/dresses/${dressToDelete.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        alert('Dress deleted successfully');
+        onRefresh();
+      } else {
+        alert(data.error || 'Failed to delete dress');
+      }
+    } catch (error) {
+      console.error('Error deleting dress:', error);
+      alert('Failed to delete dress');
+    } finally {
+      setShowDeleteDialog(false);
+      setDressToDelete(null);
+    }
+  };
+
   return (
     <div>
+      {showDeleteDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]">
+          <div className="bg-white rounded-lg p-6 max-w-sm mx-4 shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Confirm Delete</h3>
+            <p className="text-gray-600 mb-6">Are you sure you want to delete "{dressToDelete?.name}"?</p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => {
+                  setShowDeleteDialog(false);
+                  setDressToDelete(null);
+                }}
+                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="mb-6">
         <button
           onClick={onAddDress}
@@ -208,14 +271,23 @@ const DressesTab = ({ dresses, onAddDress, onEditDress, onRefresh }) => {
                 </p>
               )}
               
-              <div className="flex justify-between">
-                <button
-                  onClick={() => onEditDress(dress)}
-                  className="text-blue-600 hover:text-blue-800 flex items-center"
-                >
-                  <Edit className="w-4 h-4 mr-1" />
-                  Edit
-                </button>
+              <div className="flex justify-between items-center">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => onEditDress(dress)}
+                    className="text-blue-600 hover:text-blue-800 flex items-center"
+                  >
+                    <Edit className="w-4 h-4 mr-1" />
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteClick(dress)}
+                    className="text-red-600 hover:text-red-800 flex items-center"
+                  >
+                    <Trash2 className="w-4 h-4 mr-1" />
+                    Delete
+                  </button>
+                </div>
                 <span className={`px-2 py-1 rounded text-xs ${
                   dress.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                 }`}>

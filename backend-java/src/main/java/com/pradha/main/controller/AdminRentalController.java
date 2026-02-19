@@ -68,6 +68,9 @@ public class AdminRentalController {
         try {
             rentalDressRepository.deleteById(dressId);
             return ResponseEntity.ok(Map.of("message", "Dress deleted successfully"));
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            return ResponseEntity.badRequest()
+                .body(Map.of("error", "Cannot delete dress. It has existing bookings. Please delete or reassign bookings first."));
         } catch (Exception e) {
             return ResponseEntity.badRequest()
                 .body(Map.of("error", e.getMessage()));
