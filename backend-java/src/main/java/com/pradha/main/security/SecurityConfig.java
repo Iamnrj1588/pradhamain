@@ -48,7 +48,7 @@ public class SecurityConfig {
                                 "/api/hero-content",
                                 "/api/inquiries",
                                 "/api/feedback",
-                                "/api/feedback/*/images",
+                                "/api/feedback/**",
                                 "/api/cart",
                                 "/api/cart/**",
                                 "/api/checkout/**",
@@ -63,7 +63,6 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.DELETE, "/api/feedback/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

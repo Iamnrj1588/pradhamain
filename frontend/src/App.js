@@ -1485,6 +1485,7 @@ const HomePage = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [newArrivals, setNewArrivals] = useState([]);
   const [rentalDresses, setRentalDresses] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [heroSections, setHeroSections] = useState([{
     title: 'Pradha Fashion Outlet',
     subtitle: 'Where Tradition Meets Elegance',
@@ -1496,6 +1497,7 @@ const HomePage = () => {
     fetchProducts();
     fetchHeroSections();
     fetchRentalDresses();
+    fetchReviews();
   }, []);
 
   useEffect(() => {
@@ -1538,6 +1540,16 @@ const HomePage = () => {
       }
     } catch (error) {
       console.error('Failed to fetch hero sections:', error);
+    }
+  };
+
+  const fetchReviews = async () => {
+    try {
+      const response = await axios.get(`${API}/feedback`);
+      const reviewsWithImages = response.data.filter(r => r.imageUrls && r.imageUrls.length > 0);
+      setReviews(reviewsWithImages.length > 0 ? reviewsWithImages.slice(0, 3) : response.data.slice(0, 3));
+    } catch (error) {
+      console.error('Failed to fetch reviews:', error);
     }
   };
 
@@ -1593,6 +1605,55 @@ const HomePage = () => {
             <p className="text-lg font-bold text-pink-600">₹{dress.pricePerDay}</p>
             <span className="text-sm text-gray-500">per day</span>
           </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const ReviewCard = ({ review }) => {
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+    useEffect(() => {
+      if (review.imageUrls && review.imageUrls.length > 1) {
+        const interval = setInterval(() => {
+          setCurrentImageIndex((prev) => (prev + 1) % review.imageUrls.length);
+        }, 3000);
+        return () => clearInterval(interval);
+      }
+    }, [review.imageUrls]);
+
+    return (
+      <Card className="hover:shadow-lg transition-shadow overflow-hidden w-64 md:w-80 flex-shrink-0">
+        <div className="relative h-40 md:h-48 overflow-hidden bg-gray-200">
+          {review.imageUrls && review.imageUrls.length > 0 ? (
+            <>
+              <img src={review.imageUrls[currentImageIndex]} alt="Review" className="w-full h-full object-contain" />
+              {review.imageUrls.length > 1 && (
+                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
+                  {review.imageUrls.map((_, idx) => (
+                    <div
+                      key={idx}
+                      className={`w-2 h-2 rounded-full ${
+                        idx === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-400">No Image</div>
+          )}
+        </div>
+        <CardContent className="p-3 md:p-4">
+          <p className="text-sm md:text-base text-gray-700 mb-2 md:mb-3 line-clamp-3">{review.comment}</p>
+          <div className="flex items-center mb-2">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} className={`w-3 h-3 md:w-4 md:h-4 ${i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+            ))}
+          </div>
+          <p className="text-sm md:text-base font-semibold text-[#8B1538]">{review.name}</p>
+          <p className="text-xs text-gray-500">{new Date(review.createdAt).toLocaleDateString()}</p>
         </CardContent>
       </Card>
     );
@@ -1847,6 +1908,57 @@ const HomePage = () => {
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-12 px-4">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8 text-[#8B1538]">About Pradha Fashion Outlet</h2>
+          <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 mb-6 md:mb-8">
+            <div className="w-32 h-32 md:w-48 md:h-48 rounded-full overflow-hidden shadow-lg flex-shrink-0">
+              <img 
+                src="/images/owner.jpg" 
+                alt="Owner"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="text-center md:text-left">
+              <p className="text-base md:text-lg text-gray-700 leading-relaxed mb-3 md:mb-4">
+                Welcome to Pradha Fashion Outlet, where tradition meets elegance. We specialize in exquisite traditional and modern fashion wear for both women and men.
+              </p>
+              <p className="text-sm md:text-base text-gray-600">
+                Our boutique offers customization services and premium rental collections, ensuring that every piece reflects your unique style and personality.
+              </p>
+            </div>
+          </div>
+          <Button onClick={() => navigate('/about')} className="bg-[#8B1538] hover:bg-[#6B0F2A] w-full md:w-auto">
+            Learn More About Us
+          </Button>
+        </div>
+      </section>
+
+      <section className="py-12 px-4 bg-gray-50">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4 text-center text-[#8B1538]">What Our Customers Say</h2>
+          <p className="text-sm md:text-base text-gray-600 mb-6 md:mb-8 text-center">Hear from our satisfied customers about their experience with Pradha Fashion Outlet</p>
+          
+          {reviews.length > 0 ? (
+            <div className="overflow-x-auto pb-4">
+              <div className="flex gap-4 md:gap-6 mb-6 md:mb-8 min-w-max px-2 md:px-4">
+                {reviews.map((review) => (
+                  <ReviewCard key={review.id} review={review} />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className="text-center text-gray-500 mb-6 md:mb-8 text-sm md:text-base">No reviews yet. Be the first to share your experience!</p>
+          )}
+          
+          <div className="text-center">
+            <Button onClick={() => navigate('/reviews')} className="bg-[#8B1538] hover:bg-[#6B0F2A] w-full md:w-auto">
+              View All Reviews
+            </Button>
           </div>
         </div>
       </section>

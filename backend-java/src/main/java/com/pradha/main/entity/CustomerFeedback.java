@@ -28,6 +28,7 @@ public class CustomerFeedback {
     private Integer rating;
 
     @NotBlank
+    @Column(columnDefinition = "TEXT")
     private String comment;
 
     @ElementCollection

@@ -55,8 +55,13 @@ public class CustomerFeedbackController {
 
             for (MultipartFile image : images) {
                 if (!image.isEmpty()) {
-                    String imageUrl = s3Service.uploadFile(image, "feedback");
-                    imageUrls.add(imageUrl);
+                    try {
+                        String imageUrl = s3Service.uploadFile(image, "feedback");
+                        imageUrls.add(imageUrl);
+                    } catch (Exception e) {
+                        System.err.println("Failed to upload image: " + e.getMessage());
+                        e.printStackTrace();
+                    }
                 }
             }
 
@@ -64,7 +69,9 @@ public class CustomerFeedbackController {
             feedbackRepository.save(feedback);
 
             return ResponseEntity.ok("Images uploaded successfully");
-        } catch (IOException e) {
+        } catch (Exception e) {
+            System.err.println("Error in uploadFeedbackImages: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest().body("Failed to upload images: " + e.getMessage());
         }
     }

@@ -4,6 +4,45 @@ import { Star, Upload, X, CheckCircle } from 'lucide-react';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081';
 const API = `${BACKEND_URL}/api`;
 
+const ReviewImageSlider = ({ imageUrls }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    if (imageUrls && imageUrls.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentImageIndex((prev) => (prev + 1) % imageUrls.length);
+      }, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [imageUrls]);
+
+  if (!imageUrls || imageUrls.length === 0) {
+    return (
+      <div className="h-48 bg-gray-200 flex items-center justify-center">
+        <span className="text-gray-400">No Image</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative h-48 bg-gray-200">
+      <img src={imageUrls[currentImageIndex]} alt="Review" className="w-full h-full object-contain" />
+      {imageUrls.length > 1 && (
+        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
+          {imageUrls.map((_, idx) => (
+            <div
+              key={idx}
+              className={`w-2 h-2 rounded-full ${
+                idx === currentImageIndex ? 'bg-white' : 'bg-white/50'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const CustomerReviews = () => {
   const [reviews, setReviews] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -48,31 +87,42 @@ const CustomerReviews = () => {
         body: JSON.stringify(formData)
       });
 
-      if (feedbackResponse.ok) {
-        const feedback = await feedbackResponse.json();
+      if (!feedbackResponse.ok) {
+        throw new Error('Failed to submit review');
+      }
 
-        // Upload images if any
-        if (selectedImages.length > 0) {
-          const formDataImages = new FormData();
-          selectedImages.forEach(image => {
-            formDataImages.append('images', image);
-          });
+      const feedback = await feedbackResponse.json();
 
-          await fetch(`${API}/feedback/${feedback.id}/images`, {
+      // Upload images if any
+      if (selectedImages.length > 0) {
+        const formDataImages = new FormData();
+        selectedImages.forEach(image => {
+          formDataImages.append('images', image);
+        });
+
+        try {
+          const imageResponse = await fetch(`${API}/feedback/${feedback.id}/images`, {
             method: 'POST',
             body: formDataImages
           });
+          
+          if (!imageResponse.ok) {
+            console.error('Image upload failed:', await imageResponse.text());
+          }
+        } catch (imgError) {
+          console.error('Image upload error:', imgError);
         }
-
-        setFormData({ name: '', email: '', rating: 5, comment: '' });
-        setSelectedImages([]);
-        setShowForm(false);
-        setShowThankYou(true);
-        fetchReviews();
-        setTimeout(() => setShowThankYou(false), 3000);
       }
+
+      setFormData({ name: '', email: '', rating: 5, comment: '' });
+      setSelectedImages([]);
+      setShowForm(false);
+      setShowThankYou(true);
+      fetchReviews();
+      setTimeout(() => setShowThankYou(false), 3000);
     } catch (error) {
       console.error('Error submitting review:', error);
+      alert('Failed to submit review. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -206,36 +256,20 @@ const CustomerReviews = () => {
         </div>
       )}
 
-      <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {reviews.map((review) => (
-          <div key={review.id} className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex justify-between items-start mb-3">
-              <div>
-                <h3 className="font-semibold text-lg">{review.name}</h3>
-                <div className="flex items-center space-x-2">
-                  <div className="flex">{renderStars(review.rating)}</div>
-                  <span className="text-sm text-gray-500">
-                    {new Date(review.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
+          <div key={review.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+            <ReviewImageSlider imageUrls={review.imageUrls} />
+            <div className="p-4">
+              <p className="text-gray-700 mb-3">{review.comment}</p>
+              <div className="flex items-center mb-2">
+                <div className="flex">{renderStars(review.rating)}</div>
               </div>
+              <h3 className="font-semibold text-lg">{review.name}</h3>
+              <span className="text-sm text-gray-500">
+                {new Date(review.createdAt).toLocaleDateString()}
+              </span>
             </div>
-            
-            <p className="text-gray-700 mb-4">{review.comment}</p>
-            
-            {review.imageUrls && review.imageUrls.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {review.imageUrls.map((imageUrl, index) => (
-                  <img
-                    key={index}
-                    src={imageUrl}
-                    alt={`Review ${index + 1}`}
-                    className="w-20 h-16 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                    onClick={() => setLightboxImage(imageUrl)}
-                  />
-                ))}
-              </div>
-            )}
           </div>
         ))}
       </div>
